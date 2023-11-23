@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.acme.jga.users.mgt.exceptions.FunctionalException;
-import com.acme.users.mgt.annotations.MetricPoint;
 import com.acme.users.mgt.dto.port.organizations.v1.OrganizationDto;
 import com.acme.users.mgt.dto.port.organizations.v1.OrganizationListLightDto;
 import com.acme.users.mgt.dto.port.shared.UidDto;
@@ -22,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class OrganizationsController {
     private final IOrganizationPortService organizationPortService;
 
-    @MetricPoint(alias = "ORG_CREATE", version = "v1", regex = "/api/v1/tenants/(.*)/organizations")
+    @PostMapping(value = "/api/v1/tenants/{tenantUid}/organizations")
     public ResponseEntity<Object> createOrganization(@PathVariable("tenantUid") String tenantUid,
             @RequestBody OrganizationDto organizationDto) throws FunctionalException {
         UidDto uidDto = organizationPortService.createOrganization(tenantUid, organizationDto);
