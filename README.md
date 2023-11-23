@@ -49,5 +49,8 @@ Standard REST application relying on:
         * email: Email address
         * status: (Enumeration: DRAFT, ACTIVE, INACTIVE)
 
+## Testing REST APIS
 
+An [Insomnia](https://insomnia.rest/) collection is available in docs directory.
 
+![Insomnia](docs/insomnina.png)
