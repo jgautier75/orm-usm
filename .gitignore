@@ -42,3 +42,5 @@ webapi/target/**/*.*
 webapi/.classpath
 webapi/.factorypath
 webapi/.project
+webapi/LOG_PATH_IS_UNDEFINED/orm-usm.log
+webapi/orm-usm.log
