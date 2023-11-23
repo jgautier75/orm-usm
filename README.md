@@ -53,4 +53,4 @@ Standard REST application relying on:
 
 An [Insomnia](https://insomnia.rest/) collection is available in docs directory.
 
-![Insomnia](docs/insomnina.png)
+![Insomnia](docs/insomnia.png)
