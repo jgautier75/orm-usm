@@ -13,6 +13,7 @@ import com.acme.users.mgt.dto.port.organizations.v1.OrganizationDto;
 import com.acme.users.mgt.dto.port.organizations.v1.OrganizationListLightDto;
 import com.acme.users.mgt.dto.port.shared.UidDto;
 import com.acme.users.mgt.services.api.organization.IOrganizationPortService;
+import com.acme.users.mgt.versioning.WebApiVersions.OrganizationsResourceVersion;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,21 +22,21 @@ import lombok.RequiredArgsConstructor;
 public class OrganizationsController {
     private final IOrganizationPortService organizationPortService;
 
-    @PostMapping(value = "/api/v1/tenants/{tenantUid}/organizations")
+    @PostMapping(value = OrganizationsResourceVersion.ROOT)
     public ResponseEntity<Object> createOrganization(@PathVariable("tenantUid") String tenantUid,
             @RequestBody OrganizationDto organizationDto) throws FunctionalException {
         UidDto uidDto = organizationPortService.createOrganization(tenantUid, organizationDto);
         return new ResponseEntity<>(uidDto, HttpStatus.CREATED);
     }
 
-    @GetMapping(value = "/api/v1/tenants/{tenantUid}/organizations")
+    @GetMapping(value = OrganizationsResourceVersion.ROOT)
     public ResponseEntity<Object> findOrgsByTenant(@PathVariable("tenantUid") String tenantUid)
             throws FunctionalException {
         OrganizationListLightDto lightList = organizationPortService.findAllOrgsLightByTenant(tenantUid);
         return new ResponseEntity<>(lightList, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/api/v1/tenants/{tenantUid}/organizations/{orgUid}")
+    @GetMapping(value = OrganizationsResourceVersion.WITH_UID)
     public ResponseEntity<Object> findOrgDetails(@PathVariable("tenantUid") String tenantUid,
             @PathVariable("orgUid") String orgUid)
             throws FunctionalException {
@@ -43,7 +44,7 @@ public class OrganizationsController {
         return new ResponseEntity<>(orgDto, HttpStatus.OK);
     }
 
-    @PostMapping(value = "/api/v1/tenants/{tenantUid}/organizations/{orgUid}")
+    @PostMapping(value = OrganizationsResourceVersion.WITH_UID)
     public ResponseEntity<Object> updateOrganization(@PathVariable("tenantUid") String tenantUid,
             @PathVariable("orgUid") String orgUid, @RequestBody OrganizationDto organizationDto)
             throws FunctionalException {
