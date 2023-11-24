@@ -11,7 +11,7 @@ public class WebApiVersions {
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public class TenantsResourceVersion {
         public static final String ROOT = API_PREFIX + V1_PREFIX + "/tenants";
-        public static final String WITH_UID = API_PREFIX + V1_PREFIX + "/tenants/{tenantUid}";
+        public static final String WITH_UID = API_PREFIX + V1_PREFIX + "/tenants/{uid}";
     }
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)

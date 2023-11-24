@@ -56,10 +56,10 @@ public class TenantInfraService implements ITenantInfraService {
     }
 
     @Override
-    public void updateTenant(Tenant tenant) {
-        tenantsDao.updateTenant(tenant.getId(), tenant.getCode(), tenant.getLabel());
+    public Integer updateTenant(Tenant tenant) {
         logService.debugS(this.getClass().getCanonicalName() + "-updateTenant",
                 "tenant " + tenant.getCode() + " updated", null);
+        return tenantsDao.updateTenant(tenant.getId(), tenant.getCode(), tenant.getLabel());
     }
 
     @Override

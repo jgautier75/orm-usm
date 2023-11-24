@@ -75,13 +75,13 @@ public class TenantDomainService implements ITenantDomainService {
     }
 
     @Override
-    public void updateTenant(Tenant tenant) throws FunctionalException {
+    public Integer updateTenant(Tenant tenant) throws FunctionalException {
         // Ensure tenant already exists
         Tenant rbdmsTenant = findTenantByUid(tenant.getUid());
         tenant.setId(rbdmsTenant.getId());
 
         // Tenant update
-        tenantInfraService.updateTenant(tenant);
+        Integer nbRowsUpdated = tenantInfraService.updateTenant(tenant);
 
         // Create audit event
         AuditEvent auditEvent = AuditEvent.builder()
@@ -93,10 +93,12 @@ public class TenantDomainService implements ITenantDomainService {
                 .timestamp(DateTimeUtils.nowIso())
                 .build();
         eventsInfraService.createEvent(auditEvent);
+
+        return nbRowsUpdated;
     }
 
     @Override
-    public void deleteTenant(String tenantUid) throws FunctionalException {
+    public Integer deleteTenant(String tenantUid) throws FunctionalException {
         String callerName = this.getClass().getName() + "-deleteTenant";
         logService.infoS(callerName, "Delete tenant [%s]", new Object[] { tenantUid });
 
@@ -113,7 +115,7 @@ public class TenantDomainService implements ITenantDomainService {
 
         // Delete tenant
         logService.debugS(callerName, "Delete tenant [%s] itself", new Object[] { tenantUid });
-        tenantInfraService.deleteTenant(tenant.getId());
+        Integer nbDeleted = tenantInfraService.deleteTenant(tenant.getId());
 
         // Create audit event
         AuditEvent auditEvent = AuditEvent.builder()
@@ -125,6 +127,7 @@ public class TenantDomainService implements ITenantDomainService {
                 .timestamp(DateTimeUtils.nowIso())
                 .build();
         eventsInfraService.createEvent(auditEvent);
+        return nbDeleted;
     }
 
 }

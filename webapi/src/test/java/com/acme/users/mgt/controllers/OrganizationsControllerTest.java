@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
 import com.acme.jga.users.mgt.dto.organizations.OrganizationKind;
 import com.acme.jga.users.mgt.dto.organizations.OrganizationStatus;
 import com.acme.users.mgt.config.AppDebuggingConfig;
@@ -55,7 +57,6 @@ class OrganizationsControllerTest {
                                 .commons(orgCommonsDto)
                                 .tenantUid(TENANT_UID)
                                 .build();
-                // mockMvc = MockMvcBuilders.standaloneSetup(organizationsController).build();
                 ObjectMapper objectMapper = new ObjectMapper();
                 String orgJson = objectMapper.writeValueAsString(organizationDto);
 
@@ -71,6 +72,39 @@ class OrganizationsControllerTest {
                                 .andExpect(status().isCreated())
                                 .andExpect(jsonPath("$.uid", "").exists())
                                 .andExpect(jsonPath("$.uid", "").value(uidDto.getUid()));
+        }
+
+        @Test
+        void updateOrganization() throws Exception {
+                // GIVEN
+
+                UidDto uidDto = new UidDto(UUID.randomUUID().toString());
+                OrganizationCommonsDto orgCommonsDto = OrganizationCommonsDto.builder()
+                                .code("org-code")
+                                .country("fr")
+                                .kind(OrganizationKind.BU)
+                                .label("org-label")
+                                .status(OrganizationStatus.ACTIVE)
+                                .build();
+
+                OrganizationDto organizationDto = OrganizationDto.builder()
+                                .commons(orgCommonsDto)
+                                .tenantUid(TENANT_UID)
+                                .build();
+                ObjectMapper objectMapper = new ObjectMapper();
+                String orgJson = objectMapper.writeValueAsString(organizationDto);
+
+                // WHEN
+                Mockito.when(organizationPortService.createOrganization(Mockito.any(), Mockito.any()))
+                                .thenReturn(uidDto);
+                // THEN
+                String targetUri = "/api/v1/tenants/" + TENANT_UID + "/organizations/" + uidDto.getUid();
+                mockMvc.perform(post(targetUri)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(orgJson)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .characterEncoding(StandardCharsets.UTF_8))
+                                .andExpect(status().isNoContent());
         }
 
 }

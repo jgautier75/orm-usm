@@ -13,6 +13,6 @@ public interface IUserPortService {
 
     UsersDisplayListDto findUsers(String tenantUid, String orgUid) throws FunctionalException;
 
-    void deleteUser(String tenantUid, String orgUid, String userUid) throws FunctionalException;
+    Integer deleteUser(String tenantUid, String orgUid, String userUid) throws FunctionalException;
 
 }

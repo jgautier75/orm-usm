@@ -74,8 +74,8 @@ public class UserPortService implements IUserPortService {
     }
 
     @Override
-    public void deleteUser(String tenantUid, String orgUid, String userUid) throws FunctionalException {
-        userDomainService.deleteUser(tenantUid, orgUid, userUid);
+    public Integer deleteUser(String tenantUid, String orgUid, String userUid) throws FunctionalException {
+        return userDomainService.deleteUser(tenantUid, orgUid, userUid);
     }
 
 }

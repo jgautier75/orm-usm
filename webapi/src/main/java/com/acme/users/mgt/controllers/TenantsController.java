@@ -50,7 +50,7 @@ public class TenantsController {
             @RequestBody TenantDto tenantDto)
             throws FunctionalException {
         tenantPortService.updateTenant(uid, tenantDto);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @DeleteMapping(value = TenantsResourceVersion.WITH_UID)

@@ -14,7 +14,7 @@ public interface ITenantInfraService {
 
     List<Tenant> findAllTenants();
 
-    void updateTenant(Tenant tenant);
+    Integer updateTenant(Tenant tenant);
 
     Integer deleteUsersByTenantId(Long tenantId);
 
