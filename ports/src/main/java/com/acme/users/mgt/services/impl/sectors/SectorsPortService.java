@@ -11,6 +11,9 @@ import com.acme.users.mgt.dto.port.sectors.v1.SectorDto;
 import com.acme.users.mgt.dto.port.shared.UidDto;
 import com.acme.users.mgt.services.api.sectors.ISectorsPortService;
 import com.acme.users.mgt.services.sectors.api.ISectorsDomainService;
+import com.acme.users.mgt.validation.ValidationException;
+import com.acme.users.mgt.validation.ValidationResult;
+import com.acme.users.mgt.validation.sectors.SectorsValidationEngine;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,10 +22,15 @@ import lombok.RequiredArgsConstructor;
 public class SectorsPortService implements ISectorsPortService {
     private final ISectorsDomainService sectorsDomainService;
     private final SectorsPortConverter sectorsConverter;
+    private final SectorsValidationEngine sectorsValidationEngine;
 
     @Override
     public UidDto createSector(String tenantUid, String organizationUid, SectorDto sectorDto)
             throws FunctionalException {
+        ValidationResult validationResult = sectorsValidationEngine.validate(sectorDto);
+        if (!validationResult.isSuccess()) {
+            throw new ValidationException(validationResult.getErrors());
+        }
         Sector sector = sectorsConverter.convertSectorDtoToDomain(sectorDto);
         CompositeId compositeId = sectorsDomainService.createSector(tenantUid, organizationUid, sector);
         return UidDto.builder().uid(compositeId.getUid()).build();

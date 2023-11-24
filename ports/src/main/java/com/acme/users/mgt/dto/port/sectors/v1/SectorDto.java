@@ -15,7 +15,6 @@ import lombok.NoArgsConstructor;
 public class SectorDto implements IVersioned {
     private String code;
     private String label;
-    private boolean root;
     private String parentUid;
 
     @Override

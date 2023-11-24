@@ -16,7 +16,6 @@ public class SectorsPortConverter {
                     .code(sectorDto.getCode())
                     .label(sectorDto.getLabel())
                     .parentUid(sectorDto.getParentUid())
-                    .root(sectorDto.isRoot())
                     .build();
         }
         return targetSector;
