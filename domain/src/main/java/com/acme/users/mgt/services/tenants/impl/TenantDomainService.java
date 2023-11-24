@@ -64,7 +64,6 @@ public class TenantDomainService implements ITenantDomainService {
             throw new FunctionalException(FunctionalErrorsTypes.TENANT_NOT_FOUND.name(), null,
                     messageSource.getMessage("tenant_not_found_by_uid", new Object[] { uid },
                             LocaleContextHolder.getLocale()));
-
         }
         return tenant;
     }

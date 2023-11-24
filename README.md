@@ -54,8 +54,6 @@ Standard REST application relying on:
 
 An [Insomnia](https://insomnia.rest/) collection is available in docs directory.
 
-![Insomnia](docs/insomnia.png)
-
 ## Debugging HTTP requests
 
 A particular HTTP filter (see: LogHttpFilter class in webapi module) has been designed to be able to debug a single HTTP request.
