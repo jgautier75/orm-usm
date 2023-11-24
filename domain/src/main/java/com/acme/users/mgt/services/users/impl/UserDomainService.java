@@ -8,12 +8,20 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+
+import com.acme.jga.users.mgt.domain.events.v1.AuditAction;
+import com.acme.jga.users.mgt.domain.events.v1.AuditEvent;
+import com.acme.jga.users.mgt.domain.events.v1.AuditScope;
+import com.acme.jga.users.mgt.domain.events.v1.EventStatus;
+import com.acme.jga.users.mgt.domain.events.v1.EventTarget;
 import com.acme.jga.users.mgt.domain.organizations.v1.Organization;
 import com.acme.jga.users.mgt.domain.users.v1.User;
 import com.acme.jga.users.mgt.dto.ids.CompositeId;
 import com.acme.jga.users.mgt.dto.tenant.Tenant;
 import com.acme.jga.users.mgt.exceptions.FunctionalErrorsTypes;
 import com.acme.jga.users.mgt.exceptions.FunctionalException;
+import com.acme.jga.users.mgt.utils.DateTimeUtils;
+import com.acme.users.mgt.infra.services.api.events.IEventsInfraService;
 import com.acme.users.mgt.infra.services.api.users.IUsersInfraService;
 import com.acme.users.mgt.logging.services.api.ILogService;
 import com.acme.users.mgt.services.organizations.api.IOrganizationsDomainService;
@@ -29,12 +37,15 @@ public class UserDomainService implements IUserDomainService {
     private final IUsersInfraService usersInfraService;
     private final ILogService logService;
     private final MessageSource messageSource;
+    private final IEventsInfraService eventsInfraService;
 
     @Override
     public CompositeId createUser(String tenantUid, String orgUid, User user) throws FunctionalException {
         String callerName = this.getClass().getName() + "-createUser";
 
         // Ensure email is not already in use
+        logService.debugS(callerName, "Check if email [%s] is not already in use",
+                new Object[] { user.getCredentials().getEmail() });
         Optional<Long> emailAlreadyExist = usersInfraService.emailUsed(user.getCredentials().getEmail());
         if (emailAlreadyExist.isPresent()) {
             throw new FunctionalException(FunctionalErrorsTypes.USER_EMAIL_ALREADY_USED.name(), null,
@@ -43,6 +54,8 @@ public class UserDomainService implements IUserDomainService {
         }
 
         // Ensure login is not already in use
+        logService.debugS(callerName, "Check if login [%s] is not already in use",
+                new Object[] { user.getCredentials().getLogin() });
         Optional<Long> loginAlreadyExist = usersInfraService.loginUsed(user.getCredentials().getLogin());
         if (loginAlreadyExist.isPresent()) {
             throw new FunctionalException(FunctionalErrorsTypes.USER_LOGIN_ALREADY_USED.name(), null,
@@ -61,7 +74,22 @@ public class UserDomainService implements IUserDomainService {
 
         user.setTenantId(tenant.getId());
         user.setOrganizationId(org.getId());
-        return usersInfraService.createUser(user);
+        CompositeId userCompositeId = usersInfraService.createUser(user);
+
+        // Create user audit event
+        AuditEvent userAuditEvent = AuditEvent.builder()
+                .action(AuditAction.CREATE)
+                .objectUid(userCompositeId.getUid())
+                .target(EventTarget.USER)
+                .scope(AuditScope.builder().tenantName(tenant.getLabel()).tenantUid(tenantUid)
+                        .organizationUid(org.getUid()).organizationName(org.getCommons().getLabel())
+                        .build())
+                .status(EventStatus.PENDING)
+                .timestamp(DateTimeUtils.nowIso())
+                .build();
+        eventsInfraService.createEvent(userAuditEvent);
+
+        return userCompositeId;
     }
 
     @Override
@@ -98,6 +126,19 @@ public class UserDomainService implements IUserDomainService {
 
         // Update user
         usersInfraService.updateUser(user);
+
+        // Create user audit event
+        AuditEvent userAuditEvent = AuditEvent.builder()
+                .action(AuditAction.UPDATE)
+                .objectUid(user.getUid())
+                .target(EventTarget.USER)
+                .scope(AuditScope.builder().tenantName(tenant.getLabel()).tenantUid(tenantUid)
+                        .organizationUid(org.getUid()).organizationName(org.getCommons().getLabel())
+                        .build())
+                .status(EventStatus.PENDING)
+                .timestamp(DateTimeUtils.nowIso())
+                .build();
+        eventsInfraService.createEvent(userAuditEvent);
     }
 
     @Override
@@ -163,7 +204,22 @@ public class UserDomainService implements IUserDomainService {
         // Find user by uid
         User user = findByUid(tenantUid, orgUid, userUid);
 
-        return usersInfraService.deleteUser(tenant.getId(), org.getId(), user.getId());
+        Integer nbRowsDeleted = usersInfraService.deleteUser(tenant.getId(), org.getId(), user.getId());
+
+        // Create user audit event
+        AuditEvent userAuditEvent = AuditEvent.builder()
+                .action(AuditAction.DELETE)
+                .objectUid(user.getUid())
+                .target(EventTarget.USER)
+                .scope(AuditScope.builder().tenantName(tenant.getLabel()).tenantUid(tenantUid)
+                        .organizationUid(org.getUid()).organizationName(org.getCommons().getLabel())
+                        .build())
+                .status(EventStatus.PENDING)
+                .timestamp(DateTimeUtils.nowIso())
+                .build();
+        eventsInfraService.createEvent(userAuditEvent);
+
+        return nbRowsDeleted;
     }
 
 }

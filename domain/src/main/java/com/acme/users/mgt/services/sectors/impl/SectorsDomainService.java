@@ -8,12 +8,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
+import com.acme.jga.users.mgt.domain.events.v1.AuditAction;
+import com.acme.jga.users.mgt.domain.events.v1.AuditEvent;
+import com.acme.jga.users.mgt.domain.events.v1.AuditScope;
+import com.acme.jga.users.mgt.domain.events.v1.EventStatus;
+import com.acme.jga.users.mgt.domain.events.v1.EventTarget;
 import com.acme.jga.users.mgt.domain.organizations.v1.Organization;
 import com.acme.jga.users.mgt.domain.sectors.v1.Sector;
 import com.acme.jga.users.mgt.dto.ids.CompositeId;
 import com.acme.jga.users.mgt.dto.tenant.Tenant;
 import com.acme.jga.users.mgt.exceptions.FunctionalErrorsTypes;
 import com.acme.jga.users.mgt.exceptions.FunctionalException;
+import com.acme.jga.users.mgt.utils.DateTimeUtils;
+import com.acme.users.mgt.infra.services.api.events.IEventsInfraService;
 import com.acme.users.mgt.infra.services.api.sectors.ISectorsInfraService;
 import com.acme.users.mgt.services.organizations.api.IOrganizationsDomainService;
 import com.acme.users.mgt.services.sectors.api.ISectorsDomainService;
@@ -28,6 +35,7 @@ public class SectorsDomainService implements ISectorsDomainService {
     private final IOrganizationsDomainService organizationsDomainService;
     private final ISectorsInfraService sectorsInfraService;
     private final MessageSource messageSource;
+    private final IEventsInfraService eventsInfraService;
 
     @Transactional(rollbackFor = { FunctionalException.class })
     @Override
@@ -54,7 +62,22 @@ public class SectorsDomainService implements ISectorsDomainService {
             sector.setParentId(parentSector.getId());
         }
 
-        return sectorsInfraService.createSector(tenant.getId(), organization.getId(), sector);
+        CompositeId sectorCompositeId = sectorsInfraService.createSector(tenant.getId(), organization.getId(), sector);
+
+        // Create sector audit event
+        AuditEvent sectorAuditEvent = AuditEvent.builder()
+                .action(AuditAction.CREATE)
+                .objectUid(sectorCompositeId.getUid())
+                .target(EventTarget.SECTOR)
+                .scope(AuditScope.builder().tenantName(tenant.getLabel()).tenantUid(tenantUid)
+                        .organizationUid(organization.getUid()).organizationName(organization.getCommons().getLabel())
+                        .build())
+                .status(EventStatus.PENDING)
+                .timestamp(DateTimeUtils.nowIso())
+                .build();
+        eventsInfraService.createEvent(sectorAuditEvent);
+
+        return sectorCompositeId;
     }
 
     @Override

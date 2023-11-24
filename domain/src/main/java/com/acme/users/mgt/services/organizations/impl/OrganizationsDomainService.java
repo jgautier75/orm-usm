@@ -8,12 +8,19 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.acme.jga.users.mgt.domain.events.v1.AuditAction;
+import com.acme.jga.users.mgt.domain.events.v1.AuditEvent;
+import com.acme.jga.users.mgt.domain.events.v1.AuditScope;
+import com.acme.jga.users.mgt.domain.events.v1.EventStatus;
+import com.acme.jga.users.mgt.domain.events.v1.EventTarget;
 import com.acme.jga.users.mgt.domain.organizations.v1.Organization;
 import com.acme.jga.users.mgt.domain.sectors.v1.Sector;
 import com.acme.jga.users.mgt.dto.ids.CompositeId;
 import com.acme.jga.users.mgt.dto.tenant.Tenant;
 import com.acme.jga.users.mgt.exceptions.FunctionalErrorsTypes;
 import com.acme.jga.users.mgt.exceptions.FunctionalException;
+import com.acme.jga.users.mgt.utils.DateTimeUtils;
+import com.acme.users.mgt.infra.services.api.events.IEventsInfraService;
 import com.acme.users.mgt.infra.services.api.organizations.IOrganizationsInfraService;
 import com.acme.users.mgt.infra.services.api.sectors.ISectorsInfraService;
 import com.acme.users.mgt.logging.services.api.ILogService;
@@ -30,6 +37,7 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
     private final MessageSource messageSource;
     private final ILogService logService;
     private final ISectorsInfraService sectorsInfraService;
+    private final IEventsInfraService eventsInfraService;
 
     @Transactional
     @Override
@@ -47,6 +55,19 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
         organization.setTenantId(tenant.getId());
         CompositeId orgCompositeId = organizationsInfraService.createOrganization(organization);
 
+        // Create organization audit event
+        AuditEvent orgAuditEvent = AuditEvent.builder()
+                .action(AuditAction.CREATE)
+                .objectUid(orgCompositeId.getUid())
+                .target(EventTarget.ORGANIZATION)
+                .scope(AuditScope.builder().tenantName(tenant.getLabel()).tenantUid(tenantUid)
+                        .organizationUid(orgCompositeId.getUid()).organizationName(organization.getCommons().getLabel())
+                        .build())
+                .status(EventStatus.PENDING)
+                .timestamp(DateTimeUtils.nowIso())
+                .build();
+        eventsInfraService.createEvent(orgAuditEvent);
+
         // Create root sector
         Sector sector = Sector.builder()
                 .code(organization.getCommons().getCode())
@@ -55,7 +76,22 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
                 .root(true)
                 .tenantId(tenant.getId())
                 .build();
-        sectorsInfraService.createSector(tenant.getId(), orgCompositeId.getId(), sector);
+        CompositeId sectorCompositeId = sectorsInfraService.createSector(tenant.getId(), orgCompositeId.getId(),
+                sector);
+
+        // Create sector audit event
+        AuditEvent sectorAuditEvent = AuditEvent.builder()
+                .action(AuditAction.CREATE)
+                .objectUid(sectorCompositeId.getUid())
+                .target(EventTarget.ORGANIZATION)
+                .scope(AuditScope.builder().tenantName(tenant.getLabel()).tenantUid(tenantUid)
+                        .organizationUid(orgCompositeId.getUid()).organizationName(organization.getCommons().getLabel())
+                        .build())
+                .status(EventStatus.PENDING)
+                .timestamp(DateTimeUtils.nowIso())
+                .build();
+        eventsInfraService.createEvent(sectorAuditEvent);
+
         return orgCompositeId;
     }
 
@@ -99,6 +135,19 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
                 organization.getCommons().getLabel(), organization.getCommons().getCountry(),
                 organization.getCommons().getStatus());
 
+        // Create audit event
+        AuditEvent orgUpdateAuditEvent = AuditEvent.builder()
+                .action(AuditAction.UPDATE)
+                .objectUid(organization.getUid())
+                .target(EventTarget.ORGANIZATION)
+                .scope(AuditScope.builder().tenantName(tenant.getLabel()).tenantUid(tenantUid)
+                        .organizationUid(organization.getUid()).organizationName(organization.getCommons().getLabel())
+                        .build())
+                .status(EventStatus.PENDING)
+                .timestamp(DateTimeUtils.nowIso())
+                .build();
+        eventsInfraService.createEvent(orgUpdateAuditEvent);
+
     }
 
     @Override
@@ -124,6 +173,19 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
 
         Integer nbOrgDeleted = organizationsInfraService.deleteById(tenant.getId(), organization.getId());
         logService.debugS(callerName, "Nb of organizations deleted: [%s]", new Object[] { nbOrgDeleted });
+
+        // Create audit event
+        AuditEvent orgUpdateAuditEvent = AuditEvent.builder()
+                .action(AuditAction.DELETE)
+                .objectUid(organization.getUid())
+                .target(EventTarget.ORGANIZATION)
+                .scope(AuditScope.builder().tenantName(tenant.getLabel()).tenantUid(tenantUid)
+                        .organizationUid(organization.getUid()).organizationName(organization.getCommons().getLabel())
+                        .build())
+                .status(EventStatus.PENDING)
+                .timestamp(DateTimeUtils.nowIso())
+                .build();
+        eventsInfraService.createEvent(orgUpdateAuditEvent);
     }
 
 }
