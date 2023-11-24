@@ -34,7 +34,7 @@ public interface IOrganizationPortService {
      * @param organizationDto Organization payload
      * @throws FunctionalException Functional error
      */
-    void updateOrganization(String tenantUid, String orgUid, OrganizationDto organizationDto)
+    Integer updateOrganization(String tenantUid, String orgUid, OrganizationDto organizationDto)
             throws FunctionalException;
 
     /**
@@ -46,5 +46,15 @@ public interface IOrganizationPortService {
      * @throws FunctionalException
      */
     OrganizationDto findOrganizationByUid(String tenantUid, String orgUid) throws FunctionalException;
+
+    /**
+     * Delete organization.
+     * 
+     * @param tenantUid Tenant external id
+     * @param orgUid    Organization external id
+     * @return Nb od rows deleted
+     * @throws FunctionalException Functional error
+     */
+    Integer deleteOrganization(String tenantUid, String orgUid) throws FunctionalException;
 
 }

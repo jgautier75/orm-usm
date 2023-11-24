@@ -77,4 +77,9 @@ public class TenantInfraService implements ITenantInfraService {
         return tenantsDao.deleteTenant(tenantId);
     }
 
+    @Override
+    public Integer deleteSectorsByTenantId(Long tenantId) {
+        return tenantsDao.deleteSectorsByTenantId(tenantId);
+    }
+
 }

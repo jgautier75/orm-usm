@@ -174,4 +174,12 @@ public class TenantsDao extends AbstractJdbcDaoSupport implements ITenantsDao {
         return super.getNamedParameterJdbcTemplate().update(baseQuery, params);
     }
 
+    @Override
+    public Integer deleteSectorsByTenantId(Long tenantId) {
+        String baseQuery = super.getQuery("tenant_delete_sectors");
+        Map<String, Object> params = new HashMap<>();
+        params.put(DaoConstants.P_TENANT_ID, tenantId);
+        return super.getNamedParameterJdbcTemplate().update(baseQuery, params);
+    }
+
 }

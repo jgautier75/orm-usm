@@ -26,4 +26,6 @@ public interface ITenantsDao {
 
     Integer deleteOrganizationsByTenantId(Long tenantId);
 
+    Integer deleteSectorsByTenantId(Long tenantId);
+
 }

@@ -30,4 +30,6 @@ public interface IOrganizationsDao {
 
 	Integer deleteById(Long tenantId, Long orgId);
 
+	Integer deleteSectorsByOrganization(Long tenantId, Long orgId);
+
 }

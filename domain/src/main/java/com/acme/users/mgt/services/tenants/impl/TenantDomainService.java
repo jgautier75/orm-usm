@@ -109,6 +109,10 @@ public class TenantDomainService implements ITenantDomainService {
         logService.debugS(callerName, "Delete users for tenant [%s]", new Object[] { tenantUid });
         tenantInfraService.deleteUsersByTenantId(tenant.getId());
 
+        // Delete sectors by tenant id
+        logService.debugS(callerName, "Delete sectors for tenant [%s]", new Object[] { tenantUid });
+        tenantInfraService.deleteSectorsByTenantId(tenant.getId());
+
         // Delete organizations by tenant id
         logService.debugS(callerName, "Delete organizations for tenant [%s]", new Object[] { tenantUid });
         tenantInfraService.deleteOrganizationsByTenantId(tenant.getId());

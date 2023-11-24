@@ -1,5 +1,6 @@
 package com.acme.users.mgt.controllers;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -77,7 +78,6 @@ class OrganizationsControllerTest {
         @Test
         void updateOrganization() throws Exception {
                 // GIVEN
-
                 UidDto uidDto = new UidDto(UUID.randomUUID().toString());
                 OrganizationCommonsDto orgCommonsDto = OrganizationCommonsDto.builder()
                                 .code("org-code")
@@ -95,13 +95,29 @@ class OrganizationsControllerTest {
                 String orgJson = objectMapper.writeValueAsString(organizationDto);
 
                 // WHEN
-                Mockito.when(organizationPortService.createOrganization(Mockito.any(), Mockito.any()))
-                                .thenReturn(uidDto);
+                Mockito.when(organizationPortService.updateOrganization(Mockito.any(), Mockito.any(), Mockito.any()))
+                                .thenReturn(1);
                 // THEN
                 String targetUri = "/api/v1/tenants/" + TENANT_UID + "/organizations/" + uidDto.getUid();
                 mockMvc.perform(post(targetUri)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(orgJson)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .characterEncoding(StandardCharsets.UTF_8))
+                                .andExpect(status().isNoContent());
+        }
+
+        @Test
+        void deleteOrganization() throws Exception {
+                // GIVEN
+                UidDto uidDto = new UidDto(UUID.randomUUID().toString());
+
+                // WHEN
+                Mockito.when(organizationPortService.deleteOrganization(Mockito.any(), Mockito.any())).thenReturn(1);
+
+                // THEN
+                String targetUri = "/api/v1/tenants/" + TENANT_UID + "/organizations/" + uidDto.getUid();
+                mockMvc.perform(delete(targetUri)
                                 .accept(MediaType.APPLICATION_JSON)
                                 .characterEncoding(StandardCharsets.UTF_8))
                                 .andExpect(status().isNoContent());

@@ -48,9 +48,9 @@ public class OrganizationsInfraService implements IOrganizationsInfraService {
 
     @Transactional
     @Override
-    public void updateOrganization(Long tenantId, Long orgId, String code, String label, String country,
+    public Integer updateOrganization(Long tenantId, Long orgId, String code, String label, String country,
             OrganizationStatus status) {
-        organizationsDao.updateOrganization(tenantId, orgId, code, label, country, status);
+        return organizationsDao.updateOrganization(tenantId, orgId, code, label, country, status);
     }
 
     @Override
@@ -78,6 +78,11 @@ public class OrganizationsInfraService implements IOrganizationsInfraService {
     @Override
     public Integer deleteUsersByOrganization(Long tenantId, Long orgId) {
         return organizationsDao.deleteUsersByOrganization(tenantId, orgId);
+    }
+
+    @Override
+    public Integer deleteSectors(Long tenantId, Long orgId) {
+        return organizationsDao.deleteSectorsByOrganization(tenantId, orgId);
     }
 
 }

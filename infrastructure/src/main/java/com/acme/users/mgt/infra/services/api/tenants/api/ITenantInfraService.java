@@ -21,4 +21,6 @@ public interface ITenantInfraService {
     Integer deleteOrganizationsByTenantId(Long tenantId);
 
     Integer deleteTenant(Long tenantId);
+
+    Integer deleteSectorsByTenantId(Long tenantId);
 }

@@ -85,15 +85,19 @@ public class OrganizationPortService implements IOrganizationPortService {
      * @inheritDoc
      */
     @Override
-    public void updateOrganization(String tenantUid, String orgUid, OrganizationDto organizationDto)
+    public Integer updateOrganization(String tenantUid, String orgUid, OrganizationDto organizationDto)
             throws FunctionalException {
         // Find tenant
         tenantDomainService.findTenantByUid(tenantUid);
 
         // Update organization
         Organization org = organizationsConverter.convertOrganizationDtoToDomain(organizationDto);
-        organizationDomainService.updateOrganization(tenantUid, orgUid, org);
+        return organizationDomainService.updateOrganization(tenantUid, orgUid, org);
+    }
 
+    @Override
+    public Integer deleteOrganization(String tenantUid, String orgUid) throws FunctionalException {
+        return organizationDomainService.deleteOrganization(tenantUid, orgUid);
     }
 
 }
