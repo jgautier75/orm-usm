@@ -36,5 +36,9 @@ public enum FunctionalErrorsTypes {
     /**
      * Sector not found.
      */
-    SECTOR_NOT_FOUND;
+    SECTOR_NOT_FOUND,
+    /**
+     * Sector code already used.
+     */
+    SECTOR_CODE_ALREADY_USED;
 }

@@ -63,6 +63,11 @@ public class SectorsInfraService implements ISectorsInfraService {
         return sectorsConverter.convertSectorDbToDomain(sectorDb);
     }
 
+    @Override
+    public Optional<Long> existsByCode(String code) {
+        return sectorsDao.existsByCode(code);
+    }
+
     /**
      * Build sectors hierarchy.
      * 

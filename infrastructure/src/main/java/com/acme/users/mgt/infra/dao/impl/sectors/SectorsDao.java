@@ -4,8 +4,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.sql.DataSource;
 
@@ -113,6 +115,24 @@ public class SectorsDao extends AbstractJdbcDaoSupport implements ISectorsDao {
                 return SectorDbExtractor.extractSector(rs, true);
             }
         });
+    }
+
+    @Override
+    public Optional<Long> existsByCode(String code) {
+        String baseQuery = super.getQuery("sector_exists_by_code");
+        Map<String, Object> params = new HashMap<>();
+        params.put(DaoConstants.P_CODE, code);
+        Long sectorId = super.getNamedParameterJdbcTemplate().query(baseQuery, params, new ResultSetExtractor<Long>() {
+            @Override
+            public Long extractData(ResultSet rs) throws SQLException {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                } else {
+                    return null;
+                }
+            }
+        });
+        return Optional.ofNullable(sectorId);
     }
 
 }

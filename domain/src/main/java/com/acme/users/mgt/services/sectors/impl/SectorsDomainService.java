@@ -1,5 +1,7 @@
 package com.acme.users.mgt.services.sectors.impl;
 
+import java.util.Optional;
+
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
@@ -39,6 +41,14 @@ public class SectorsDomainService implements ISectorsDomainService {
         Organization organization = organizationsDomainService.findOrganizationByTenantAndUid(tenant.getId(),
                 organizationUid);
 
+        Optional<Long> optSectorId = sectorsInfraService.existsByCode(sector.getCode());
+        if (optSectorId.isPresent()) {
+            throw new FunctionalException(FunctionalErrorsTypes.SECTOR_CODE_ALREADY_USED.name(), null,
+                    messageSource.getMessage("sector_code_already_used",
+                            new Object[] { sector.getCode() }, LocaleContextHolder.getLocale()));
+        }
+
+        // Ensure parent sector exists
         if (!ObjectUtils.isEmpty(sector.getParentUid())) {
             Sector parentSector = findSectorByUidTenantOrg(tenantUid, organizationUid, sector.getParentUid());
             sector.setParentId(parentSector.getId());

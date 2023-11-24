@@ -19,5 +19,6 @@ public class ApiError implements Serializable {
 	private String message;
 	private String debugMessage;
 	private Integer status;
+	private String errorUid;
 	private List<ApiErrorDetail> details;
 }
