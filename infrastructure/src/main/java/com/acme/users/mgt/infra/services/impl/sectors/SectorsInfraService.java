@@ -26,7 +26,7 @@ public class SectorsInfraService implements ISectorsInfraService {
 
     @Override
     public Sector fetchSectorsWithHierarchy(Long tenantId, Long organizationId) {
-        List<SectorDb> sectors = sectorsDao.findSectorsByOrgId(1L, 1L);
+        List<SectorDb> sectors = sectorsDao.findSectorsByOrgId(tenantId, organizationId);
         SectorDb rootSectorDb = null;
         Sector targetSector = null;
 

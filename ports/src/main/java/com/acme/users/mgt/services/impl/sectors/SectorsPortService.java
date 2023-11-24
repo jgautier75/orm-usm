@@ -6,6 +6,7 @@ import com.acme.jga.users.mgt.domain.sectors.v1.Sector;
 import com.acme.jga.users.mgt.dto.ids.CompositeId;
 import com.acme.jga.users.mgt.exceptions.FunctionalException;
 import com.acme.users.mgt.converters.sectors.SectorsPortConverter;
+import com.acme.users.mgt.dto.port.sectors.v1.SectorDisplayDto;
 import com.acme.users.mgt.dto.port.sectors.v1.SectorDto;
 import com.acme.users.mgt.dto.port.shared.UidDto;
 import com.acme.users.mgt.services.api.sectors.ISectorsPortService;
@@ -25,6 +26,12 @@ public class SectorsPortService implements ISectorsPortService {
         Sector sector = sectorsConverter.convertSectorDtoToDomain(sectorDto);
         CompositeId compositeId = sectorsDomainService.createSector(tenantUid, organizationUid, sector);
         return UidDto.builder().uid(compositeId.getUid()).build();
+    }
+
+    @Override
+    public SectorDisplayDto findSectors(String tenantUid, String organizationUid) throws FunctionalException {
+        Sector rootSector = sectorsDomainService.fetchSectorsWithHierarchy(tenantUid, organizationUid);
+        return sectorsConverter.convertSectorDomainToSectorDisplay(rootSector);
     }
 
 }

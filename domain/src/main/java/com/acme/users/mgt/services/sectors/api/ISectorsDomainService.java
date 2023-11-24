@@ -5,11 +5,14 @@ import com.acme.jga.users.mgt.dto.ids.CompositeId;
 import com.acme.jga.users.mgt.exceptions.FunctionalException;
 
 public interface ISectorsDomainService {
-    CompositeId createSector(String tenantUid, String organizationUid, Sector sector) throws FunctionalException;
+        CompositeId createSector(String tenantUid, String organizationUid, Sector sector) throws FunctionalException;
 
-    Sector findSectorByUidTenantOrg(String tenantUid, String organizationUid, String sectorUid)
-            throws FunctionalException;
+        Sector findSectorByUidTenantOrg(String tenantUid, String organizationUid, String sectorUid)
+                        throws FunctionalException;
 
-    Sector findSectorByUidTenantOrg(Long tenantId, Long organizationId, String sectorUid)
-            throws FunctionalException;
+        Sector findSectorByUidTenantOrg(Long tenantId, Long organizationId, String sectorUid)
+                        throws FunctionalException;
+
+        Sector fetchSectorsWithHierarchy(String tenantUid, String organizationUid) throws FunctionalException;
+
 }

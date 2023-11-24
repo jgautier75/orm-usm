@@ -71,4 +71,16 @@ public class SectorsDomainService implements ISectorsDomainService {
         return sector;
     }
 
+    @Override
+    public Sector fetchSectorsWithHierarchy(String tenantUid, String organizationUid) throws FunctionalException {
+        // Find tenant
+        Tenant tenant = tenantDomainService.findTenantByUid(tenantUid);
+
+        // Find organization
+        Organization organization = organizationsDomainService.findOrganizationByTenantAndUid(tenant.getId(),
+                organizationUid);
+
+        return sectorsInfraService.fetchSectorsWithHierarchy(tenant.getId(), organization.getId());
+    }
+
 }
