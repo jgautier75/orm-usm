@@ -7,8 +7,8 @@ import org.springframework.util.CollectionUtils;
 import com.acme.jga.users.mgt.domain.users.v1.User;
 import com.acme.jga.users.mgt.dto.ids.CompositeId;
 import com.acme.jga.users.mgt.exceptions.FunctionalException;
-import com.acme.users.mgt.converters.organization.OrganizationsConverter;
-import com.acme.users.mgt.converters.user.UsersConverter;
+import com.acme.users.mgt.converters.organization.OrganizationsPortConverter;
+import com.acme.users.mgt.converters.user.UsersPortConverter;
 import com.acme.users.mgt.dto.port.organizations.v1.OrganizationLightDto;
 import com.acme.users.mgt.dto.port.shared.UidDto;
 import com.acme.users.mgt.dto.port.users.v1.UserDisplayDto;
@@ -25,8 +25,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserPortService implements IUserPortService {
     private final IUserDomainService userDomainService;
-    private final UsersConverter usersConverter;
-    private final OrganizationsConverter organizationsConverter;
+    private final UsersPortConverter usersConverter;
+    private final OrganizationsPortConverter organizationsConverter;
     private final UsersValidationEngine usersValidationEngine;
 
     @Override

@@ -2,20 +2,24 @@ package com.acme.users.mgt.services.organizations.impl;
 
 import java.util.List;
 import java.util.Optional;
+
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.acme.jga.users.mgt.domain.organizations.v1.Organization;
+import com.acme.jga.users.mgt.domain.sectors.v1.Sector;
 import com.acme.jga.users.mgt.dto.ids.CompositeId;
 import com.acme.jga.users.mgt.dto.tenant.Tenant;
 import com.acme.jga.users.mgt.exceptions.FunctionalErrorsTypes;
 import com.acme.jga.users.mgt.exceptions.FunctionalException;
 import com.acme.users.mgt.infra.services.api.organizations.IOrganizationsInfraService;
+import com.acme.users.mgt.infra.services.api.sectors.ISectorsInfraService;
 import com.acme.users.mgt.logging.services.api.ILogService;
 import com.acme.users.mgt.services.organizations.api.IOrganizationsDomainService;
 import com.acme.users.mgt.services.tenants.api.ITenantDomainService;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -25,7 +29,9 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
     private final ITenantDomainService tenantDomainService;
     private final MessageSource messageSource;
     private final ILogService logService;
+    private final ISectorsInfraService sectorsInfraService;
 
+    @Transactional
     @Override
     public CompositeId createOrganization(String tenantUid, Organization organization) throws FunctionalException {
         // Find tenant
@@ -39,7 +45,18 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
         }
 
         organization.setTenantId(tenant.getId());
-        return organizationsInfraService.createOrganization(organization);
+        CompositeId orgCompositeId = organizationsInfraService.createOrganization(organization);
+
+        // Create root sector
+        Sector sector = Sector.builder()
+                .code(organization.getCommons().getCode())
+                .label(organization.getCommons().getLabel())
+                .orgId(orgCompositeId.getId())
+                .root(true)
+                .tenantId(tenant.getId())
+                .build();
+        sectorsInfraService.createSector(tenant.getId(), orgCompositeId.getId(), sector);
+        return orgCompositeId;
     }
 
     @Override

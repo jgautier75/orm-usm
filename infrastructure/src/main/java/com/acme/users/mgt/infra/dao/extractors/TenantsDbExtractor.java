@@ -7,11 +7,11 @@ import com.acme.jga.users.mgt.dao.jdbc.utils.DaoConstants;
 import com.acme.jga.users.mgt.dao.jdbc.utils.SQLExtractor;
 import com.acme.users.mgt.infra.dto.tenants.v1.TenantDb;
 
-public class TenantsDbExtractor {
-    private TenantsDbExtractor() {
-        // Private constructor for utility class
-    }
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class TenantsDbExtractor {
     public static TenantDb extractTenant(ResultSet resultSet, boolean checkNext) throws SQLException {
         TenantDb tenant = null;
         if (!checkNext || resultSet.next()) {

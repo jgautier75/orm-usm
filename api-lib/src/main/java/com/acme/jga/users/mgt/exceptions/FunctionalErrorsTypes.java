@@ -32,5 +32,9 @@ public enum FunctionalErrorsTypes {
     /**
      * Tenant id expected when filtering on an organization.
      */
-    TENANT_ORG_EXPECTED;
+    TENANT_ORG_EXPECTED,
+    /**
+     * Sector not found.
+     */
+    SECTOR_NOT_FOUND;
 }

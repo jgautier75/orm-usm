@@ -1,5 +1,6 @@
 package com.acme.users.mgt.infra.dao.impl.events;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
@@ -23,7 +24,7 @@ public class EventsDao extends AbstractJdbcDaoSupport implements IEventsDao {
     }
 
     @Override
-    public String insertEvent(AuditEvent event) throws JsonProcessingException {
+    public String insertEvent(AuditEvent event) throws JsonProcessingException, SQLException {
         String baseQuery = super.getQuery("event_create");
         String uuid = DaoConstants.generatedUUID();
         Map<String, Object> params = new HashMap<>();
@@ -33,9 +34,9 @@ public class EventsDao extends AbstractJdbcDaoSupport implements IEventsDao {
         params.put("pTarget", event.getTarget().getValue());
         params.put("pObjectUid", event.getObjectUid());
         params.put("pAction", event.getAction().name());
-        params.put("pStatus", event.getStatus().name());
+        params.put("pStatus", event.getStatus().getValue());
         String jsonedEvent = this.mapper.writeValueAsString(event);
-        params.put("pPayload", jsonedEvent);
+        params.put("pPayload", super.buildPGobject(jsonedEvent));
         super.getNamedParameterJdbcTemplate().update(baseQuery, params);
         return uuid;
     }

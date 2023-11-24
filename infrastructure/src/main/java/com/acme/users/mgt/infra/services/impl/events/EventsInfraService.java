@@ -1,5 +1,7 @@
 package com.acme.users.mgt.infra.services.impl.events;
 
+import java.sql.SQLException;
+
 import org.springframework.stereotype.Service;
 
 import com.acme.jga.users.mgt.domain.events.v1.AuditEvent;
@@ -19,7 +21,7 @@ public class EventsInfraService implements IEventsInfraService {
     public String createEvent(AuditEvent auditEvent) throws TechnicalException {
         try {
             return eventsDao.insertEvent(auditEvent);
-        } catch (JsonProcessingException e) {
+        } catch (JsonProcessingException | SQLException e) {
             throw new TechnicalException("Unable to persist event", e);
         }
     }

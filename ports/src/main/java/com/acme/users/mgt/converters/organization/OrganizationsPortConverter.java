@@ -9,7 +9,7 @@ import com.acme.users.mgt.dto.port.organizations.v1.OrganizationDto;
 import com.acme.users.mgt.dto.port.organizations.v1.OrganizationLightDto;
 
 @Component
-public class OrganizationsConverter {
+public class OrganizationsPortConverter {
 
     public Organization convertOrganizationDtoToDomain(OrganizationDto organizationDto) {
         Organization organization = null;

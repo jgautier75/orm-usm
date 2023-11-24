@@ -7,7 +7,7 @@ import org.springframework.util.CollectionUtils;
 import com.acme.jga.users.mgt.dto.ids.CompositeId;
 import com.acme.jga.users.mgt.dto.tenant.Tenant;
 import com.acme.jga.users.mgt.exceptions.FunctionalException;
-import com.acme.users.mgt.converters.tenant.TenantsConverter;
+import com.acme.users.mgt.converters.tenant.TenantsPortConverter;
 import com.acme.users.mgt.dto.port.shared.UidDto;
 import com.acme.users.mgt.dto.port.tenants.v1.TenantDisplayDto;
 import com.acme.users.mgt.dto.port.tenants.v1.TenantDto;
@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class TenantPortService implements ITenantPortService {
-    private final TenantsConverter tenantsConverter;
+    private final TenantsPortConverter tenantsConverter;
     private final ITenantDomainService tenantDomainService;
     private final TenantsValidationEngine tenantsValidationEngine;
 
