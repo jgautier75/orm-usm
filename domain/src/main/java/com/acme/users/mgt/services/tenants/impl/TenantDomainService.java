@@ -75,6 +75,10 @@ public class TenantDomainService implements ITenantDomainService {
 
     @Override
     public Integer updateTenant(Tenant tenant) throws FunctionalException {
+        String callerName = this.getClass().getName() + "-updateTenant";
+
+        logService.infoS(callerName, "U%pdating tenant [%s] ", new Object[] { tenant.getUid() });
+
         // Ensure tenant already exists
         Tenant rbdmsTenant = findTenantByUid(tenant.getUid());
         tenant.setId(rbdmsTenant.getId());
@@ -91,7 +95,8 @@ public class TenantDomainService implements ITenantDomainService {
                 .status(EventStatus.PENDING)
                 .timestamp(DateTimeUtils.nowIso())
                 .build();
-        eventsInfraService.createEvent(auditEvent);
+        String eventUid = eventsInfraService.createEvent(auditEvent);
+        logService.debugS(callerName, "Event [%s] created", new Object[] { eventUid });
 
         return nbRowsUpdated;
     }
