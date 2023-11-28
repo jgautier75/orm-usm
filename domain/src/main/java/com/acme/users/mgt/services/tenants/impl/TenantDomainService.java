@@ -50,7 +50,8 @@ public class TenantDomainService implements ITenantDomainService {
                 .target(EventTarget.TENANT)
                 .scope(AuditScope.builder().tenantName(tenant.getLabel()).tenantUid(compositeId.getUid()).build())
                 .status(EventStatus.PENDING)
-                .timestamp(DateTimeUtils.nowIso())
+                .createdAt(DateTimeUtils.nowIso())
+                .lastUpdatedAt(DateTimeUtils.nowIso())
                 .build();
         String eventUid = eventsInfraService.createEvent(auditEvent);
         logService.debugS(callerName, "Created event [%s]", new Object[] { eventUid });
@@ -93,7 +94,8 @@ public class TenantDomainService implements ITenantDomainService {
                 .target(EventTarget.TENANT)
                 .scope(AuditScope.builder().tenantName(tenant.getLabel()).tenantUid(tenant.getUid()).build())
                 .status(EventStatus.PENDING)
-                .timestamp(DateTimeUtils.nowIso())
+                .createdAt(DateTimeUtils.nowIso())
+                .lastUpdatedAt(DateTimeUtils.nowIso())
                 .build();
         String eventUid = eventsInfraService.createEvent(auditEvent);
         logService.debugS(callerName, "Event [%s] created", new Object[] { eventUid });
@@ -132,7 +134,8 @@ public class TenantDomainService implements ITenantDomainService {
                 .target(EventTarget.TENANT)
                 .scope(AuditScope.builder().tenantName(tenant.getLabel()).tenantUid(tenant.getUid()).build())
                 .status(EventStatus.PENDING)
-                .timestamp(DateTimeUtils.nowIso())
+                .createdAt(DateTimeUtils.nowIso())
+                .lastUpdatedAt(DateTimeUtils.nowIso())
                 .build();
         eventsInfraService.createEvent(auditEvent);
         return nbDeleted;

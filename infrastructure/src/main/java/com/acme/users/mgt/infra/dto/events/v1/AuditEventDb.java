@@ -1,26 +1,27 @@
-package com.acme.jga.users.mgt.domain.events.v1;
+package com.acme.users.mgt.infra.dto.events.v1;
 
 import java.time.LocalDateTime;
-import java.util.List;
+
+import com.acme.jga.users.mgt.domain.events.v1.AuditAction;
+import com.acme.jga.users.mgt.domain.events.v1.EventStatus;
+import com.acme.jga.users.mgt.domain.events.v1.EventTarget;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Data
 @Builder(toBuilder = true)
-public class AuditEvent {
+public class AuditEventDb {
+    private String uid;
     private LocalDateTime createdAt;
     private LocalDateTime lastUpdatedAt;
-    private String uid;
     private EventTarget target;
-    private AuditAuthor author;
-    private AuditScope scope;
     private String objectUid;
     private AuditAction action;
     private EventStatus status;
-    private List<AuditChange> changes;
+    private String payload;
 }

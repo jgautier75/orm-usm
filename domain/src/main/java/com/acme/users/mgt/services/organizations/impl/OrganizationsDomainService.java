@@ -67,7 +67,8 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
                                                 .organizationName(organization.getCommons().getLabel())
                                                 .build())
                                 .status(EventStatus.PENDING)
-                                .timestamp(DateTimeUtils.nowIso())
+                                .createdAt(DateTimeUtils.nowIso())
+                                .lastUpdatedAt(DateTimeUtils.nowIso())
                                 .build();
                 eventsInfraService.createEvent(orgAuditEvent);
 
@@ -92,7 +93,8 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
                                                 .organizationName(organization.getCommons().getLabel())
                                                 .build())
                                 .status(EventStatus.PENDING)
-                                .timestamp(DateTimeUtils.nowIso())
+                                .createdAt(DateTimeUtils.nowIso())
+                                .lastUpdatedAt(DateTimeUtils.nowIso())
                                 .build();
                 eventsInfraService.createEvent(sectorAuditEvent);
 
@@ -150,7 +152,8 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
                                                 .organizationName(organization.getCommons().getLabel())
                                                 .build())
                                 .status(EventStatus.PENDING)
-                                .timestamp(DateTimeUtils.nowIso())
+                                .createdAt(DateTimeUtils.nowIso())
+                                .lastUpdatedAt(DateTimeUtils.nowIso())
                                 .build();
                 eventsInfraService.createEvent(orgUpdateAuditEvent);
                 return nbUpdated;
@@ -196,7 +199,8 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
                                                 .organizationName(organization.getCommons().getLabel())
                                                 .build())
                                 .status(EventStatus.PENDING)
-                                .timestamp(DateTimeUtils.nowIso())
+                                .createdAt(DateTimeUtils.nowIso())
+                                .lastUpdatedAt(DateTimeUtils.nowIso())
                                 .build();
                 eventsInfraService.createEvent(orgUpdateAuditEvent);
                 return nbUsersDeleted;

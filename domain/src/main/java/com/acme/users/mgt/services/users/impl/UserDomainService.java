@@ -85,7 +85,8 @@ public class UserDomainService implements IUserDomainService {
                         .organizationUid(org.getUid()).organizationName(org.getCommons().getLabel())
                         .build())
                 .status(EventStatus.PENDING)
-                .timestamp(DateTimeUtils.nowIso())
+                .createdAt(DateTimeUtils.nowIso())
+                .lastUpdatedAt(DateTimeUtils.nowIso())
                 .build();
         eventsInfraService.createEvent(userAuditEvent);
 
@@ -136,7 +137,8 @@ public class UserDomainService implements IUserDomainService {
                         .organizationUid(org.getUid()).organizationName(org.getCommons().getLabel())
                         .build())
                 .status(EventStatus.PENDING)
-                .timestamp(DateTimeUtils.nowIso())
+                .createdAt(DateTimeUtils.nowIso())
+                .lastUpdatedAt(DateTimeUtils.nowIso())
                 .build();
         eventsInfraService.createEvent(userAuditEvent);
     }
@@ -215,7 +217,8 @@ public class UserDomainService implements IUserDomainService {
                         .organizationUid(org.getUid()).organizationName(org.getCommons().getLabel())
                         .build())
                 .status(EventStatus.PENDING)
-                .timestamp(DateTimeUtils.nowIso())
+                .createdAt(DateTimeUtils.nowIso())
+                .lastUpdatedAt(DateTimeUtils.nowIso())
                 .build();
         eventsInfraService.createEvent(userAuditEvent);
 

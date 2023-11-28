@@ -31,89 +31,95 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class SectorsDomainService implements ISectorsDomainService {
-    private final ITenantDomainService tenantDomainService;
-    private final IOrganizationsDomainService organizationsDomainService;
-    private final ISectorsInfraService sectorsInfraService;
-    private final MessageSource messageSource;
-    private final IEventsInfraService eventsInfraService;
+        private final ITenantDomainService tenantDomainService;
+        private final IOrganizationsDomainService organizationsDomainService;
+        private final ISectorsInfraService sectorsInfraService;
+        private final MessageSource messageSource;
+        private final IEventsInfraService eventsInfraService;
 
-    @Transactional(rollbackFor = { FunctionalException.class })
-    @Override
-    public CompositeId createSector(String tenantUid, String organizationUid, Sector sector)
-            throws FunctionalException {
+        @Transactional(rollbackFor = { FunctionalException.class })
+        @Override
+        public CompositeId createSector(String tenantUid, String organizationUid, Sector sector)
+                        throws FunctionalException {
 
-        // Find tenant
-        Tenant tenant = tenantDomainService.findTenantByUid(tenantUid);
+                // Find tenant
+                Tenant tenant = tenantDomainService.findTenantByUid(tenantUid);
 
-        // Find organization
-        Organization organization = organizationsDomainService.findOrganizationByTenantAndUid(tenant.getId(),
-                organizationUid);
+                // Find organization
+                Organization organization = organizationsDomainService.findOrganizationByTenantAndUid(tenant.getId(),
+                                organizationUid);
 
-        Optional<Long> optSectorId = sectorsInfraService.existsByCode(sector.getCode());
-        if (optSectorId.isPresent()) {
-            throw new FunctionalException(FunctionalErrorsTypes.SECTOR_CODE_ALREADY_USED.name(), null,
-                    messageSource.getMessage("sector_code_already_used",
-                            new Object[] { sector.getCode() }, LocaleContextHolder.getLocale()));
+                Optional<Long> optSectorId = sectorsInfraService.existsByCode(sector.getCode());
+                if (optSectorId.isPresent()) {
+                        throw new FunctionalException(FunctionalErrorsTypes.SECTOR_CODE_ALREADY_USED.name(), null,
+                                        messageSource.getMessage("sector_code_already_used",
+                                                        new Object[] { sector.getCode() },
+                                                        LocaleContextHolder.getLocale()));
+                }
+
+                // Ensure parent sector exists
+                if (!ObjectUtils.isEmpty(sector.getParentUid())) {
+                        Sector parentSector = findSectorByUidTenantOrg(tenantUid, organizationUid,
+                                        sector.getParentUid());
+                        sector.setParentId(parentSector.getId());
+                }
+
+                CompositeId sectorCompositeId = sectorsInfraService.createSector(tenant.getId(), organization.getId(),
+                                sector);
+
+                // Create sector audit event
+                AuditEvent sectorAuditEvent = AuditEvent.builder()
+                                .action(AuditAction.CREATE)
+                                .objectUid(sectorCompositeId.getUid())
+                                .target(EventTarget.SECTOR)
+                                .scope(AuditScope.builder().tenantName(tenant.getLabel()).tenantUid(tenantUid)
+                                                .organizationUid(organization.getUid())
+                                                .organizationName(organization.getCommons().getLabel())
+                                                .build())
+                                .status(EventStatus.PENDING)
+                                .createdAt(DateTimeUtils.nowIso())
+                                .lastUpdatedAt(DateTimeUtils.nowIso())
+                                .build();
+                eventsInfraService.createEvent(sectorAuditEvent);
+
+                return sectorCompositeId;
         }
 
-        // Ensure parent sector exists
-        if (!ObjectUtils.isEmpty(sector.getParentUid())) {
-            Sector parentSector = findSectorByUidTenantOrg(tenantUid, organizationUid, sector.getParentUid());
-            sector.setParentId(parentSector.getId());
+        @Override
+        public Sector findSectorByUidTenantOrg(String tenantUid, String organizationUid, String sectorUid)
+                        throws FunctionalException {
+                // Find tenant
+                Tenant tenant = tenantDomainService.findTenantByUid(tenantUid);
+
+                // Find organization
+                Organization organization = organizationsDomainService.findOrganizationByTenantAndUid(tenant.getId(),
+                                organizationUid);
+
+                return findSectorByUidTenantOrg(tenant.getId(), organization.getId(), sectorUid);
         }
 
-        CompositeId sectorCompositeId = sectorsInfraService.createSector(tenant.getId(), organization.getId(), sector);
-
-        // Create sector audit event
-        AuditEvent sectorAuditEvent = AuditEvent.builder()
-                .action(AuditAction.CREATE)
-                .objectUid(sectorCompositeId.getUid())
-                .target(EventTarget.SECTOR)
-                .scope(AuditScope.builder().tenantName(tenant.getLabel()).tenantUid(tenantUid)
-                        .organizationUid(organization.getUid()).organizationName(organization.getCommons().getLabel())
-                        .build())
-                .status(EventStatus.PENDING)
-                .timestamp(DateTimeUtils.nowIso())
-                .build();
-        eventsInfraService.createEvent(sectorAuditEvent);
-
-        return sectorCompositeId;
-    }
-
-    @Override
-    public Sector findSectorByUidTenantOrg(String tenantUid, String organizationUid, String sectorUid)
-            throws FunctionalException {
-        // Find tenant
-        Tenant tenant = tenantDomainService.findTenantByUid(tenantUid);
-
-        // Find organization
-        Organization organization = organizationsDomainService.findOrganizationByTenantAndUid(tenant.getId(),
-                organizationUid);
-
-        return findSectorByUidTenantOrg(tenant.getId(), organization.getId(), sectorUid);
-    }
-
-    @Override
-    public Sector findSectorByUidTenantOrg(Long tenantId, Long organizationId, String sectorUid)
-            throws FunctionalException {
-        Sector sector = sectorsInfraService.findSectorByUid(tenantId, organizationId, sectorUid);
-        if (sector == null) {
-            throw new FunctionalException(FunctionalErrorsTypes.SECTOR_NOT_FOUND.name(), null, messageSource
-                    .getMessage("sector_not_found", new Object[] { sectorUid }, LocaleContextHolder.getLocale()));
+        @Override
+        public Sector findSectorByUidTenantOrg(Long tenantId, Long organizationId, String sectorUid)
+                        throws FunctionalException {
+                Sector sector = sectorsInfraService.findSectorByUid(tenantId, organizationId, sectorUid);
+                if (sector == null) {
+                        throw new FunctionalException(FunctionalErrorsTypes.SECTOR_NOT_FOUND.name(), null, messageSource
+                                        .getMessage("sector_not_found", new Object[] { sectorUid },
+                                                        LocaleContextHolder.getLocale()));
+                }
+                return sector;
         }
-        return sector;
-    }
 
-    @Override
-    public Sector fetchSectorsWithHierarchy(String tenantUid, String organizationUid) throws FunctionalException {
-        // Find tenant
-        Tenant tenant = tenantDomainService.findTenantByUid(tenantUid);
+        @Override
+        public Sector fetchSectorsWithHierarchy(String tenantUid, String organizationUid) throws FunctionalException {
+                // Find tenant
+                Tenant tenant = tenantDomainService.findTenantByUid(tenantUid);
 
-        // Find organization
-        Organization organization = organizationsDomainService.findOrganizationByTenantAndUid(tenant.getId(),
-                organizationUid);
+                // Find organization
+                Organization organization = organizationsDomainService.findOrganizationByTenantAndUid(tenant.getId(),
+                                organizationUid);
 
-        return sectorsInfraService.fetchSectorsWithHierarchy(tenant.getId(), organization.getId());
-    }
+                return sectorsInfraService.fetchSectorsWithHierarchy(tenant.getId(), organization.getId());
+        }
 
 }

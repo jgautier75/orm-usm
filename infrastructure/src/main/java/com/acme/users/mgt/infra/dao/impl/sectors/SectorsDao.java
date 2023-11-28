@@ -74,7 +74,7 @@ public class SectorsDao extends AbstractJdbcDaoSupport implements ISectorsDao {
         MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
         mapSqlParameterSource.addValue(DaoConstants.P_TENANT_ID, tenantId);
         mapSqlParameterSource.addValue(DaoConstants.P_ORG_ID, orgId);
-        mapSqlParameterSource.addValue(DaoConstants.P_UID, DaoConstants.generatedUUID());
+        mapSqlParameterSource.addValue(DaoConstants.P_UID, uuid);
         mapSqlParameterSource.addValue(DaoConstants.P_CODE, sectorDb.getCode());
         mapSqlParameterSource.addValue(DaoConstants.P_LABEL, sectorDb.getLabel());
         mapSqlParameterSource.addValue("pRoot", sectorDb.isRoot());

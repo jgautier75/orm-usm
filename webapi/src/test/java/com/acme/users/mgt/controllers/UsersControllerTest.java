@@ -127,17 +127,12 @@ class UsersControllerTest {
                                 .characterEncoding(StandardCharsets.UTF_8))
                                 .andDo(print())
                                 .andExpect(status().isOk());
-
         }
 
         @Test
         void deleteUser() throws Exception {
                 // GIVEN
                 UidDto uidDto = new UidDto(UUID.randomUUID().toString());
-                UserDto userDto = mockUserDto();
-
-                ObjectMapper mapper = new ObjectMapper();
-                String userJson = mapper.writeValueAsString(userDto);
 
                 // WHEN
                 Mockito.when(userPortService.deleteUser(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(1);
@@ -146,14 +141,16 @@ class UsersControllerTest {
                 String usersUri = "/api/v1/tenants/" + TENANT_UID + "/organizations/" + ORG_UID + "/users/"
                                 + uidDto.getUid();
                 mockMvc.perform(delete(usersUri)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(userJson)
-                                .accept(MediaType.APPLICATION_JSON)
                                 .characterEncoding(StandardCharsets.UTF_8))
                                 .andDo(print())
                                 .andExpect(status().isNoContent());
         }
 
+        /**
+         * Mock user dto.
+         * 
+         * @return User DTO
+         */
         private UserDto mockUserDto() {
                 UserCommonsDto userCommonsDto = UserCommonsDto.builder()
                                 .firstName("fname")
