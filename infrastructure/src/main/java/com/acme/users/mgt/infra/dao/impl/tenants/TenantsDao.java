@@ -88,25 +88,6 @@ public class TenantsDao extends AbstractJdbcDaoSupport implements ITenantsDao {
 
     @Override
     public CompositeId createTenant(String code, String label) {
-
-        /*-String dbtest = "SELECT datname FROM pg_database";
-        List<Map<String, Object>> testOut = super.getNamedParameterJdbcTemplate().queryForList(dbtest,
-                (SqlParameterSource) null);
-        Iterator<Map<String, Object>> it = testOut.iterator();
-        while (it.hasNext()) {
-            Map<String, Object> m = it.next();
-            log.info(m.toString());
-        }
-        
-        String test = "SELECT table_schema,table_name FROM information_schema.tables ORDER BY table_schema,table_name";
-        List<Map<String, Object>> out = super.getNamedParameterJdbcTemplate().queryForList(test,
-                (SqlParameterSource) null);
-        it = out.iterator();
-        while (it.hasNext()) {
-            Map<String, Object> m = it.next();
-            log.info(m.toString());
-        }*/
-
         String baseQuery = super.getQuery("tenant_create");
         KeyHolder keyHolder = new GeneratedKeyHolder();
         String uuid = DaoConstants.generatedUUID();

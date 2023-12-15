@@ -37,9 +37,7 @@ import com.acme.users.mgt.infra.dao.config.DaoTestConfig;
 import com.acme.users.mgt.infra.dao.config.DatabaseTestConfig;
 import com.acme.users.mgt.infra.dao.utils.DaoTestUtils;
 import com.acme.users.mgt.infra.dto.events.v1.AuditEventDb;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.JsonPath;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE, classes = { DatabaseTestConfig.class, DaoTestConfig.class })
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
