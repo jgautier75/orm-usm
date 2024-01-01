@@ -1,54 +1,150 @@
 # orm-usm
+
 Organizations &amp; Users Management
 
 [Multi-tenant](https://en.wikipedia.org/wiki/Multitenancy) designed spring-boot application for users management.
 
 A multi-tenants software architecture aims at serving multiple organizations.
 
+Code is organized in a "domain driven" way where:
+
+- "ports" interfaces REST apis and Domain business layer, basically converting from REST DTO format to
+  domain entities format.
+- "domain" layer contains all business rules and is agnostic either from REST format and to underlying storage layer
+- "infrastucture" layer ensures format conversion between domain and the persistence layer
+
 ## Technical stack
 
 Standard REST application relying on:
 
-* PostgreSQL (16.x) for persistence
-* Liquibase for rdbms schema versions management
-* Spring boot JDBC for persistence (No f****** ORM)
-* HikariCP for connection pooling 
-* Sprint boot (3.1.x)
-* Testcontainers and Mockito for unit testing (docker containers like postgreSQL)
+- Sprint boot (3.2.x)
+- PostgreSQL (16.x) for persistence
+- Liquibase for rdbms schema versions management
+- Spring boot JDBC for persistence (No f**\*\*** ORM)
+- Spring integration for PublishSubscribe channel
+- HikariCP for connection pooling
+- Kafka stack (Kafka + Zookeeper + Schema registry + AKHQ)
+- Testcontainers and Mockito for unit testing (docker containers like postgreSQL)
+
+## Docker
+
+Docker compose file: docker/docker-services.yml
+
+`docker-compose -f docker/docker-services.yml up -d`
+
+Services:
+
+| Service         | Version | Port |
+| --------------- | ------- | ---- |
+| postgreSQL      | 16.1    | 5432 |
+| akhq            | 0.24.0  | 8086 |
+| zookeeper       | 7.4.3   | 2181 |
+| kafka           | 7.4.3   | 9092 |
+| schema-registry | 7.4.3   | 8085 |
+
+**Database setup**:
+
+Database schema management relies on liquibase, to setup:
+
+1. Connect to postgreSQL container and execute db_accounts_setup.sql which:
+
+- Creates database
+- Creates accounts:
+  - tec_orm_usm_dba: database account with DDL authorizations (Data Definition Language)
+  - tec_orm_usm_app: database account with only DML authorizations (Data Modeling Language). This account is used by spring boot application since applicative accounts must not have thr rights to alter database schema
+
+2. Package project
+
+```java
+mvn clean package install -DskipTests
+```
+
+3. Move to db-migration/target folder
+
+4. Perform Liquibase update:
+
+```java
+java -jar db-migration.jar --classpath=db-migration.jar --driver=org.postgresql.Driver --url="jdbc:postgresql://localhost:5432/orm_usm" --changeLogFile="postgresql/changelogs.xml" --username=tec_orm_usm_dba --password=tec_orm_usm_dba --logLevel=info  update
+```
 
 ## Entities
 
-* **Tenant**: 
-    * A tenant aims at serving multiple organizations.
-    * Properties:
-        * id: internal identifier
-        * uid: external identifier (UUID)
-        * code: functional code (unique)
-        * label: tenant's label
-* **Organization**:
-    * An organization belongs to a tenant and holds users
-    * Properties:
-        * id: internal identifier
-        * uid: external identifier (UUID)
-        * tenant: Refererce on tenant
-        * label: Organization's label
-        * code: functional code (unique)
-        * kind: Organization's code (Enumeration: TENANT,BU,COMMUNITY,ENTERPRISE)
-        * country: Country code (ISO 3166-1 Alpha2)
-        * status: status (Enumeration: DRAFT, ACTIVE, INACTIVE)
-* **User**:
-    * A user belongs to an organization and thus to a tenant
-    * Properties:
-        * id: internal identifier
-        * uid: external identifier (UUID)
-        * tenant_id: Reference on tenant
-        * org_id: Reference on organization
-        * login: User login (unique)
-        * firstName: First name
-        * lastName: Last name
-        * middleName: Middle name
-        * email: Email address
-        * status: (Enumeration: DRAFT, ACTIVE, INACTIVE)
+- **Tenant**:
+  - A tenant aims at serving multiple organizations.
+  - Properties:
+    - id: internal identifier
+    - uid: external identifier (UUID)
+    - code: functional code (unique)
+    - label: tenant's label
+- **Organization**:
+  - An organization belongs to a tenant and holds users
+  - Properties:
+    - id: internal identifier
+    - uid: external identifier (UUID)
+    - tenant: Refererce on tenant
+    - label: Organization's label
+    - code: functional code (unique)
+    - kind: Organization's code (Enumeration: TENANT,BU,COMMUNITY,ENTERPRISE)
+    - country: Country code (ISO 3166-1 Alpha2)
+    - status: status (Enumeration: DRAFT, ACTIVE, INACTIVE)
+- **User**:
+  - A user belongs to an organization and thus to a tenant
+  - Properties:
+    - id: internal identifier
+    - uid: external identifier (UUID)
+    - tenant_id: Reference on tenant
+    - org_id: Reference on organization
+    - login: User login (unique)
+    - firstName: First name
+    - lastName: Last name
+    - middleName: Middle name
+    - email: Email address
+    - status: (Enumeration: DRAFT, ACTIVE, INACTIVE)
+- **Events**:
+  - Storage of audit events.
+  - An audit event is always recorded when an entity is created (tenant, organization, sector), updated or deleted
+  - Properties:
+    - uid: A uique identifier (uuid)
+    - created_at: Creation timestamp (UTC/ISO-8601)
+    - last_updated_at: Last update timestamp (UTC/ISO-8601)
+    - target: Entity type (Enumeration: Tenant(0), Organization(1), User(2), Sector(3))
+    - object_uid: Entity object uid
+    - action: Enumeration: CREATE, UPDATE, DELETE
+    - status: Event status (Enumeration: PENDING(0), PROCESSED(1), FAILED(2))
+    - payload: Audit event in json format (PostgreSQL jsonb)
+
+## Audit events
+
+Everytime an entity (tenant, organization, user, sector) is created, updated or deleted, an audit event is persisted in rdbms.
+
+**Why persisting audit events in rdbms and not sending event directly to kafka ?**
+
+When talking about audit events, we must ensure audit events and underlying data in rdbms are **consistent**.
+
+Indeed, we want to avoid the following two use cases:
+
+- A rollback is performed in rdbms and the event is still sent and thus the audit event does not reflect the underlying data.
+- For some reasons, the kafka brokers are not reacheable (network failure for example). In this case, either transation is rollback if message sending is within the same transactional method or message is not sent at all to kafka if outside transactiona method.
+
+Thus, to ensure consistency between data stored in rdbms and audit event, these ones are stored in rdbms in the same transaction than the data. Obvisouly, we're here relying on ACID features of potgreSQL relational database.
+In other words, if a transaction rollback occurs, both data and audit events are rollbacked.
+
+![](docs/images/AuditEvents.drawio.png)
+
+Schema above describes this behaviour, the audit event is created in the same transaction than data.
+Once audit events and data have been persisted, a "wakeup" message is sent to a spring-integration PublishSubscribe channel
+
+```java
+eventAuditChannel.send(MessageBuilder.withPayload(KafkaConfig.AUDIT_WAKE_UP).build());
+```
+
+Listener "eventAuditChannel" responsibilities are:
+
+- Retrieve "pending" events from rdbms
+- Push events to kafka
+- Mark events are processed
+
+![](docs/images/AuditEventListener.drawio.png)
 
 ## Testing REST APIS
 
@@ -79,12 +175,15 @@ To achieve this, first compile package maven project.
 Once project bas been compiled, run scripts/get-spring-boot-modules.sh:
 
 Parameters:
-* 1: Full path to spring-boot fat jar
-* 2: Jdk version (17)
-* 3: Temp directory for spring-boot app extraction
-*   4: Automatic modules: list of automatic modules, typically legacy libraries (multiple values separator is the comma)
 
-Example: get-springboot-modules.sh webapi/target/webapi.jar 17 webapi/target/tmp "snakeyaml-1.28.jar,jakarta.annotation-api-1.3.5.jar,slf4j-api-1.7.32.jar"
+- 1: Full path to spring-boot fat jar
+- 2: Jdk version (17)
+- 3: Temp directory for spring-boot app extraction
+- 4: Automatic modules: list of automatic modules, typically legacy libraries (multiple values separator is the comma)
+
+```sh
+./get-springboot-modules.sh webapi/target/webapi.jar 17 webapi/target/tmp "snakeyaml-1.28.jar,jakarta.annotation-api-1.3.5.jar,slf4j-api-1.7.32.jar"
+```
 
 Update webapi/Dockerfile accordingly in jlinks section
 
