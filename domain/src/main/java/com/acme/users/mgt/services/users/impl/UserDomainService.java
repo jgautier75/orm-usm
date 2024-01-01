@@ -5,6 +5,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.integration.channel.PublishSubscribeChannel;
+import org.springframework.integration.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -21,6 +23,7 @@ import com.acme.jga.users.mgt.dto.tenant.Tenant;
 import com.acme.jga.users.mgt.exceptions.FunctionalErrorsTypes;
 import com.acme.jga.users.mgt.exceptions.FunctionalException;
 import com.acme.jga.users.mgt.utils.DateTimeUtils;
+import com.acme.users.mgt.config.KafkaConfig;
 import com.acme.users.mgt.infra.services.api.events.IEventsInfraService;
 import com.acme.users.mgt.infra.services.api.users.IUsersInfraService;
 import com.acme.users.mgt.logging.services.api.ILogService;
@@ -38,6 +41,7 @@ public class UserDomainService implements IUserDomainService {
     private final ILogService logService;
     private final MessageSource messageSource;
     private final IEventsInfraService eventsInfraService;
+    private final PublishSubscribeChannel eventAuditChannel;
 
     @Override
     public CompositeId createUser(String tenantUid, String orgUid, User user) throws FunctionalException {
@@ -89,7 +93,7 @@ public class UserDomainService implements IUserDomainService {
                 .lastUpdatedAt(DateTimeUtils.nowIso())
                 .build();
         eventsInfraService.createEvent(userAuditEvent);
-
+        eventAuditChannel.send(MessageBuilder.withPayload(KafkaConfig.AUDIT_WAKE_UP).build());
         return userCompositeId;
     }
 
@@ -141,6 +145,7 @@ public class UserDomainService implements IUserDomainService {
                 .lastUpdatedAt(DateTimeUtils.nowIso())
                 .build();
         eventsInfraService.createEvent(userAuditEvent);
+        eventAuditChannel.send(MessageBuilder.withPayload(KafkaConfig.AUDIT_WAKE_UP).build());
     }
 
     @Override
@@ -221,7 +226,7 @@ public class UserDomainService implements IUserDomainService {
                 .lastUpdatedAt(DateTimeUtils.nowIso())
                 .build();
         eventsInfraService.createEvent(userAuditEvent);
-
+        eventAuditChannel.send(MessageBuilder.withPayload(KafkaConfig.AUDIT_WAKE_UP).build());
         return nbRowsDeleted;
     }
 

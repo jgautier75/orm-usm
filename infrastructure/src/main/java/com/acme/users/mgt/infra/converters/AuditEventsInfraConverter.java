@@ -29,4 +29,20 @@ public class AuditEventsInfraConverter {
         return auditEventDb;
     }
 
+    public AuditEvent convertAuditEventDbToDomain(AuditEventDb auditEventDb) {
+        AuditEvent auditEvent = null;
+        if (auditEventDb != null) {
+            auditEvent = AuditEvent.builder()
+                    .action(auditEventDb.getAction())
+                    .createdAt(auditEventDb.getCreatedAt())
+                    .lastUpdatedAt(auditEventDb.getLastUpdatedAt())
+                    .objectUid(auditEventDb.getObjectUid())
+                    .payload(auditEventDb.getPayload())
+                    .status(auditEventDb.getStatus())
+                    .uid(auditEventDb.getUid())
+                    .build();
+        }
+        return auditEvent;
+    }
+
 }

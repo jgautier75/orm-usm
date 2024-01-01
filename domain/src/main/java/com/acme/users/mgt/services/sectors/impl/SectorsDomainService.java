@@ -4,6 +4,8 @@ import java.util.Optional;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.integration.channel.PublishSubscribeChannel;
+import org.springframework.integration.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
@@ -20,6 +22,7 @@ import com.acme.jga.users.mgt.dto.tenant.Tenant;
 import com.acme.jga.users.mgt.exceptions.FunctionalErrorsTypes;
 import com.acme.jga.users.mgt.exceptions.FunctionalException;
 import com.acme.jga.users.mgt.utils.DateTimeUtils;
+import com.acme.users.mgt.config.KafkaConfig;
 import com.acme.users.mgt.infra.services.api.events.IEventsInfraService;
 import com.acme.users.mgt.infra.services.api.sectors.ISectorsInfraService;
 import com.acme.users.mgt.services.organizations.api.IOrganizationsDomainService;
@@ -36,6 +39,7 @@ public class SectorsDomainService implements ISectorsDomainService {
         private final ISectorsInfraService sectorsInfraService;
         private final MessageSource messageSource;
         private final IEventsInfraService eventsInfraService;
+        private final PublishSubscribeChannel eventAuditChannel;
 
         @Transactional(rollbackFor = { FunctionalException.class })
         @Override
@@ -81,6 +85,7 @@ public class SectorsDomainService implements ISectorsDomainService {
                                 .lastUpdatedAt(DateTimeUtils.nowIso())
                                 .build();
                 eventsInfraService.createEvent(sectorAuditEvent);
+                eventAuditChannel.send(MessageBuilder.withPayload(KafkaConfig.AUDIT_WAKE_UP).build());
 
                 return sectorCompositeId;
         }
