@@ -13,7 +13,7 @@ spring:
     encoding: UTF-8
     fallback-to-system-locale: false
     use-code-as-default-message: true
-  datasource:    
+  datasource:
     type: com.zaxxer.hikari.HikariDataSource
     url: jdbc:postgresql://localhost:5432/orm_usm
     username: tec_orm_usm_app
@@ -46,11 +46,11 @@ management:
       enabled: true
   health:
     readinessstate:
-      enabled: true    
+      enabled: true
     livenessstate:
       enabled: true
     defaults:
-      enabled: true      
+      enabled: true
 server:
   servlet:
     context-path: /orm-usm/
@@ -68,3 +68,11 @@ app:
     forceDebugMode: "true"
     headerName: "X-APP-DEBUG"
     debugValue: "1"
+  kafka:
+    producer:
+      bootstrap-servers:
+        - 192.168.1.15:9092
+      acks: all
+      client-id: "orm-usm"
+      retries: 100
+      topicNameAuditEvents: "audit_events"

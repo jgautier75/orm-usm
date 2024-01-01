@@ -3,6 +3,8 @@ package com.acme.users.mgt.services.tenants.impl;
 import java.util.List;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.integration.channel.PublishSubscribeChannel;
+import org.springframework.integration.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +18,7 @@ import com.acme.jga.users.mgt.dto.tenant.Tenant;
 import com.acme.jga.users.mgt.exceptions.FunctionalErrorsTypes;
 import com.acme.jga.users.mgt.exceptions.FunctionalException;
 import com.acme.jga.users.mgt.utils.DateTimeUtils;
+import com.acme.users.mgt.config.KafkaConfig;
 import com.acme.users.mgt.infra.services.api.events.IEventsInfraService;
 import com.acme.users.mgt.infra.services.api.tenants.api.ITenantInfraService;
 import com.acme.users.mgt.logging.services.api.ILogService;
@@ -30,6 +33,7 @@ public class TenantDomainService implements ITenantDomainService {
     private final ILogService logService;
     private final MessageSource messageSource;
     private final IEventsInfraService eventsInfraService;
+    private final PublishSubscribeChannel eventAuditChannel;
 
     @Override
     public CompositeId createTenant(Tenant tenant) throws FunctionalException {
@@ -138,6 +142,7 @@ public class TenantDomainService implements ITenantDomainService {
                 .lastUpdatedAt(DateTimeUtils.nowIso())
                 .build();
         eventsInfraService.createEvent(auditEvent);
+        eventAuditChannel.send(MessageBuilder.withPayload(KafkaConfig.AUDIT_WAKE_UP).build());
         return nbDeleted;
     }
 

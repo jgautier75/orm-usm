@@ -3,8 +3,7 @@ package com.acme.jga.users.mgt.domain.events.v1;
 public enum EventStatus {
     PENDING(0),
     PROCESSED(1),
-    FINISHED(2),
-    FAILED(3);
+    FAILED(2);
 
     private Integer value;
 
@@ -21,8 +20,6 @@ public enum EventStatus {
             return PENDING;
         } else if (aValue != null && aValue.equals(1)) {
             return PROCESSED;
-        } else if (aValue != null && aValue.equals(2)) {
-            return FINISHED;
         } else if (aValue != null && aValue.equals(3)) {
             return FAILED;
         } else {

@@ -23,4 +23,5 @@ public class AuditEvent {
     private AuditAction action;
     private EventStatus status;
     private List<AuditChange> changes;
+    private String payload;
 }
