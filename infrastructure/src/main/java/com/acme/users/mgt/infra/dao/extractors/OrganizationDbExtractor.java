@@ -9,12 +9,11 @@ import com.acme.jga.users.mgt.dto.organizations.OrganizationKind;
 import com.acme.jga.users.mgt.dto.organizations.OrganizationStatus;
 import com.acme.users.mgt.infra.dto.organizations.v1.OrganizationDb;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class OrganizationDbExtractor {
-
-	private OrganizationDbExtractor() {
-		// Private constructor for utility class
-	}
-
 	public static OrganizationDb extractOrganization(ResultSet resultSet, boolean checkNext) throws SQLException {
 		OrganizationDb org = null;
 		if (!checkNext || resultSet.next()) {
@@ -29,5 +28,4 @@ public class OrganizationDbExtractor {
 		}
 		return org;
 	}
-
 }

@@ -14,7 +14,7 @@ public interface IOrganizationsInfraService {
 
     Organization findOrganizationByUid(Long tenantId, String uid);
 
-    void updateOrganization(Long tenantId, Long orgId, String code, String label, String country,
+    Integer updateOrganization(Long tenantId, Long orgId, String code, String label, String country,
             OrganizationStatus status);
 
     Optional<Long> codeAlreadyUsed(String code);
@@ -24,4 +24,6 @@ public interface IOrganizationsInfraService {
     Integer deleteUsersByOrganization(Long tenantId, Long orgId);
 
     Integer deleteById(Long tenantId, Long orgId);
+
+    Integer deleteSectors(Long tenantId, Long orgId);
 }

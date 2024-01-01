@@ -101,7 +101,7 @@ class OrganizationsDaoTest {
                 OrganizationDb organizationByUid = organizationDao.findOrganizationByTenantAndUid(
                                 tenantCompositeId.getId(),
                                 compositeId.getUid());
-                assertNotNull("Organization by uidnot null", organizationByUid);
+                assertNotNull("Organization by uid not null", organizationByUid);
 
                 // Update organization
                 organizationDb.setCountry("de");

@@ -9,7 +9,7 @@ import com.acme.users.mgt.dto.port.users.v1.UserDisplayDto;
 import com.acme.users.mgt.dto.port.users.v1.UserDto;
 
 @Component
-public class UsersConverter {
+public class UsersPortConverter {
 
     public User convertUserDtoToDomain(UserDto userDto) {
         User user = null;

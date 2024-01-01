@@ -16,6 +16,7 @@ import com.acme.users.mgt.dto.port.tenants.v1.TenantDisplayDto;
 import com.acme.users.mgt.dto.port.tenants.v1.TenantDto;
 import com.acme.users.mgt.dto.port.tenants.v1.TenantListDisplayDto;
 import com.acme.users.mgt.services.api.tenant.ITenantPortService;
+import com.acme.users.mgt.versioning.WebApiVersions.TenantsResourceVersion;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,35 +25,35 @@ import lombok.RequiredArgsConstructor;
 public class TenantsController {
     private final ITenantPortService tenantPortService;
 
-    @PostMapping(value = "/api/v1/tenants", consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = {
+    @PostMapping(value = TenantsResourceVersion.ROOT, consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = {
             MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<Object> createTenant(@RequestBody TenantDto tenantDto) throws FunctionalException {
         UidDto uid = tenantPortService.createTenant(tenantDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(uid);
     }
 
-    @GetMapping(value = "/api/v1/tenants/{uid}")
+    @GetMapping(value = TenantsResourceVersion.WITH_UID)
     public ResponseEntity<Object> findTenantByUid(@PathVariable(name = "uid", required = true) String uid)
             throws FunctionalException {
         TenantDisplayDto tenantDisplayDto = tenantPortService.findTenantByUid(uid);
         return new ResponseEntity<>(tenantDisplayDto, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/api/v1/tenants")
+    @GetMapping(value = TenantsResourceVersion.ROOT)
     public ResponseEntity<Object> listTenants() {
         TenantListDisplayDto tenantListDisplayDto = tenantPortService.findAllTenants();
         return new ResponseEntity<>(tenantListDisplayDto, HttpStatus.OK);
     }
 
-    @PostMapping(value = "/api/v1/tenants/{uid}")
+    @PostMapping(value = TenantsResourceVersion.WITH_UID)
     public ResponseEntity<Object> updateTenantByUid(@PathVariable(name = "uid", required = true) String uid,
             @RequestBody TenantDto tenantDto)
             throws FunctionalException {
         tenantPortService.updateTenant(uid, tenantDto);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @DeleteMapping(value = "/api/v1/tenants/{uid}")
+    @DeleteMapping(value = TenantsResourceVersion.WITH_UID)
     public ResponseEntity<Object> deleteTenantByUid(@PathVariable(name = "uid", required = true) String uid)
             throws FunctionalException {
         tenantPortService.deleteTenant(uid);

@@ -42,13 +42,16 @@ public class TenantDomainService implements ITenantDomainService {
         }
         CompositeId compositeId = tenantInfraService.createTenant(tenant);
         logService.infoS(callerName, "Created tenant [%s]", new Object[] { compositeId.getUid() });
+
+        // Create audit event
         AuditEvent auditEvent = AuditEvent.builder()
                 .action(AuditAction.CREATE)
                 .objectUid(compositeId.getUid())
                 .target(EventTarget.TENANT)
                 .scope(AuditScope.builder().tenantName(tenant.getLabel()).tenantUid(compositeId.getUid()).build())
                 .status(EventStatus.PENDING)
-                .timestamp(DateTimeUtils.nowIso())
+                .createdAt(DateTimeUtils.nowIso())
+                .lastUpdatedAt(DateTimeUtils.nowIso())
                 .build();
         String eventUid = eventsInfraService.createEvent(auditEvent);
         logService.debugS(callerName, "Created event [%s]", new Object[] { eventUid });
@@ -62,7 +65,6 @@ public class TenantDomainService implements ITenantDomainService {
             throw new FunctionalException(FunctionalErrorsTypes.TENANT_NOT_FOUND.name(), null,
                     messageSource.getMessage("tenant_not_found_by_uid", new Object[] { uid },
                             LocaleContextHolder.getLocale()));
-
         }
         return tenant;
     }
@@ -73,17 +75,36 @@ public class TenantDomainService implements ITenantDomainService {
     }
 
     @Override
-    public void updateTenant(Tenant tenant) throws FunctionalException {
+    public Integer updateTenant(Tenant tenant) throws FunctionalException {
+        String callerName = this.getClass().getName() + "-updateTenant";
+
+        logService.infoS(callerName, "U%pdating tenant [%s] ", new Object[] { tenant.getUid() });
+
         // Ensure tenant already exists
         Tenant rbdmsTenant = findTenantByUid(tenant.getUid());
         tenant.setId(rbdmsTenant.getId());
 
         // Tenant update
-        tenantInfraService.updateTenant(tenant);
+        Integer nbRowsUpdated = tenantInfraService.updateTenant(tenant);
+
+        // Create audit event
+        AuditEvent auditEvent = AuditEvent.builder()
+                .action(AuditAction.UPDATE)
+                .objectUid(tenant.getUid())
+                .target(EventTarget.TENANT)
+                .scope(AuditScope.builder().tenantName(tenant.getLabel()).tenantUid(tenant.getUid()).build())
+                .status(EventStatus.PENDING)
+                .createdAt(DateTimeUtils.nowIso())
+                .lastUpdatedAt(DateTimeUtils.nowIso())
+                .build();
+        String eventUid = eventsInfraService.createEvent(auditEvent);
+        logService.debugS(callerName, "Event [%s] created", new Object[] { eventUid });
+
+        return nbRowsUpdated;
     }
 
     @Override
-    public void deleteTenant(String tenantUid) throws FunctionalException {
+    public Integer deleteTenant(String tenantUid) throws FunctionalException {
         String callerName = this.getClass().getName() + "-deleteTenant";
         logService.infoS(callerName, "Delete tenant [%s]", new Object[] { tenantUid });
 
@@ -94,13 +115,30 @@ public class TenantDomainService implements ITenantDomainService {
         logService.debugS(callerName, "Delete users for tenant [%s]", new Object[] { tenantUid });
         tenantInfraService.deleteUsersByTenantId(tenant.getId());
 
+        // Delete sectors by tenant id
+        logService.debugS(callerName, "Delete sectors for tenant [%s]", new Object[] { tenantUid });
+        tenantInfraService.deleteSectorsByTenantId(tenant.getId());
+
         // Delete organizations by tenant id
         logService.debugS(callerName, "Delete organizations for tenant [%s]", new Object[] { tenantUid });
         tenantInfraService.deleteOrganizationsByTenantId(tenant.getId());
 
         // Delete tenant
         logService.debugS(callerName, "Delete tenant [%s] itself", new Object[] { tenantUid });
-        tenantInfraService.deleteTenant(tenant.getId());
+        Integer nbDeleted = tenantInfraService.deleteTenant(tenant.getId());
+
+        // Create audit event
+        AuditEvent auditEvent = AuditEvent.builder()
+                .action(AuditAction.DELETE)
+                .objectUid(tenant.getUid())
+                .target(EventTarget.TENANT)
+                .scope(AuditScope.builder().tenantName(tenant.getLabel()).tenantUid(tenant.getUid()).build())
+                .status(EventStatus.PENDING)
+                .createdAt(DateTimeUtils.nowIso())
+                .lastUpdatedAt(DateTimeUtils.nowIso())
+                .build();
+        eventsInfraService.createEvent(auditEvent);
+        return nbDeleted;
     }
 
 }

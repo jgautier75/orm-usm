@@ -13,6 +13,8 @@ import com.acme.users.mgt.dto.port.shared.UidDto;
 import com.acme.users.mgt.dto.port.users.v1.UserDto;
 import com.acme.users.mgt.dto.port.users.v1.UsersDisplayListDto;
 import com.acme.users.mgt.services.api.users.IUserPortService;
+import com.acme.users.mgt.versioning.WebApiVersions.UsersResourceVersion;
+
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -20,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 public class UsersController {
     private final IUserPortService userPortService;
 
-    @PostMapping(value = "/api/v1/tenants/{tenantUid}/organizations/{orgUid}/users")
+    @PostMapping(value = UsersResourceVersion.ROOT)
     public ResponseEntity<Object> createUser(@PathVariable("tenantUid") String tenantUid,
             @PathVariable(value = "orgUid") String orgUid,
             @RequestBody UserDto userDto) throws FunctionalException {
@@ -28,7 +30,7 @@ public class UsersController {
         return new ResponseEntity<>(uidDto, HttpStatus.CREATED);
     }
 
-    @PostMapping(value = "/api/v1/tenants/{tenantUid}/organizations/{orgUid}/users/{userUid}")
+    @PostMapping(value = UsersResourceVersion.WITH_UID)
     public ResponseEntity<Object> updateUser(@PathVariable("tenantUid") String tenantUid,
             @PathVariable("orgUid") String orgUid, @PathVariable("userUid") String userUid,
             @RequestBody UserDto userDto) throws FunctionalException {
@@ -36,14 +38,14 @@ public class UsersController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/api/v1/tenants/{tenantUid}/organizations/{orgUid}/users")
+    @GetMapping(UsersResourceVersion.ROOT)
     public ResponseEntity<Object> listUsers(@PathVariable("tenantUid") String tenantUid,
             @PathVariable("orgUid") String orgUid) throws FunctionalException {
         UsersDisplayListDto users = userPortService.findUsers(tenantUid, orgUid);
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
-    @DeleteMapping(value = "/api/v1/tenants/{tenantUid}/organizations/{orgUid}/users/{userUid}")
+    @DeleteMapping(UsersResourceVersion.WITH_UID)
     public ResponseEntity<Object> deleteUser(@PathVariable("tenantUid") String tenantUid,
             @PathVariable("orgUid") String orgUid, @PathVariable("userUid") String userUid) throws FunctionalException {
         userPortService.deleteUser(tenantUid, orgUid, userUid);

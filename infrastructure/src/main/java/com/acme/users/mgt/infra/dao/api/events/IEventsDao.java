@@ -1,10 +1,13 @@
 package com.acme.users.mgt.infra.dao.api.events;
 
-import com.acme.jga.users.mgt.domain.events.v1.AuditEvent;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import java.sql.SQLException;
+
+import com.acme.users.mgt.infra.dto.events.v1.AuditEventDb;
 
 public interface IEventsDao {
 
-    String insertEvent(AuditEvent event) throws JsonProcessingException;
+    String insertEvent(AuditEventDb event) throws SQLException;
+
+    AuditEventDb findByUid(String uid);
 
 }

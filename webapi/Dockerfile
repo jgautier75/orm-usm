@@ -8,12 +8,12 @@ RUN jlink --compress=2 --no-header-files --no-man-pages --add-modules java.base,
 
 FROM alpine:3.18.4
 EXPOSE 8080/tcp
-RUN addgroup -g 101 -S lxcgroup && \
-    adduser -u 100 -S lxcuser -G lxcgroup && \
+RUN addgroup -g 101 -S appgrp && \
+    adduser -u 100 -S appusr -G appgrp && \
     mkdir -p /app/ && \
-    chown lxcuser /app/ && \
+    chown appusr /app/ && \
     apk add --no-cache curl jq
-USER lxcuser
+USER appusr
 COPY --from=customjre /app/customjre /app/customjre
 COPY --from=customjre /app/app.jar /app/app.jar
 ENV JAVA_HOME=/app/customjre

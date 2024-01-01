@@ -87,8 +87,8 @@
             </column>
         </createTable>
     </changeSet>
-    <!--<changeSet
-    id="events" author="jga">
+    <changeSet id="events" author="jga">
+        <createSequence sequenceName="seq_events" />
         <createTable tableName="events">
             <column name="uid" type="varchar(40)" defaultValueSequenceNext="seq_events">
                 <constraints primaryKey="true" primaryKeyName="pk_events" nullable="false" />
@@ -123,5 +123,38 @@
     </changeSet>
     <changeSet id="grants" author="jga" runAlways="true" runOrder="last" failOnError="false">
         <sqlFile path="grants.sql" relativeToChangelogFile="true" encoding="UTF-8"></sqlFile>
-    </changeSet>-->
+    </changeSet>
+    <changeSet id="sectors" author="jga">
+        <createSequence sequenceName="seq_sectors" />
+        <createTable tableName="sectors">
+            <column name="id" type="bigint" defaultValueSequenceNext="seq_sectors">
+                <constraints primaryKey="true" primaryKeyName="pk_sectors" />
+            </column>
+            <column name="uid" type="varchar(40)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="un_sectors_uid" />
+            </column>
+            <column name="tenant_id" type="bigint">
+                <constraints nullable="false" referencedTableName="tenants"
+                    referencedColumnNames="id" foreignKeyName="fk_users_tenant_id" />
+            </column>
+            <column name="org_id" type="bigint">
+                <constraints nullable="false" referencedTableName="organizations"
+                    referencedColumnNames="id" foreignKeyName="fk_sectors_organization_id" />
+            </column>
+            <column name="label" type="varchar(80)">
+                <constraints nullable="false" unique="true"
+                    uniqueConstraintName="un_sectors_label" />
+            </column>
+            <column name="code" type="varchar(50)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="un_sectors_code" />
+            </column>
+            <column name="parent_id" type="bigint">
+                <constraints referencedTableName="sectors" referencedColumnNames="id"
+                    foreignKeyName="fk_sectors_id" />
+            </column>
+            <column name="root" type="boolean" defaultValue="false">
+                <constraints nullable="false" notNullConstraintName="nn_sectors_root" />
+            </column>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>

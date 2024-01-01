@@ -40,7 +40,7 @@ public interface ITenantPortService {
      * @param tenantDto Tenant payload
      * @throws FunctionalException Functional error
      */
-    void updateTenant(String uid, TenantDto tenantDto) throws FunctionalException;
+    Integer updateTenant(String uid, TenantDto tenantDto) throws FunctionalException;
 
     /**
      * Delete tenant and related data.
@@ -48,5 +48,5 @@ public interface ITenantPortService {
      * @param tenantUid Tenant uid
      * @throws FunctionalException Functional error
      */
-    void deleteTenant(String tenantUid) throws FunctionalException;
+    Integer deleteTenant(String tenantUid) throws FunctionalException;
 }

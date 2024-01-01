@@ -1,5 +1,6 @@
 package com.acme.users.mgt.controllers;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -55,6 +56,43 @@ class TenantsControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.uid", "").exists())
                 .andExpect(jsonPath("$.uid", "").value(uidDto.getUid()));
+    }
+
+    @Test
+    void updateTenant() throws Exception {
+        // GIVEN
+        UidDto uidDto = new UidDto(UUID.randomUUID().toString());
+        TenantDto tenantDto = new TenantDto("tenant-code", "tenant-label");
+        ObjectMapper mapper = new ObjectMapper();
+        String tenantJson = mapper.writeValueAsString(tenantDto);
+
+        // WHEN
+        Mockito.when(tenantPortService.updateTenant(Mockito.any(), Mockito.any())).thenReturn(1);
+
+        // THEN
+        String targetUri = "/api/v1/tenants/" + uidDto.getUid();
+        mockMvc.perform(post(targetUri)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(tenantJson)
+                .accept(MediaType.APPLICATION_JSON)
+                .characterEncoding(StandardCharsets.UTF_8))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void deleteTenant() throws Exception {
+        // GIVEN
+        UidDto uidDto = new UidDto(UUID.randomUUID().toString());
+
+        // WHEN
+        Mockito.when(tenantPortService.deleteTenant(Mockito.any())).thenReturn(1);
+
+        // THEN
+        String targetUri = "/api/v1/tenants/" + uidDto.getUid();
+        mockMvc.perform(delete(targetUri)
+                .accept(MediaType.APPLICATION_JSON)
+                .characterEncoding(StandardCharsets.UTF_8))
+                .andExpect(status().isNoContent());
     }
 
 }

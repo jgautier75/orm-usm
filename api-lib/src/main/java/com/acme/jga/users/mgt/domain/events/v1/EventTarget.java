@@ -3,7 +3,8 @@ package com.acme.jga.users.mgt.domain.events.v1;
 public enum EventTarget {
     TENANT(0),
     ORGANIZATION(1),
-    USER(2);
+    USER(2),
+    SECTOR(3);
 
     private Integer value;
 
@@ -22,6 +23,8 @@ public enum EventTarget {
             return ORGANIZATION;
         } else if (aValue != null && aValue.equals(2)) {
             return USER;
+        } else if (aValue != null && aValue.equals(3)) {
+            return SECTOR;
         } else {
             throw new IllegalArgumentException("Unknown eventScope value [" + aValue + "]");
         }

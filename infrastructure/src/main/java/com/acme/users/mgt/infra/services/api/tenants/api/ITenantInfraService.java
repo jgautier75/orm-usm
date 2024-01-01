@@ -14,11 +14,13 @@ public interface ITenantInfraService {
 
     List<Tenant> findAllTenants();
 
-    void updateTenant(Tenant tenant);
+    Integer updateTenant(Tenant tenant);
 
     Integer deleteUsersByTenantId(Long tenantId);
 
     Integer deleteOrganizationsByTenantId(Long tenantId);
 
     Integer deleteTenant(Long tenantId);
+
+    Integer deleteSectorsByTenantId(Long tenantId);
 }

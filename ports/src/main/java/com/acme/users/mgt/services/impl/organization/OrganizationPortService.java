@@ -8,7 +8,7 @@ import com.acme.jga.users.mgt.domain.organizations.v1.Organization;
 import com.acme.jga.users.mgt.dto.ids.CompositeId;
 import com.acme.jga.users.mgt.dto.tenant.Tenant;
 import com.acme.jga.users.mgt.exceptions.FunctionalException;
-import com.acme.users.mgt.converters.organization.OrganizationsConverter;
+import com.acme.users.mgt.converters.organization.OrganizationsPortConverter;
 import com.acme.users.mgt.dto.port.organizations.v1.OrganizationDto;
 import com.acme.users.mgt.dto.port.organizations.v1.OrganizationLightDto;
 import com.acme.users.mgt.dto.port.organizations.v1.OrganizationListLightDto;
@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 public class OrganizationPortService implements IOrganizationPortService {
     private final ITenantDomainService tenantDomainService;
     private final IOrganizationsDomainService organizationDomainService;
-    private final OrganizationsConverter organizationsConverter;
+    private final OrganizationsPortConverter organizationsConverter;
     private final OrganizationsValidationEngine organizationsValidationEngine;
 
     /**
@@ -85,15 +85,19 @@ public class OrganizationPortService implements IOrganizationPortService {
      * @inheritDoc
      */
     @Override
-    public void updateOrganization(String tenantUid, String orgUid, OrganizationDto organizationDto)
+    public Integer updateOrganization(String tenantUid, String orgUid, OrganizationDto organizationDto)
             throws FunctionalException {
         // Find tenant
         tenantDomainService.findTenantByUid(tenantUid);
 
         // Update organization
         Organization org = organizationsConverter.convertOrganizationDtoToDomain(organizationDto);
-        organizationDomainService.updateOrganization(tenantUid, orgUid, org);
+        return organizationDomainService.updateOrganization(tenantUid, orgUid, org);
+    }
 
+    @Override
+    public Integer deleteOrganization(String tenantUid, String orgUid) throws FunctionalException {
+        return organizationDomainService.deleteOrganization(tenantUid, orgUid);
     }
 
 }

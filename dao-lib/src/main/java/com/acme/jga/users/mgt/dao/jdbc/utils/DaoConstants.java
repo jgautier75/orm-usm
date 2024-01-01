@@ -13,6 +13,7 @@ public final class DaoConstants {
 	public static final String FIELD_LABEL = "label";
 	public static final String FIELD_TENANT_ID = "tenant_id";
 	public static final String FIELD_ORG_ID = "org_id";
+	public static final String FIELD_PARENT_ID = "parent_id";
 	public static final String P_ID = "pId";
 	public static final String P_TENANT_ID = "pTenantId";
 	public static final String P_ORG_ID = "pOrgId";
@@ -27,6 +28,7 @@ public final class DaoConstants {
 	public static final String P_KIND = "pKind";
 	public static final String P_COUNTRY = "pCountry";
 	public static final String P_STATUS = "pStatus";
+	public static final String P_PARENT_ID = "pParentId";
 
 	public static String generatedUUID() {
 		return UUID.randomUUID().toString();

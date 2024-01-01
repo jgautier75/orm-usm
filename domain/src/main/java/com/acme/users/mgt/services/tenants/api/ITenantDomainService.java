@@ -14,8 +14,8 @@ public interface ITenantDomainService {
 
     List<Tenant> findAllTenants();
 
-    void updateTenant(Tenant tenant) throws FunctionalException;
+    Integer updateTenant(Tenant tenant) throws FunctionalException;
 
-    void deleteTenant(String tenantUid) throws FunctionalException;
+    Integer deleteTenant(String tenantUid) throws FunctionalException;
 
 }

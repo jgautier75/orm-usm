@@ -7,3 +7,6 @@ spring:
   test:
     database:
       replace: none
+logging:
+  file:
+    path: .

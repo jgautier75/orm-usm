@@ -1,5 +1,6 @@
 package com.acme.jga.users.mgt.domain.events.v1;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -12,7 +13,8 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder(toBuilder = true)
 public class AuditEvent {
-    private String timestamp;
+    private LocalDateTime createdAt;
+    private LocalDateTime lastUpdatedAt;
     private String uid;
     private EventTarget target;
     private AuditAuthor author;

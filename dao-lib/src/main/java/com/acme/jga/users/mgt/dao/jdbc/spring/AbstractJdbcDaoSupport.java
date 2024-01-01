@@ -192,7 +192,7 @@ public abstract class AbstractJdbcDaoSupport extends JdbcDaoSupport {
 	 * @return Generated id
 	 */
 	public Long extractGeneratedId(KeyHolder keyHolder, String targetField) {
-		if (keyHolder != null && keyHolder.getKeys() != null) {
+		if (keyHolder != null && keyHolder.getKeys() != null && keyHolder.getKeys().get(targetField) != null) {
 			return Long.valueOf(keyHolder.getKeys().get(targetField).toString());
 		} else {
 			return null;

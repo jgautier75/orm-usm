@@ -7,7 +7,7 @@ import org.springframework.util.CollectionUtils;
 import com.acme.jga.users.mgt.dto.ids.CompositeId;
 import com.acme.jga.users.mgt.dto.tenant.Tenant;
 import com.acme.jga.users.mgt.exceptions.FunctionalException;
-import com.acme.users.mgt.converters.tenant.TenantsConverter;
+import com.acme.users.mgt.converters.tenant.TenantsPortConverter;
 import com.acme.users.mgt.dto.port.shared.UidDto;
 import com.acme.users.mgt.dto.port.tenants.v1.TenantDisplayDto;
 import com.acme.users.mgt.dto.port.tenants.v1.TenantDto;
@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class TenantPortService implements ITenantPortService {
-    private final TenantsConverter tenantsConverter;
+    private final TenantsPortConverter tenantsConverter;
     private final ITenantDomainService tenantDomainService;
     private final TenantsValidationEngine tenantsValidationEngine;
 
@@ -64,15 +64,19 @@ public class TenantPortService implements ITenantPortService {
     }
 
     @Override
-    public void updateTenant(String uid, TenantDto tenantDto) throws FunctionalException {
+    public Integer updateTenant(String uid, TenantDto tenantDto) throws FunctionalException {
         Tenant tenant = tenantsConverter.tenantDtoToDomainTenant(tenantDto);
         tenant.setUid(uid);
-        tenantDomainService.updateTenant(tenant);
+        return tenantDomainService.updateTenant(tenant);
     }
 
     @Override
-    public void deleteTenant(String tenantUid) throws FunctionalException {
-        tenantDomainService.deleteTenant(tenantUid);
+    public Integer deleteTenant(String tenantUid) throws FunctionalException {
+
+        // Ensure tenant exists
+        findTenantByUid(tenantUid);
+
+        return tenantDomainService.deleteTenant(tenantUid);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.acme.users.mgt.controllers;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -126,9 +127,30 @@ class UsersControllerTest {
                                 .characterEncoding(StandardCharsets.UTF_8))
                                 .andDo(print())
                                 .andExpect(status().isOk());
-
         }
 
+        @Test
+        void deleteUser() throws Exception {
+                // GIVEN
+                UidDto uidDto = new UidDto(UUID.randomUUID().toString());
+
+                // WHEN
+                Mockito.when(userPortService.deleteUser(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(1);
+
+                // THEN
+                String usersUri = "/api/v1/tenants/" + TENANT_UID + "/organizations/" + ORG_UID + "/users/"
+                                + uidDto.getUid();
+                mockMvc.perform(delete(usersUri)
+                                .characterEncoding(StandardCharsets.UTF_8))
+                                .andDo(print())
+                                .andExpect(status().isNoContent());
+        }
+
+        /**
+         * Mock user dto.
+         * 
+         * @return User DTO
+         */
         private UserDto mockUserDto() {
                 UserCommonsDto userCommonsDto = UserCommonsDto.builder()
                                 .firstName("fname")

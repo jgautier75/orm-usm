@@ -8,11 +8,11 @@ import com.acme.jga.users.mgt.dao.jdbc.utils.SQLExtractor;
 import com.acme.jga.users.mgt.dto.users.UserStatus;
 import com.acme.users.mgt.infra.dto.users.v1.UserDb;
 
-public class UsersDbExtractor {
-    private UsersDbExtractor() {
-        // Private constructor for utility class
-    }
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class UsersDbExtractor {
     public static UserDb extractUser(ResultSet resultSet, boolean checkNext) throws SQLException {
         UserDb userDb = null;
         if (!checkNext || resultSet.next()) {

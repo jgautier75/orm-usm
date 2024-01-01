@@ -7,7 +7,7 @@ import com.acme.users.mgt.dto.port.tenants.v1.TenantDisplayDto;
 import com.acme.users.mgt.dto.port.tenants.v1.TenantDto;
 
 @Component
-public class TenantsConverter {
+public class TenantsPortConverter {
 
     public Tenant tenantDtoToDomainTenant(TenantDto tenantDto) {
         Tenant tenant = null;
