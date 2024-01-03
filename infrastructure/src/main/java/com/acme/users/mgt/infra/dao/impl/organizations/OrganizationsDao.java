@@ -176,7 +176,7 @@ public class OrganizationsDao extends AbstractJdbcDaoSupport implements IOrganiz
 		String baseQuery = super.getQuery("org_delete_by_id");
 		Map<String, Object> params = new HashMap<>();
 		params.put(DaoConstants.P_TENANT_ID, tenantId);
-		params.put(DaoConstants.P_ORG_ID, orgId);
+		params.put(DaoConstants.P_ID, orgId);
 		return super.getNamedParameterJdbcTemplate().update(baseQuery, params);
 	}
 
@@ -194,7 +194,7 @@ public class OrganizationsDao extends AbstractJdbcDaoSupport implements IOrganiz
 		String baseQuery = super.getQuery("org_delete_sectors");
 		Map<String, Object> params = new HashMap<>();
 		params.put(DaoConstants.P_TENANT_ID, tenantId);
-		params.put(DaoConstants.P_ID, orgId);
+		params.put(DaoConstants.P_ORG_ID, orgId);
 		return super.getNamedParameterJdbcTemplate().update(baseQuery, params);
 	}
 
