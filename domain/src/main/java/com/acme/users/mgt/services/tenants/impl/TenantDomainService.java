@@ -82,7 +82,7 @@ public class TenantDomainService implements ITenantDomainService {
     public Integer updateTenant(Tenant tenant) throws FunctionalException {
         String callerName = this.getClass().getName() + "-updateTenant";
 
-        logService.infoS(callerName, "U%pdating tenant [%s] ", new Object[] { tenant.getUid() });
+        logService.infoS(callerName, "Updating tenant [%s] ", new Object[] { tenant.getUid() });
 
         // Ensure tenant already exists
         Tenant rbdmsTenant = findTenantByUid(tenant.getUid());
