@@ -166,7 +166,7 @@ Moreover, the unique Spring LogService logs requests depending of the ThreadLoca
 
 Finally, by default all requests are debugged, this behaviour is controlled by "forceDebugMode" parameter in application.yml
 
-## Custom JDK
+## Minimizing JDK in Docker image for spring-boot application
 
 In order to minimize java runtime in webapi Docker image, jdeps tool must be used to determine which java jdk modules are used by application.
 
