@@ -157,4 +157,9 @@
             </column>
         </createTable>
     </changeSet>
+    <changeSet id="label_unique_constraints" author="JGA">
+        <dropUniqueConstraint tableName="organizations" constraintName="un_organizations_label" />
+        <dropUniqueConstraint tableName="tenants" constraintName="un_tenant_label" />
+        <dropUniqueConstraint tableName="sectors" constraintName="un_sectors_label" />
+    </changeSet>
 </databaseChangeLog>
