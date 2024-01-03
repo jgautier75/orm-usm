@@ -26,4 +26,5 @@ public class AuditEvent {
     private EventStatus status;
     private List<AuditChange> changes;
     private String payload;
+    private String infos;
 }
