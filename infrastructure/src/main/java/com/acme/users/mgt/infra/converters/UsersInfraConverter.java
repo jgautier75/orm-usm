@@ -22,6 +22,7 @@ public class UsersInfraConverter {
                     .orgId(user.getOrganizationId())
                     .status(user.getStatus())
                     .tenantId(user.getTenantId())
+                    .id(user.getId())
                     .build();
             userDb.setStatus(user.getStatus());
         }

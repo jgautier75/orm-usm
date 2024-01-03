@@ -8,6 +8,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.integration.channel.PublishSubscribeChannel;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -43,6 +44,7 @@ public class UserDomainService implements IUserDomainService {
     private final IEventsInfraService eventsInfraService;
     private final PublishSubscribeChannel eventAuditChannel;
 
+    @Transactional
     @Override
     public CompositeId createUser(String tenantUid, String orgUid, User user) throws FunctionalException {
         String callerName = this.getClass().getName() + "-createUser";
@@ -97,6 +99,7 @@ public class UserDomainService implements IUserDomainService {
         return userCompositeId;
     }
 
+    @Transactional
     @Override
     public void updateUser(String tenantUid, String orgUid, User user) throws FunctionalException {
 
@@ -128,6 +131,8 @@ public class UserDomainService implements IUserDomainService {
                             new Object[] { user.getCredentials().getEmail() }, LocaleContextHolder.getLocale()));
         }
         user.setId(rdbmsUser.getId());
+        user.setOrganizationId(rdbmsUser.getOrganizationId());
+        user.setTenantId(rdbmsUser.getTenantId());
 
         // Update user
         usersInfraService.updateUser(user);
@@ -200,6 +205,7 @@ public class UserDomainService implements IUserDomainService {
         return user;
     }
 
+    @Transactional
     @Override
     public Integer deleteUser(String tenantUid, String orgUid, String userUid) throws FunctionalException {
         // Find tenant
