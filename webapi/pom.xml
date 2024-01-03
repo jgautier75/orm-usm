@@ -25,7 +25,8 @@
                   <goal>compile-no-fork</goal>
                 </goals>
                 <configuration>
-                  <buildArgs>-H:IncludeResources=.*properties$</buildArgs>
+                  <buildArgs>-H:+UnlockExperimentalVMOptions -H:IncludeResources=.*properties$
+                    -H:ReflectionConfigurationFiles=../spring-native/reflect-config.json</buildArgs>
                 </configuration>
                 <phase>package</phase>
               </execution>

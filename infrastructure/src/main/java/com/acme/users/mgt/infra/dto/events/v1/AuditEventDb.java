@@ -8,12 +8,14 @@ import com.acme.jga.users.mgt.domain.events.v1.EventTarget;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@Getter
+@Setter
 @Builder(toBuilder = true)
 public class AuditEventDb {
     private String uid;

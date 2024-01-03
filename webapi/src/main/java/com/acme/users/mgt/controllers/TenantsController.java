@@ -27,26 +27,26 @@ public class TenantsController {
 
     @PostMapping(value = TenantsResourceVersion.ROOT, consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = {
             MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<Object> createTenant(@RequestBody TenantDto tenantDto) throws FunctionalException {
+    public ResponseEntity<UidDto> createTenant(@RequestBody TenantDto tenantDto) throws FunctionalException {
         UidDto uid = tenantPortService.createTenant(tenantDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(uid);
     }
 
     @GetMapping(value = TenantsResourceVersion.WITH_UID)
-    public ResponseEntity<Object> findTenantByUid(@PathVariable(name = "uid", required = true) String uid)
+    public ResponseEntity<TenantDisplayDto> findTenantByUid(@PathVariable(name = "uid", required = true) String uid)
             throws FunctionalException {
         TenantDisplayDto tenantDisplayDto = tenantPortService.findTenantByUid(uid);
         return new ResponseEntity<>(tenantDisplayDto, HttpStatus.OK);
     }
 
     @GetMapping(value = TenantsResourceVersion.ROOT)
-    public ResponseEntity<Object> listTenants() {
+    public ResponseEntity<TenantListDisplayDto> listTenants() {
         TenantListDisplayDto tenantListDisplayDto = tenantPortService.findAllTenants();
-        return new ResponseEntity<>(tenantListDisplayDto, HttpStatus.OK);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(tenantListDisplayDto);
     }
 
     @PostMapping(value = TenantsResourceVersion.WITH_UID)
-    public ResponseEntity<Object> updateTenantByUid(@PathVariable(name = "uid", required = true) String uid,
+    public ResponseEntity<Void> updateTenantByUid(@PathVariable(name = "uid", required = true) String uid,
             @RequestBody TenantDto tenantDto)
             throws FunctionalException {
         tenantPortService.updateTenant(uid, tenantDto);
@@ -54,7 +54,7 @@ public class TenantsController {
     }
 
     @DeleteMapping(value = TenantsResourceVersion.WITH_UID)
-    public ResponseEntity<Object> deleteTenantByUid(@PathVariable(name = "uid", required = true) String uid)
+    public ResponseEntity<Void> deleteTenantByUid(@PathVariable(name = "uid", required = true) String uid)
             throws FunctionalException {
         tenantPortService.deleteTenant(uid);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

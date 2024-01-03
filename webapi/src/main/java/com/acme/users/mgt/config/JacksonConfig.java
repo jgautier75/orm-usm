@@ -26,4 +26,5 @@ public class JacksonConfig {
         objectMapper.setTimeZone(TimeZone.getTimeZone(ZoneOffset.UTC));
         return objectMapper;
     }
+
 }
