@@ -188,3 +188,13 @@ Parameters:
 Update webapi/Dockerfile accordingly in jlinks section
 
 `RUN jlink --compress=2 --no-header-files --no-man-pages --add-modules java.base,java.desktop,java.instrument,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.security.sasl,java.sql.rowset,jdk.compiler,jdk.jfr,jdk.management,jdk.unsupported,jdk.crypto.ec  --output /app/customjre`
+
+## Native image with GraalVM
+
+Prerequisite: Graalvm installed https://www.graalvm.org/downloads/
+
+To build a native image run the following command:
+
+```sh
+mvn clean package -DskipTests -Pnative
+```
