@@ -198,3 +198,59 @@ To build a native image run the following command:
 ```sh
 mvn clean package -DskipTests -Pnative
 ```
+
+Command above relies on https://graalvm.github.io/native-build-tools/latest/maven-plugin.html
+
+Plugin configuration example in webapi/pom.xml file
+
+```xml
+<profile>
+      <id>native</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.graalvm.buildtools</groupId>
+            <artifactId>native-maven-plugin</artifactId>
+            <version>0.9.28</version>
+            <executions>
+              <execution>
+                <id>build-native</id>
+                <goals>
+                  <goal>compile-no-fork</goal>
+                </goals>
+                <configuration>
+                  <buildArgs>
+                    <arg>-H:+UnlockExperimentalVMOptions</arg>
+                    <arg>-H:IncludeResources=.*properties$</arg>
+                    <arg>-H:ReflectionConfigurationFiles=../spring-native/reflect-config.json</arg>
+                  </buildArgs>
+                </configuration>
+                <phase>package</phase>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+```
+
+**TIPS**
+
+Since AOT(**A**head **O**f **T**ime) is a kind of static compilation, reflection mechanisms cannot be handled the same way than JIT (**Just** **In** **T**ime) which occurs at runtime.
+
+Thus, to use reflection like jackson when serializing / deserializing from/to json, description of fields and methods of DTOs (**Data** **T**ransfer **Object**) might be required.
+
+To achieve this, a reflect-config file must be designed to indicate how to seriaize / deserialize a DTO/JSON.
+
+See https://www.graalvm.org/latest/reference-manual/native-image/dynamic-features/Reflection/
+
+In this project, spring-native/reflect-config.json file describes classes like:
+
+- AuditEvent: These objects are serialized in json before being persisted in rdbms
+- AuditScope: A nested object of AuditEvent
+- ApiError: Standard POJO returned as json when an error occurs in REST controllers
+
+**Youtube Spring I/O**:
+
+- https://www.youtube.com/watch?v=8umoZWj6UcU
+- https://www.youtube.com/watch?v=HWUy0kTlcj8
