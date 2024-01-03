@@ -22,14 +22,14 @@ public class SectorsController {
     private final ISectorsPortService sectorsPortService;
 
     @PostMapping(value = "/api/v1/tenants/{tenantUid}/organizations/{orgUid}/sectors")
-    public ResponseEntity<Object> createSector(@PathVariable("tenantUid") String tenantUid,
+    public ResponseEntity<UidDto> createSector(@PathVariable("tenantUid") String tenantUid,
             @PathVariable("orgUid") String orgUid, @RequestBody SectorDto sectorDto) throws FunctionalException {
         UidDto uidDto = sectorsPortService.createSector(tenantUid, orgUid, sectorDto);
         return new ResponseEntity<>(uidDto, HttpStatus.CREATED);
     }
 
     @GetMapping(value = "/api/v1/tenants/{tenantUid}/organizations/{orgUid}/sectors")
-    public ResponseEntity<Object> findSectors(@PathVariable("tenantUid") String tenantUid,
+    public ResponseEntity<SectorDisplayDto> findSectors(@PathVariable("tenantUid") String tenantUid,
             @PathVariable("orgUid") String orgUid) throws FunctionalException {
         SectorDisplayDto sectorDisplayDto = sectorsPortService.findSectors(tenantUid, orgUid);
         return new ResponseEntity<>(sectorDisplayDto, HttpStatus.OK);

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -29,7 +30,7 @@ public class AppControllerAdvice {
     private final AppGenericConfig appGenericConfig;
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleInternal(Exception exception) throws IOException {
+    public ResponseEntity<ApiError> handleInternal(Exception exception) throws IOException {
         UUID idError = UUID.randomUUID();
         String stack = null;
         try (StringWriter sw = new StringWriter(); PrintWriter pw = new PrintWriter(sw)) {
@@ -58,7 +59,7 @@ public class AppControllerAdvice {
     }
 
     @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<Object> handleValidationException(Exception ex, WebRequest request) {
+    public ResponseEntity<ApiError> handleValidationException(Exception ex, WebRequest request) {
         List<ApiErrorDetail> errorDetailList = new ArrayList<>();
         final ApiError apiError = ApiError.builder()
                 .kind(ErrorKind.FUNCTIONAL)
@@ -80,7 +81,7 @@ public class AppControllerAdvice {
     }
 
     @ExceptionHandler(FunctionalException.class)
-    public ResponseEntity<Object> handleFunctionalException(Exception ex, WebRequest request) {
+    public ResponseEntity<ApiError> handleFunctionalException(Exception ex, WebRequest request) {
         // Defaults to 400-BAD_REQUEST
         Integer targetStatus = HttpStatus.BAD_REQUEST.value();
 
@@ -96,7 +97,7 @@ public class AppControllerAdvice {
                 .message(((FunctionalException) ex).getMessage())
                 .status(targetStatus)
                 .build();
-        return ResponseEntity.status(targetStatus).body(apiError);
+        return ResponseEntity.status(targetStatus).contentType(MediaType.APPLICATION_JSON).body(apiError);
     }
 
     private boolean isConflict(FunctionalException exception) {

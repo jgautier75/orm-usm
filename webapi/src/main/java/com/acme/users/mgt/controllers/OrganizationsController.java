@@ -24,21 +24,21 @@ public class OrganizationsController {
     private final IOrganizationPortService organizationPortService;
 
     @PostMapping(value = OrganizationsResourceVersion.ROOT)
-    public ResponseEntity<Object> createOrganization(@PathVariable("tenantUid") String tenantUid,
+    public ResponseEntity<UidDto> createOrganization(@PathVariable("tenantUid") String tenantUid,
             @RequestBody OrganizationDto organizationDto) throws FunctionalException {
         UidDto uidDto = organizationPortService.createOrganization(tenantUid, organizationDto);
         return new ResponseEntity<>(uidDto, HttpStatus.CREATED);
     }
 
     @GetMapping(value = OrganizationsResourceVersion.ROOT)
-    public ResponseEntity<Object> findOrgsByTenant(@PathVariable("tenantUid") String tenantUid)
+    public ResponseEntity<OrganizationListLightDto> findOrgsByTenant(@PathVariable("tenantUid") String tenantUid)
             throws FunctionalException {
         OrganizationListLightDto lightList = organizationPortService.findAllOrgsLightByTenant(tenantUid);
         return new ResponseEntity<>(lightList, HttpStatus.OK);
     }
 
     @GetMapping(value = OrganizationsResourceVersion.WITH_UID)
-    public ResponseEntity<Object> findOrgDetails(@PathVariable("tenantUid") String tenantUid,
+    public ResponseEntity<OrganizationDto> findOrgDetails(@PathVariable("tenantUid") String tenantUid,
             @PathVariable("orgUid") String orgUid)
             throws FunctionalException {
         OrganizationDto orgDto = organizationPortService.findOrganizationByUid(tenantUid, orgUid);
@@ -46,7 +46,7 @@ public class OrganizationsController {
     }
 
     @PostMapping(value = OrganizationsResourceVersion.WITH_UID)
-    public ResponseEntity<Object> updateOrganization(@PathVariable("tenantUid") String tenantUid,
+    public ResponseEntity<Void> updateOrganization(@PathVariable("tenantUid") String tenantUid,
             @PathVariable("orgUid") String orgUid, @RequestBody OrganizationDto organizationDto)
             throws FunctionalException {
         organizationPortService.updateOrganization(tenantUid, orgUid, organizationDto);
@@ -54,7 +54,7 @@ public class OrganizationsController {
     }
 
     @DeleteMapping(value = OrganizationsResourceVersion.WITH_UID)
-    public ResponseEntity<Object> deleteOrganization(@PathVariable("tenantUid") String tenantUid,
+    public ResponseEntity<Void> deleteOrganization(@PathVariable("tenantUid") String tenantUid,
             @PathVariable("orgUid") String orgUid)
             throws FunctionalException {
         organizationPortService.deleteOrganization(tenantUid, orgUid);

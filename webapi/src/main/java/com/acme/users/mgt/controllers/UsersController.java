@@ -23,7 +23,7 @@ public class UsersController {
     private final IUserPortService userPortService;
 
     @PostMapping(value = UsersResourceVersion.ROOT)
-    public ResponseEntity<Object> createUser(@PathVariable("tenantUid") String tenantUid,
+    public ResponseEntity<UidDto> createUser(@PathVariable("tenantUid") String tenantUid,
             @PathVariable(value = "orgUid") String orgUid,
             @RequestBody UserDto userDto) throws FunctionalException {
         UidDto uidDto = userPortService.createUser(tenantUid, orgUid, userDto);
@@ -31,7 +31,7 @@ public class UsersController {
     }
 
     @PostMapping(value = UsersResourceVersion.WITH_UID)
-    public ResponseEntity<Object> updateUser(@PathVariable("tenantUid") String tenantUid,
+    public ResponseEntity<Void> updateUser(@PathVariable("tenantUid") String tenantUid,
             @PathVariable("orgUid") String orgUid, @PathVariable("userUid") String userUid,
             @RequestBody UserDto userDto) throws FunctionalException {
         userPortService.updateUser(tenantUid, orgUid, userUid, userDto);
@@ -39,14 +39,14 @@ public class UsersController {
     }
 
     @GetMapping(UsersResourceVersion.ROOT)
-    public ResponseEntity<Object> listUsers(@PathVariable("tenantUid") String tenantUid,
+    public ResponseEntity<UsersDisplayListDto> listUsers(@PathVariable("tenantUid") String tenantUid,
             @PathVariable("orgUid") String orgUid) throws FunctionalException {
         UsersDisplayListDto users = userPortService.findUsers(tenantUid, orgUid);
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @DeleteMapping(UsersResourceVersion.WITH_UID)
-    public ResponseEntity<Object> deleteUser(@PathVariable("tenantUid") String tenantUid,
+    public ResponseEntity<Void> deleteUser(@PathVariable("tenantUid") String tenantUid,
             @PathVariable("orgUid") String orgUid, @PathVariable("userUid") String userUid) throws FunctionalException {
         userPortService.deleteUser(tenantUid, orgUid, userUid);
         return ResponseEntity.noContent().build();
