@@ -45,9 +45,9 @@ public class EventBusHandler implements MessageHandler, InitializingBean {
             for (AuditEvent auditEvent : auditEvents) {
                 kakaTemplateAudit.send(kafkaConfig.getTopicNameAuditEvents(), auditEvent.getPayload());
             }
+            List<String> uids = auditEvents.stream().map(AuditEvent::getUid).distinct().collect(Collectors.toList());
+            eventsInfraService.updateEventsStatus(uids, EventStatus.PROCESSED);
         }
-        List<String> uids = auditEvents.stream().map(AuditEvent::getUid).distinct().collect(Collectors.toList());
-        eventsInfraService.updateEventsStatus(uids, EventStatus.PROCESSED);
     }
 
 }
