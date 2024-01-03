@@ -193,7 +193,13 @@ Update webapi/Dockerfile accordingly in jlinks section
 
 Prerequisite: Graalvm installed https://www.graalvm.org/downloads/
 
-To build a native image run the following command:
+To build a native image run the following command to build all maven modules:
+
+```sh
+mvn clean package -DskipTests
+```
+
+Then move to webapi directory and run:
 
 ```sh
 mvn clean package -DskipTests -Pnative
@@ -240,7 +246,7 @@ Since AOT(**A**head **O**f **T**ime) is a kind of static compilation, reflection
 
 Thus, to use reflection like jackson when serializing / deserializing from/to json, description of fields and methods of DTOs (**Data** **T**ransfer **Object**) might be required.
 
-To achieve this, a reflect-config file must be designed to indicate how to seriaize / deserialize a DTO/JSON.
+To achieve this, a reflect-config file must be designed to indicate how to seriaize / deserialize from a DTO / JSON.
 
 See https://www.graalvm.org/latest/reference-manual/native-image/dynamic-features/Reflection/
 
