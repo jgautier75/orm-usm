@@ -1,0 +1,167 @@
+openapi: '3.0.2'
+info:
+  title: Organizations & Users Management
+  version: '1.0'
+components:
+  schemas:
+    ApiErrorDetail:
+      type: object
+      description: "API Error detail"
+      properties:
+        code:
+          type: string
+          x-extensible-enum:
+            - "LIST_NOT_NULL_NOT_EMPTY"
+            - "NOT_NULL"
+            - "NOT_EMPTY"
+            - "PAYLOAD"
+            - "LENGTH"
+          description: |
+            Detail error code, for example validation errors.
+          example: "NOT_NULL"
+        field:
+          type: string
+          description: "Field concerned by error, for example when a field length constraint is violated"
+          example: "firstName"
+        message:
+          type: string
+          description: "A human readable error message"
+          example: "Invalid field [firstName] size, expected [1-50]"
+    ApiError:
+      type: object
+      description: "Standard API error"
+      required:
+        - "status"
+        - "kind"
+        - "code"
+      properties:
+        status:
+          type: number
+          format: integer
+          description: "HTTP status code (400, 409, 500, ...)"
+          nullable: false
+        kind:
+          type: string
+          description: "Error kind"
+          default: "FUNCTIONAL"
+          nullable: false
+          enum:
+            - FUNCTIONAL          
+            - TECHNICAL
+        code:
+          type: string
+          description: "Error code (UNIQUE)"
+          nullable: false
+          x-extensible-enum:
+            - "ORG_CODE_ALREADY_USED"
+            - "USER_EMAIL_ALREADY_USED"      
+        message:
+          type: string
+          description: "A human readeable error message"
+          example: "Email [test@test.fr] already in use"
+          nullable: false
+        debugMessage:
+          type: string
+          description: "Debug message (stacktrace), only for TECHNICAL errors"
+          nullable: true
+        errorUid:
+          type: string
+          description: "Unique identifier of technical error dump"
+          nullable: true
+          example: "baa901c1-1e3e-4388-84a1-1940dc3fc575"
+        details:
+          type: array
+          description: "Error details"
+          items:
+            $ref: "#/components/schemas/ApiErrorDetail"
+    Uid:
+      type: object
+      properties:
+        uid:
+          type: string
+          description: "Unique identifier (UUID)"
+          externalDocs:
+            url: "https://schema.org/identifier"
+          nullable: false
+          example: "e2e1e622-d05a-42f1-a4d9-5addef76f3be"
+    Tenant:
+      type: object
+      required:
+        - "code"
+        - "label"
+      properties:
+        code:
+          type: string
+          description: "Short internal code (UNIQUE)"
+          minimum: 0
+          maximum: 50
+          nullable: false
+          example: "my_tenant_1"
+        label:
+          type: string
+          description: "Label"
+          minimum: 0
+          maximum: 80
+          nullable: false
+          example: "My Tenant 1"      
+paths:
+  /api/v1/tenants:
+    post:
+      tags:
+        - "Tenants"
+      description: "Create a tenant"
+      requestBody:
+        description: "Create tenant"
+        content:
+          appliation/json:
+            schema:
+              $ref: "#/components/schemas/Tenant"
+      responses:
+        '201':
+          description: "Created successfully"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Uid"
+        '400':
+          description: "Bad request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "BAD_REQUEST"
+                status: "400"
+                message: "Organization code [rennes-01] already in use"
+        '409':
+          description: "Business error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "ArgumentNotValid"
+                status: "409"
+                message: "Organization code [rennes-01] already in use"
+                details:
+                  - code: "NOT_NULL"
+                    field: "code"
+                    message: "Field [code] is required"
+                  - code: "LENGTH"
+                    field: "label"
+                    message: "Invalid field [label] size, expected [1-80]"        
+        '500':
+          description: "Technical error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "TECHNICAL"
+                code: "INTERNAL_SERVER_ERROR"
+                status: "500"
+                message: "ERROR: duplicate key value violates unique constraint ...."
+                debugMessage: "org.springframework.dao.DuplicateKeyException: PreparedStatementCallback; SQL [insert into ..."
+                errorUid: "0bb555bf-87b2-4c0f-b802-c1c34aa058da"
