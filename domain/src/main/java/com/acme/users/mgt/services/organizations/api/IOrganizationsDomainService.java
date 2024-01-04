@@ -29,12 +29,14 @@ public interface IOrganizationsDomainService {
     /**
      * Find organizations.
      * 
-     * @param tenantId Tenant internal id
-     * @param orgUid   Organization external id
+     * @param tenantId     Tenant internal id
+     * @param orgUid       Organization external id
+     * @param fetchSectors Fetch sectors
      * @return Organization
      * @throws FunctionalException Functional error
      */
-    Organization findOrganizationByTenantAndUid(Long tenantId, String orgUid) throws FunctionalException;
+    Organization findOrganizationByTenantAndUid(Long tenantId, String orgUid, boolean fetchSectors)
+            throws FunctionalException;
 
     /**
      * Update organization.

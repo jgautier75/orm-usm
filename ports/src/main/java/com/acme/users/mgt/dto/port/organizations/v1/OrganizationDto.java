@@ -8,6 +8,7 @@ import com.acme.jga.users.mgt.dto.api.IVersioned;
 import com.acme.users.mgt.dto.port.addresses.v1.AddressDto;
 import com.acme.users.mgt.dto.port.delegations.v1.DelegationDto;
 import com.acme.users.mgt.dto.port.phones.v1.PhoneDto;
+import com.acme.users.mgt.dto.port.sectors.v1.SectorDisplayDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,6 +28,7 @@ public class OrganizationDto implements Serializable, IVersioned {
 	private List<PhoneDto> phones;
 	private List<AddressDto> addresses;
 	private List<DelegationDto> delegations;
+	private SectorDisplayDto sector;
 
 	@Override
 	public ApiVersion getVersion() {

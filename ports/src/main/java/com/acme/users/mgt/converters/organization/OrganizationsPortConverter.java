@@ -4,12 +4,18 @@ import org.springframework.stereotype.Component;
 
 import com.acme.jga.users.mgt.domain.organizations.v1.Organization;
 import com.acme.jga.users.mgt.domain.organizations.v1.OrganizationCommons;
+import com.acme.users.mgt.converters.sectors.SectorsPortConverter;
 import com.acme.users.mgt.dto.port.organizations.v1.OrganizationCommonsDto;
 import com.acme.users.mgt.dto.port.organizations.v1.OrganizationDto;
 import com.acme.users.mgt.dto.port.organizations.v1.OrganizationLightDto;
+import com.acme.users.mgt.dto.port.sectors.v1.SectorDisplayDto;
+
+import lombok.RequiredArgsConstructor;
 
 @Component
+@RequiredArgsConstructor
 public class OrganizationsPortConverter {
+    private final SectorsPortConverter sectorsPortConverter;
 
     public Organization convertOrganizationDtoToDomain(OrganizationDto organizationDto) {
         Organization organization = null;
@@ -28,6 +34,11 @@ public class OrganizationsPortConverter {
                     .id(org.getId())
                     .uid(org.getUid())
                     .build();
+            if (org.getSector() != null) {
+                SectorDisplayDto sectorDisplayDto = sectorsPortConverter
+                        .convertSectorDomainToSectorDisplay(org.getSector());
+                dto.setSector(sectorDisplayDto);
+            }
         }
         return dto;
     }

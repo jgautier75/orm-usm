@@ -40,12 +40,14 @@ public interface IOrganizationPortService {
     /**
      * Find organization by uid.
      * 
-     * @param tenantUid Tenant uid
-     * @param orgUid    Organization uid
+     * @param tenantUid    Tenant uid
+     * @param orgUid       Organization uid
+     * @param fetchSectors Fectch sectors hierarchy
      * @return Organization
      * @throws FunctionalException
      */
-    OrganizationDto findOrganizationByUid(String tenantUid, String orgUid) throws FunctionalException;
+    OrganizationDto findOrganizationByUid(String tenantUid, String orgUid, boolean fetchSectors)
+            throws FunctionalException;
 
     /**
      * Delete organization.

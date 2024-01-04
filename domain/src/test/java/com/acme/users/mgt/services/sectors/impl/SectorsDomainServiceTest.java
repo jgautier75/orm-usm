@@ -54,7 +54,8 @@ public class SectorsDomainServiceTest {
 
                 // WHEN
                 Mockito.when(tenantDomainService.findTenantByUid(Mockito.any())).thenReturn(tenant);
-                Mockito.when(organizationsDomainService.findOrganizationByTenantAndUid(Mockito.any(), Mockito.any()))
+                Mockito.when(organizationsDomainService.findOrganizationByTenantAndUid(Mockito.any(), Mockito.any(),
+                                Mockito.any()))
                                 .thenReturn(organization);
                 Mockito.when(sectorsInfraService.existsByCode(Mockito.any())).thenReturn(Optional.empty());
                 Mockito.when(sectorsInfraService.createSector(Mockito.any(), Mockito.any(), Mockito.any()))
@@ -96,7 +97,8 @@ public class SectorsDomainServiceTest {
 
                 // WHEN
                 Mockito.when(tenantDomainService.findTenantByUid(Mockito.any())).thenReturn(tenant);
-                Mockito.when(organizationsDomainService.findOrganizationByTenantAndUid(Mockito.any(), Mockito.any()))
+                Mockito.when(organizationsDomainService.findOrganizationByTenantAndUid(Mockito.any(), Mockito.any(),
+                                Mockito.any()))
                                 .thenThrow(new FunctionalException(FunctionalErrorsTypes.TENANT_NOT_FOUND.name(), null,
                                                 FunctionalErrorsTypes.TENANT_NOT_FOUND.name()));
 

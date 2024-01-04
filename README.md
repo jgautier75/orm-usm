@@ -20,9 +20,8 @@ Standard REST application relying on:
 - Sprint boot (3.2.x)
 - PostgreSQL (16.x) for persistence
 - Liquibase for rdbms schema versions management
-- Spring boot JDBC for persistence (No f**\*\*** ORM)
+- Spring JDBC for persistence (No f**\*\*** ORM)
 - Spring integration for PublishSubscribe channel
-- HikariCP for connection pooling
 - Kafka stack (Kafka + Zookeeper + Schema registry + AKHQ)
 - Testcontainers and Mockito for unit testing (docker containers like postgreSQL)
 
@@ -112,6 +111,10 @@ java -jar db-migration.jar --classpath=db-migration.jar --driver=org.postgresql.
     - action: Enumeration: CREATE, UPDATE, DELETE
     - status: Event status (Enumeration: PENDING(0), PROCESSED(1), FAILED(2))
     - payload: Audit event in json format (PostgreSQL jsonb)
+
+## OpenAPI
+
+REST endpoints OpenApi specifications: docs/orm_usm_openapi.yml
 
 ## Audit events
 

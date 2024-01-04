@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.acme.jga.users.mgt.exceptions.FunctionalException;
@@ -39,9 +40,10 @@ public class OrganizationsController {
 
     @GetMapping(value = OrganizationsResourceVersion.WITH_UID)
     public ResponseEntity<OrganizationDto> findOrgDetails(@PathVariable("tenantUid") String tenantUid,
-            @PathVariable("orgUid") String orgUid)
+            @PathVariable("orgUid") String orgUid,
+            @RequestParam(name = "fetchSectors", defaultValue = "false") boolean fecthSectors)
             throws FunctionalException {
-        OrganizationDto orgDto = organizationPortService.findOrganizationByUid(tenantUid, orgUid);
+        OrganizationDto orgDto = organizationPortService.findOrganizationByUid(tenantUid, orgUid, fecthSectors);
         return new ResponseEntity<>(orgDto, HttpStatus.OK);
     }
 

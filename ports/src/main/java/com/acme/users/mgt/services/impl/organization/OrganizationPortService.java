@@ -70,12 +70,14 @@ public class OrganizationPortService implements IOrganizationPortService {
      * @inheritDoc
      */
     @Override
-    public OrganizationDto findOrganizationByUid(String tenantUid, String orgUid) throws FunctionalException {
+    public OrganizationDto findOrganizationByUid(String tenantUid, String orgUid, boolean fetchSectors)
+            throws FunctionalException {
         // Find tenant
         Tenant tenant = tenantDomainService.findTenantByUid(tenantUid);
 
         // Find organization
-        Organization org = organizationDomainService.findOrganizationByTenantAndUid(tenant.getId(), orgUid);
+        Organization org = organizationDomainService.findOrganizationByTenantAndUid(tenant.getId(), orgUid,
+                fetchSectors);
         OrganizationDto organizationDto = organizationsConverter.convertOrganizationToDto(org);
         organizationDto.setTenantUid(tenantUid);
         return organizationDto;

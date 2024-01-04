@@ -115,13 +115,18 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
         }
 
         @Override
-        public Organization findOrganizationByTenantAndUid(Long tenantId, String orgUid) throws FunctionalException {
+        public Organization findOrganizationByTenantAndUid(Long tenantId, String orgUid, boolean fetchSectors)
+                        throws FunctionalException {
                 Organization org = organizationsInfraService.findOrganizationByUid(tenantId, orgUid);
                 if (org == null) {
                         throw new FunctionalException(FunctionalErrorsTypes.ORG_NOT_FOUND.name(), null,
                                         messageSource.getMessage("org_not_found_by_uid", new Object[] { orgUid },
                                                         LocaleContextHolder.getLocale()));
 
+                }
+                if (fetchSectors) {
+                        Sector sector = sectorsInfraService.fetchSectorsWithHierarchy(tenantId, org.getId());
+                        org.setSector(sector);
                 }
                 return org;
         }

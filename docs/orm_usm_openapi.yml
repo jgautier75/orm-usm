@@ -818,6 +818,13 @@ paths:
           required: true
           schema:
             type: string
+        - name: fetchSectors
+          in: query
+          description: "Fetch sectors hierarchy"
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: "Success"

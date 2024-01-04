@@ -51,7 +51,7 @@ public class SectorsDomainService implements ISectorsDomainService {
 
                 // Find organization
                 Organization organization = organizationsDomainService.findOrganizationByTenantAndUid(tenant.getId(),
-                                organizationUid);
+                                organizationUid, false);
 
                 Optional<Long> optSectorId = sectorsInfraService.existsByCode(sector.getCode());
                 if (optSectorId.isPresent()) {
@@ -98,7 +98,7 @@ public class SectorsDomainService implements ISectorsDomainService {
 
                 // Find organization
                 Organization organization = organizationsDomainService.findOrganizationByTenantAndUid(tenant.getId(),
-                                organizationUid);
+                                organizationUid, false);
 
                 return findSectorByUidTenantOrg(tenant.getId(), organization.getId(), sectorUid);
         }
@@ -122,7 +122,7 @@ public class SectorsDomainService implements ISectorsDomainService {
 
                 // Find organization
                 Organization organization = organizationsDomainService.findOrganizationByTenantAndUid(tenant.getId(),
-                                organizationUid);
+                                organizationUid, false);
 
                 return sectorsInfraService.fetchSectorsWithHierarchy(tenant.getId(), organization.getId());
         }

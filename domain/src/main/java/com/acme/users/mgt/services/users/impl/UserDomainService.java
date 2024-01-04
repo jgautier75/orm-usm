@@ -73,7 +73,7 @@ public class UserDomainService implements IUserDomainService {
         Tenant tenant = tenantDomainService.findTenantByUid(tenantUid);
 
         // Find organization
-        Organization org = organizationsDomainService.findOrganizationByTenantAndUid(tenant.getId(), orgUid);
+        Organization org = organizationsDomainService.findOrganizationByTenantAndUid(tenant.getId(), orgUid, false);
 
         logService.infoS(callerName, "Create user with login [%s] for tenant [%s] and organization [%s]",
                 new Object[] { user.getCredentials().getLogin(), tenant.getCode(), org.getCommons().getCode() });
@@ -108,7 +108,7 @@ public class UserDomainService implements IUserDomainService {
         Tenant tenant = tenantDomainService.findTenantByUid(tenantUid);
 
         // Find organization
-        Organization org = organizationsDomainService.findOrganizationByTenantAndUid(tenant.getId(), orgUid);
+        Organization org = organizationsDomainService.findOrganizationByTenantAndUid(tenant.getId(), orgUid, false);
 
         User rdbmsUser = usersInfraService.findByUid(tenant.getId(), org.getId(), user.getUid());
         if (rdbmsUser == null) {
@@ -166,7 +166,8 @@ public class UserDomainService implements IUserDomainService {
         }
 
         if (!ObjectUtils.isEmpty(orgUid)) {
-            Organization organization = organizationsDomainService.findOrganizationByTenantAndUid(tenantId, orgUid);
+            Organization organization = organizationsDomainService.findOrganizationByTenantAndUid(tenantId, orgUid,
+                    false);
             orgId = organization.getId();
         } else {
             if (ObjectUtils.isEmpty(tenantUid)) {
@@ -195,7 +196,7 @@ public class UserDomainService implements IUserDomainService {
         Tenant tenant = tenantDomainService.findTenantByUid(tenantUid);
 
         // Find organization
-        Organization org = organizationsDomainService.findOrganizationByTenantAndUid(tenant.getId(), orgUid);
+        Organization org = organizationsDomainService.findOrganizationByTenantAndUid(tenant.getId(), orgUid, false);
 
         // Find user
         User user = usersInfraService.findByUid(tenant.getId(), org.getId(), userUid);
@@ -215,7 +216,7 @@ public class UserDomainService implements IUserDomainService {
         Tenant tenant = tenantDomainService.findTenantByUid(tenantUid);
 
         // Find organization
-        Organization org = organizationsDomainService.findOrganizationByTenantAndUid(tenant.getId(), orgUid);
+        Organization org = organizationsDomainService.findOrganizationByTenantAndUid(tenant.getId(), orgUid, false);
 
         // Find user by uid
         User user = findByUid(tenantUid, orgUid, userUid);
