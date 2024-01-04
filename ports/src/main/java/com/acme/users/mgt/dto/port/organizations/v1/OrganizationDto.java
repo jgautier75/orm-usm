@@ -28,7 +28,7 @@ public class OrganizationDto implements Serializable, IVersioned {
 	private List<PhoneDto> phones;
 	private List<AddressDto> addresses;
 	private List<DelegationDto> delegations;
-	private SectorDisplayDto sector;
+	private SectorDisplayDto sectors;
 
 	@Override
 	public ApiVersion getVersion() {

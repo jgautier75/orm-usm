@@ -37,7 +37,7 @@ public class OrganizationsPortConverter {
             if (org.getSector() != null) {
                 SectorDisplayDto sectorDisplayDto = sectorsPortConverter
                         .convertSectorDomainToSectorDisplay(org.getSector());
-                dto.setSector(sectorDisplayDto);
+                dto.setSectors(sectorDisplayDto);
             }
         }
         return dto;
