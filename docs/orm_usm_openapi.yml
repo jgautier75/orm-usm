@@ -103,9 +103,77 @@ components:
           minimum: 0
           maximum: 80
           nullable: false
-          example: "My Tenant 1"      
+          example: "My Tenant 1"
+    TenantDisplay:
+      type: object
+      description: "Tenant DTO for display"
+      properties:
+        uid:
+          type: string
+          description: "Unique identifier"
+          externalDocs:
+            url: "https://schema.org/identifier"
+          nullable: false
+          example: "e2e1e622-d05a-42f1-a4d9-5addef76f3be"
+        code:
+          type: string
+          description: "Short internal code (UNIQUE)"
+          minimum: 0
+          maximum: 50
+          nullable: false
+          example: "my_tenant_1"
+        label:
+          type: string
+          description: "Label"
+          minimum: 0
+          maximum: 80
+          nullable: false
+          example: "My Tenant 1"
+    TenantsList:
+      type: object
+      description: "Tenants list"
+      properties:
+        tenants:
+          type: object
+          properties:
+            tenants:
+              type: array
+              items:
+                $ref: "#/components/schemas/TenantDisplay"        
 paths:
   /api/v1/tenants:
+    get:
+      tags:
+        - "Tenants"
+      description: "List tenants"
+      responses:
+        '200':
+          description: "Tenants list"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TenantsList"
+              example:
+                tenants:
+                - uid: "0bb555bf-87b2-4c0f-b802-c1c34aa058da"
+                  code: "rennes"
+                  label: "Rennes"
+                - uid: "baa901c1-1e3e-4388-84a1-1940dc3fc575"
+                  code: "caen"
+                  label: "Caen"
+        '500':
+          description: "Technical error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "TECHNICAL"
+                code: "INTERNAL_SERVER_ERROR"
+                status: "500"
+                message: "ERROR: duplicate key value violates unique constraint ...."
+                debugMessage: "org.springframework.dao.DuplicateKeyException: PreparedStatementCallback; SQL [insert into ..."
+                errorUid: "0bb555bf-87b2-4c0f-b802-c1c34aa058da"
     post:
       tags:
         - "Tenants"
@@ -122,9 +190,129 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Uid"
+                $ref: "#/components/schemas/Uid"        
         '400':
-          description: "Bad request"
+          description: "Business error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "BAD_REQUEST"
+                status: "400"
+                message: "ArgumentNotValid"
+                details:
+                  - code: "NOT_NULL"
+                    field: "code"
+                    message: "Field [code] is required"
+                  - code: "LENGTH"
+                    field: "label"
+                    message: "Invalid field [label] size, expected [1-80]"        
+        '409':
+          description: "Business error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "TENANT_CODE_ALREADY_USED"
+                status: "409"
+                message: "Tenant with code [rennes-01] already in use"
+        '500':
+          description: "Technical error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "TECHNICAL"
+                code: "INTERNAL_SERVER_ERROR"
+                status: "500"
+                message: "ERROR: duplicate key value violates unique constraint ...."
+                debugMessage: "org.springframework.dao.DuplicateKeyException: PreparedStatementCallback; SQL [insert into ..."
+                errorUid: "0bb555bf-87b2-4c0f-b802-c1c34aa058da"
+  /api/v1/tenants/{uid}:
+    get:
+      tags:
+        - "Tenants"
+      description: "find tenant by uid"
+      parameters:
+        - name: uid
+          in: path
+          description: "Tenant's unique identifier"
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: "Tenants list"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TenantDisplay"
+              example:
+                uid: "0bb555bf-87b2-4c0f-b802-c1c34aa058da"
+                code: "rennes"
+                label: "Rennes"
+        '404':
+          description: "Tenant not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "TENANT_NOT_FOUND"
+                status: "404"
+                message: "Tenant with uid [0bb555bf-87b2-4c0f-b802-c1c34aa058da] not found"
+        '500':
+          description: "Tenants list"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "TECHNICAL"
+                code: "INTERNAL_SERVER_ERROR"
+                status: "500"
+                message: "ERROR: duplicate key value violates unique constraint ...."
+                debugMessage: "org.springframework.dao.DuplicateKeyException: PreparedStatementCallback; SQL [insert into ..."
+                errorUid: "0bb555bf-87b2-4c0f-b802-c1c34aa058da"
+    post:
+      tags:
+        - "Tenants"
+      description: "Update tenant by uid"
+      parameters:
+        - name: uid
+          in: path
+          description: "Tenant's unique identifier"
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: "Update tenant payload"
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Tenant"
+      responses:
+        '204':
+          description: "Update success"
+        '404':
+          description: "Tenant not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "TENANT_NOT_FOUND"
+                status: "404"
+                message: "Tenant with uid [0bb555bf-87b2-4c0f-b802-c1c34aa058da] not found"
+        '400':
+          description: "Business error"
           content:
             application/json:
               schema:
@@ -134,6 +322,13 @@ paths:
                 code: "BAD_REQUEST"
                 status: "400"
                 message: "Organization code [rennes-01] already in use"
+                details:
+                  - code: "NOT_NULL"
+                    field: "code"
+                    message: "Field [code] is required"
+                  - code: "LENGTH"
+                    field: "label"
+                    message: "Invalid field [label] size, expected [1-80]"        
         '409':
           description: "Business error"
           content:
@@ -142,18 +337,11 @@ paths:
                 $ref: "#/components/schemas/ApiError"
               example:
                 kind: "FUNCTIONAL"
-                code: "ArgumentNotValid"
+                code: "TENANT_CODE_ALREADY_USED"
                 status: "409"
-                message: "Organization code [rennes-01] already in use"
-                details:
-                  - code: "NOT_NULL"
-                    field: "code"
-                    message: "Field [code] is required"
-                  - code: "LENGTH"
-                    field: "label"
-                    message: "Invalid field [label] size, expected [1-80]"        
+                message: "Tenant with code [rennes-01] already in use"
         '500':
-          description: "Technical error"
+          description: "Tenants list"
           content:
             application/json:
               schema:
