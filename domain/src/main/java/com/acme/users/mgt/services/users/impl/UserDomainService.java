@@ -203,6 +203,7 @@ public class UserDomainService implements IUserDomainService {
             throw new FunctionalException(FunctionalErrorsTypes.USER_NOT_FOUND.name(), null,
                     messageSource.getMessage("user_not_found", null, LocaleContextHolder.getLocale()));
         }
+        user.setOrganization(org);
 
         return user;
     }

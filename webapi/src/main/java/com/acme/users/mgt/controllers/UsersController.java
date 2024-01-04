@@ -8,8 +8,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.acme.jga.users.mgt.exceptions.FunctionalException;
 import com.acme.users.mgt.dto.port.shared.UidDto;
+import com.acme.users.mgt.dto.port.users.v1.UserDisplayDto;
 import com.acme.users.mgt.dto.port.users.v1.UserDto;
 import com.acme.users.mgt.dto.port.users.v1.UsersDisplayListDto;
 import com.acme.users.mgt.services.api.users.IUserPortService;
@@ -43,6 +45,13 @@ public class UsersController {
             @PathVariable("orgUid") String orgUid) throws FunctionalException {
         UsersDisplayListDto users = userPortService.findUsers(tenantUid, orgUid);
         return new ResponseEntity<>(users, HttpStatus.OK);
+    }
+
+    @GetMapping(UsersResourceVersion.WITH_UID)
+    public ResponseEntity<UserDisplayDto> findUser(@PathVariable("tenantUid") String tenantUid,
+            @PathVariable("orgUid") String orgUid, @PathVariable("userUid") String userUid) throws FunctionalException {
+        UserDisplayDto userDisplayDto = userPortService.findUser(tenantUid, orgUid, userUid);
+        return new ResponseEntity<>(userDisplayDto, HttpStatus.OK);
     }
 
     @DeleteMapping(UsersResourceVersion.WITH_UID)

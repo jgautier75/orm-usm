@@ -78,4 +78,10 @@ public class UserPortService implements IUserPortService {
         return userDomainService.deleteUser(tenantUid, orgUid, userUid);
     }
 
+    @Override
+    public UserDisplayDto findUser(String tenantUid, String orgUid, String userUid) throws FunctionalException {
+        User user = userDomainService.findByUid(tenantUid, orgUid, userUid);
+        return usersConverter.convertUserDomainToDisplay(user);
+    }
+
 }
