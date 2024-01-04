@@ -262,7 +262,159 @@ components:
           description: "Organizations list"
           items:
             $ref: "#/components/schemas/OrganizationLight"
-
+    UserCredentials:
+      description: "User"
+      required:
+        - "login"
+        - "email"
+      properties:
+        login:
+          type: string
+          description: "Login"
+          nullable: false
+        email:
+          type: string
+          description: "Email"
+          nullable: false
+    UserCommons:
+      description: "Common user infos"
+      required:
+        - "firstName"
+        - "lastName"
+      properties:
+        firstName:
+          type: string
+          nullable: false
+          description: "First name"
+        lastName:
+          type: string
+          nullable: false
+          description: "Last name"
+        middleName:
+          type: string
+          nullable: false
+          description: "Middle name"
+    User:
+      description: "User data"
+      required:
+        - "commons"
+        - "credentials"
+        - "status"
+      properties:
+        commons:
+          type: object
+          nullable: false
+          $ref: "#/components/schemas/UserCommons"
+        credentials:
+          type: object
+          nullable: false
+          $ref: "#/components/schemas/UserCredentials"
+        status:
+          type: number
+          format: integer
+          description: |
+            0: draft
+            1: active
+            2: suspended          
+    UserDisplay:
+      type: object
+      description: "User display"
+      required:
+        - "uid"
+        - "login"
+        - "email"
+        - "firstName"
+        - "lastName"
+        - "organization"
+      properties:
+        uid:
+          type: string
+          description: "Unique identifier"
+          nullable: false
+        login:
+          type: string
+          description: "Login"
+          nullable: false
+        email:
+          type: string
+          description: "Email"
+          nullable: false
+        firstName:
+          type: string
+          description: "First name"
+          nullable: false
+        lastName:
+          type: string
+          description: "Last name"
+          nullable: false
+        middleName:
+          type: string
+          description: "Last name"
+          nullable: false
+        organization:
+          type: object
+          $ref: "#/components/schemas/OrganizationLight"
+    UsersList:
+      type: object
+      description: "Users list"
+      properties:
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserDisplay"
+    Sector:
+      type: object
+      description: "Sector"
+      required:
+        - "code"
+        - "label"
+      properties:
+        code:
+          type: string
+          nullable: false
+          description: "Sector code (UNIQUE)"
+          minimum: 1
+          maximum: 50
+        label:
+          type: string
+          nullable: false
+          description: "Sector label"
+          minimum: 1
+          maximum: 80
+        parentUid:
+          type: string
+          nullable: true
+          description: "Parent sector uid"
+          minimum: 40
+          maximum: 40
+    SectorDisplay:
+      description: "Sector display"
+      properties:
+        uid:
+          type: string
+          description: "Sector unique identifier"
+          nullable: false
+        code:
+          type: string
+          description: "Sector code (UNIQUE)"
+          nullable: false
+        label:
+          type: string
+          description: "Sector label"
+          nullable: false
+        root:
+          type: boolean
+          description: "Is sector root organization sector"
+          nullable: false
+        parentUid:
+          type: string
+          description: "Parent sector uid"
+          nullable: true
+        children:
+          type: array
+          nullable: true
+          items:
+            $ref: "#/components/schemas/SectorDisplay"
 paths:
   /api/v1/tenants:
     get:
@@ -787,5 +939,360 @@ paths:
                 code: "ORG_NOT_FOUND"
                 status: "404"
                 message: "Organization with uid [0bb555bf-87b2-4c0f-b802-c1c34aa058da] not found"
-    
-
+  /api/v1/tenants/{uid}/organizations/{orgUid}/users:
+    post:
+      description: "Create user"
+      tags:
+        - "Users"
+      parameters:
+        - name: uid
+          in: path
+          description: "Tenant's unique identifier"
+          required: true
+          schema:
+            type: string
+        - name: orgUid
+          in: path
+          description: "Organization's unique identifier"
+          required: true
+          schema:
+            type: string
+      requestBody:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+              example:
+                commons:
+                  firstName: "Margaret"
+                  lastName: "HAMILTON"
+                  middleName: "M"
+                credentials:
+                  login: "mhamilton"
+                  email: "m.hamilton@nasa.gov"
+                status: 1
+      responses:
+        '201':
+          description: "Creation success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Uid"
+        '404':
+          description: "Organization not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "ORG_NOT_FOUND"
+                status: "404"
+                message: "Organization with uid [0bb555bf-87b2-4c0f-b802-c1c34aa058da] not found"
+        '400':
+          description: "Business error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "BAD_REQUEST"
+                status: "400"
+                message: "ArgumentNotValid"
+                details:
+                  - code: "NOT_NULL"
+                    field: "code"
+                    message: "Field [firstName] is required"
+                  - code: "LENGTH"
+                    field: "label"
+                    message: "Invalid field [lastName] size, expected [1-50]"
+        '409':
+          description: "Business error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "USER_LOGIN_ALREADY_USED"
+                status: "409"
+                message: "Login [mhamilton] already in use"
+        '500':
+          description: "Tenants list"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "TECHNICAL"
+                code: "INTERNAL_SERVER_ERROR"
+                status: "500"
+                message: "ERROR: duplicate key value violates unique constraint ...."
+                debugMessage: "org.springframework.dao.DuplicateKeyException: PreparedStatementCallback; SQL [insert into ..."
+                errorUid: "0bb555bf-87b2-4c0f-b802-c1c34aa058da"
+    get:
+      tags:
+        - "Users"
+      description: "List users"
+      parameters:
+        - name: uid
+          in: path
+          description: "Tenant's unique identifier"
+          required: true
+          schema:
+            type: string
+        - name: orgUid
+          in: path
+          description: "Organization's unique identifier"
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: "Users list"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsersList"
+        '404':
+          description: "Organization not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "ORG_NOT_FOUND"
+                status: "404"
+                message: "Organization with uid [0bb555bf-87b2-4c0f-b802-c1c34aa058da] not found"
+  /api/v1/tenants/{uid}/organizations/{orgUid}/users/{userUid}:
+    post:
+      tags:
+        - "Users"
+      description: "Update user"
+      parameters:
+        - name: uid
+          in: path
+          description: "Tenant's unique identifier"
+          required: true
+          schema:
+            type: string
+        - name: orgUid
+          in: path
+          description: "Organization's unique identifier"
+          required: true
+          schema:
+            type: string
+        - name: userUid
+          in: path
+          description: "Users's unique identifier"
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+            example:
+              commons:
+                firstName: "Margaret"
+                lastName: "HAMILTON"
+                middleName: "M"
+              credentials:
+                login: "mhamilton"
+                email: "m.hamilton@nasa.gov"
+              status: 1
+              
+      responses:
+        '204':
+          description: "Update success"
+    delete:
+      description: "Delete user"
+      tags:
+        - "Users"
+      parameters:
+        - name: uid
+          in: path
+          description: "Tenant's unique identifier"
+          required: true
+          schema:
+            type: string
+        - name: orgUid
+          in: path
+          description: "Organization's unique identifier"
+          required: true
+          schema:
+            type: string
+        - name: userUid
+          in: path
+          description: "Users's unique identifier"
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: "Deletion success"
+        '404':
+          description: "User not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "USER_NOT_FOUND"
+                status: "404"
+                message: "User with uid [0bb555bf-87b2-4c0f-b802-c1c34aa058da] not found"
+  /api/v1/tenants/{uid}/organizations/{orgUid}/sectors:
+    post:
+      description: "Create sector"
+      tags:
+        - "Sectors"        
+      parameters:
+        - name: uid
+          in: path
+          description: "Tenant's unique identifier"
+          required: true
+          schema:
+            type: string
+        - name: orgUid
+          in: path
+          description: "Organization's unique identifier"
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Sector"
+            example:
+              - code: "rennes-wst"
+                label: "Rennes west"
+                parentUid: "0bb555bf-87b2-4c0f-b802-c1c34aa058da"
+      responses:
+        '201':
+          description: "Create success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Uid"
+        '404':
+          description: "Organization not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "ORG_NOT_FOUND"
+                status: "404"
+                message: "Organization with uid [0bb555bf-87b2-4c0f-b802-c1c34aa058da] not found"
+        '400':
+          description: "Bad request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "BAD_REQUEST"
+                status: "400"
+                message: "ArgumentNotValid"
+                details:
+                  - code: "NOT_NULL"
+                    field: "code"
+                    message: "Field [code] is required"
+                  - code: "LENGTH"
+                    field: "label"
+                    message: "Invalid field [label] size, expected [1-80]"
+        '409':
+          description: "Business error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "SECTOR_NOT_FOUND"
+                status: "409"
+                message: "Sector code [rennes-wst] already in use"
+        '500':
+          description: "Tenants list"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "TECHNICAL"
+                code: "INTERNAL_SERVER_ERROR"
+                status: "500"
+                message: "ERROR: duplicate key value violates unique constraint ...."
+                debugMessage: "org.springframework.dao.DuplicateKeyException: PreparedStatementCallback; SQL [insert into ..."
+                errorUid: "0bb555bf-87b2-4c0f-b802-c1c34aa058da"
+    get:
+      tags:
+        - "Sectors"
+      description: "Sectors list"
+      parameters:
+        - name: uid
+          in: path
+          description: "Tenant's unique identifier"
+          required: true
+          schema:
+            type: string
+        - name: orgUid
+          in: path
+          description: "Organization's unique identifier"
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: "Sectors list"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SectorDisplay"
+              example:
+                uid: "0bb555bf-87b2-4c0f-b802-c1c34aa058da"
+                code: "rennes"
+                label: "Rennes"
+                root: true
+                children:
+                  - uid: "baa901c1-1e3e-4388-84a1-1940dc3fc575"
+                    code: "rennes-west"
+                    label: "Rennes West"
+                    root: false
+                    parentUid: "0bb555bf-87b2-4c0f-b802-c1c34aa058da"
+                  - uid: "e2e1e622-d05a-42f1-a4d9-5addef76f3be"
+                    code: "rennes-east"
+                    label: "Rennes East"
+                    root: false
+                    parentUid: "0bb555bf-87b2-4c0f-b802-c1c34aa058da"
+        '404':
+          description: "Organization not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "ORG_NOT_FOUND"
+                status: "404"
+                message: "Organization with uid [0bb555bf-87b2-4c0f-b802-c1c34aa058da] not found"
+        '500':
+          description: "Technical error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "TECHNICAL"
+                code: "INTERNAL_SERVER_ERROR"
+                status: "500"
+                message: "ERROR: duplicate key value violates unique constraint ...."
+                debugMessage: "org.springframework.dao.DuplicateKeyException: PreparedStatementCallback; SQL [insert into ..."
+                errorUid: "0bb555bf-87b2-4c0f-b802-c1c34aa058da"
