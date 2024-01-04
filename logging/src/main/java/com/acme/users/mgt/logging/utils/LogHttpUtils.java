@@ -152,6 +152,20 @@ public class LogHttpUtils {
         }
     }
 
+    public static void dumpToFile(ILogService logService, String path, String moduleName, String errorUUID,
+            String exContent, HttpServletRequest httpServletRequest) {
+        String payload = dumpHttpRequest(httpServletRequest);
+        try (FileWriter fw = new FileWriter(path + "/" + LogHttpUtils.generateErrorFileName(moduleName, errorUUID))) {
+            fw.write("Error:" + errorUUID + " ****************************************************\n");
+            fw.write("Payload:  ****************************************************\n");
+            fw.write(payload + "\n");
+            fw.write("Stack:  ****************************************************\n");
+            fw.write(exContent);
+        } catch (IOException ioe) {
+            logService.error("dumpToFile", ioe);
+        }
+    }
+
     /**
      * Read stream fully.
      * 

@@ -21,6 +21,8 @@ import com.acme.users.mgt.config.AppGenericConfig;
 import com.acme.users.mgt.logging.services.api.ILogService;
 import com.acme.users.mgt.logging.utils.LogHttpUtils;
 import com.acme.users.mgt.validation.ValidationException;
+
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -30,7 +32,7 @@ public class AppControllerAdvice {
     private final AppGenericConfig appGenericConfig;
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiError> handleInternal(Exception exception) throws IOException {
+    public ResponseEntity<ApiError> handleInternal(Exception exception, HttpServletRequest request) throws IOException {
         UUID idError = UUID.randomUUID();
         String stack = null;
         try (StringWriter sw = new StringWriter(); PrintWriter pw = new PrintWriter(sw)) {
@@ -50,7 +52,7 @@ public class AppControllerAdvice {
                     new Object[] { appGenericConfig.getErrorPath(), appGenericConfig.getModuleName(),
                             idError.toString() });
             LogHttpUtils.dumpToFile(logService, appGenericConfig.getErrorPath(), appGenericConfig.getModuleName(),
-                    idError.toString(), stack);
+                    idError.toString(), stack, request);
         } catch (Exception e) {
             logService.error(this.getClass().getName() + "-handleInternal", e);
         }

@@ -44,6 +44,9 @@ public class TenantDomainService implements ITenantDomainService {
                     messageSource.getMessage("tenant_code_already_used",
                             new Object[] { tenant.getCode() }, LocaleContextHolder.getLocale()));
         }
+        if (tenant.getCode().equals("crash")) {
+            throw new NullPointerException("Fake error");
+        }
         CompositeId compositeId = tenantInfraService.createTenant(tenant);
         logService.infoS(callerName, "Created tenant [%s]", new Object[] { compositeId.getUid() });
 
