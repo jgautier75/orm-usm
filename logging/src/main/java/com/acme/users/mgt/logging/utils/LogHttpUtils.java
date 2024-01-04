@@ -156,10 +156,14 @@ public class LogHttpUtils {
             String exContent, HttpServletRequest httpServletRequest) {
         String payload = dumpHttpRequest(httpServletRequest);
         try (FileWriter fw = new FileWriter(path + "/" + LogHttpUtils.generateErrorFileName(moduleName, errorUUID))) {
-            fw.write("Error:" + errorUUID + " ****************************************************\n");
-            fw.write("Payload:  ****************************************************\n");
-            fw.write(payload + "\n");
-            fw.write("Stack:  ****************************************************\n");
+            fw.write("Error:" + errorUUID + " ****************************************************");
+            fw.write(CR_SEP);
+            fw.write("Payload:  ****************************************************");
+            fw.write(CR_SEP);
+            fw.write(payload);
+            fw.write(CR_SEP);
+            fw.write("Stack:  ****************************************************");
+            fw.write(CR_SEP);
             fw.write(exContent);
         } catch (IOException ioe) {
             logService.error("dumpToFile", ioe);
