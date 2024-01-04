@@ -452,7 +452,10 @@ paths:
     post:
       tags:
         - "Tenants"
-      description: "Create a tenant"
+      description:  |
+        Create a tenant.
+
+        Provide code "crash" to throw an internal error
       requestBody:
         description: "Create tenant"
         content:
