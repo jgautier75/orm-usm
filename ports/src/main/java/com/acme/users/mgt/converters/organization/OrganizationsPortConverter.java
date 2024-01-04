@@ -68,6 +68,7 @@ public class OrganizationsPortConverter {
             organizationLightDto.setLabel(organization.getCommons().getLabel());
             organizationLightDto.setStatus(organization.getCommons().getStatus());
             organizationLightDto.setUid(organization.getUid());
+            organizationLightDto.setCode(organization.getCommons().getCode());
         }
         return organizationLightDto;
     }

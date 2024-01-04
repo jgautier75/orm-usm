@@ -139,7 +139,130 @@ components:
             tenants:
               type: array
               items:
-                $ref: "#/components/schemas/TenantDisplay"        
+                $ref: "#/components/schemas/TenantDisplay"
+    OrganizationCommons:
+      type: object
+      description: "Organization basic infos"
+      properties:
+        code:
+          type: string
+          description: "Short internal code (UNIQUE)"
+          minimum: 0
+          maximum: 50
+          nullable: false
+          example: "my_tenant_1"
+        label:
+          type: string
+          description: "Label"
+          minimum: 0
+          maximum: 80
+          nullable: false
+          example: "My Tenant 1"
+        kind:
+          type: number
+          format: integer
+          description: |
+            Organization kind:
+              0: Tenant
+              1: Bu
+              2: Community
+              3: Enterprise
+          enum:
+            - 0
+            - 1
+            - 2
+            - 3
+        status:
+          type: number
+          format: integer
+          description: |
+            Organization Status:
+              0: Draft
+              1: Active
+              2: Inactive
+          enum:
+            - 0
+            - 1
+            - 2
+        country:
+          type: string
+          description: "Country code (ISO Alpha 2)"
+          example: "fr"
+    Organization:
+      type: object
+      description: "Organization"
+      properties:
+        commons:
+          type: object
+          $ref: "#/components/schemas/OrganizationCommons"
+    OrganizationLight:
+      type: object
+      description: "Liight organization representation"
+      properties:
+        uid:
+          type: string
+          description: "Unique identifier"          
+        label:
+          type: string
+          description: "Label"
+          minimum: 0
+          maximum: 80
+          nullable: false
+          example: "My Tenant 1"
+        kind:
+          type: number
+          format: integer
+          description: |
+            Organization kind:
+              0: Tenant
+              1: Bu
+              2: Community
+              3: Enterprise
+          enum:
+            - 0
+            - 1
+            - 2
+            - 3
+        status:
+          type: number
+          format: integer
+          description: |
+            Organization Status:
+              0: Draft
+              1: Active
+              2: Inactive
+          enum:
+            - 0
+            - 1
+            - 2
+    Delegation:
+      type: object
+      description: |
+        A delegation between two organizations
+      properties:
+        delegator:
+          type: object
+          description: |
+            Delegator: the organization delegating.
+          $ref: "#/components/schemas/OrganizationLight"
+        delegate:
+          type: object
+          description: |
+            Delegate: the organization receiving the delegation
+          $ref: "#/components/schemas/OrganizationLight"
+        active:
+          type: boolean
+          description: "Is delegation active"
+    OrganizationList:
+      type: object
+      description: "Organizations list for display"
+      properties:
+        organizations:
+          type: array
+          description: "Organizations list"
+          items:
+            $ref: "#/components/schemas/OrganizationLight"
+
 paths:
   /api/v1/tenants:
     get:
@@ -321,7 +444,7 @@ paths:
                 kind: "FUNCTIONAL"
                 code: "BAD_REQUEST"
                 status: "400"
-                message: "Organization code [rennes-01] already in use"
+                message: "ArgumentNotValid"
                 details:
                   - code: "NOT_NULL"
                     field: "code"
@@ -392,3 +515,277 @@ paths:
                 message: "ERROR: duplicate key value violates unique constraint ...."
                 debugMessage: "org.springframework.dao.DuplicateKeyException: PreparedStatementCallback; SQL [insert into ..."
                 errorUid: "0bb555bf-87b2-4c0f-b802-c1c34aa058da"
+  /api/v1/tenants/{uid}/organizations:
+    get:
+      tags:
+        - "Organizations"
+      description: "List organizations"
+      parameters:
+        - name: uid
+          in: path
+          description: "Tenant's unique identifier"
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrganizationList"
+              example:
+                organizations:
+                  - uid: "0bb555bf-87b2-4c0f-b802-c1c34aa058da"
+                    code: "rennes-01"
+                    label: "Rennes"
+                    kind: "BU"
+                    status: "ACTIVE"
+        '404':
+          description: "Tenant not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "TENANT_NOT_FOUND"
+                status: "404"
+                message: "Tenant with uid [0bb555bf-87b2-4c0f-b802-c1c34aa058da] not found"
+        '500':
+          description: "Technical error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "TECHNICAL"
+                code: "INTERNAL_SERVER_ERROR"
+                status: "500"
+                message: "ERROR: duplicate key value violates unique constraint ...."
+                debugMessage: "org.springframework.dao.DuplicateKeyException: PreparedStatementCallback; SQL [insert into ..."
+                errorUid: "0bb555bf-87b2-4c0f-b802-c1c34aa058da"
+    post:
+      tags:
+        - "Organizations"
+      description: "Create an organization"
+      parameters:
+        - name: uid
+          in: path
+          description: "Tenant's unique identifier"
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Organization"
+            example:
+              - commons:
+                - code: "rennes-01" 
+                  label: "Rennes 01"
+                  kind: 0
+                  status: 1
+                  country: "fr"
+      responses:
+        '201':
+          description: "Created successfully"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Uid"
+        '404':
+          description: "Tenant not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "TENANT_NOT_FOUND"
+                status: "404"
+                message: "Tenant with uid [0bb555bf-87b2-4c0f-b802-c1c34aa058da] not found"
+        '400':
+          description: "Business error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "BAD_REQUEST"
+                status: "400"
+                message: "ArgumentNotValid"
+                details:
+                  - code: "NOT_NULL"
+                    field: "code"
+                    message: "Field [code] is required"
+                  - code: "LENGTH"
+                    field: "label"
+                    message: "Invalid field [label] size, expected [1-80]"        
+        '409':
+          description: "Business error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "ORG_CODE_ALREADY_USED"
+                status: "409"
+                message: "Organization with code [rennes-01] already in use"
+        '500':
+          description: "Tenants list"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "TECHNICAL"
+                code: "INTERNAL_SERVER_ERROR"
+                status: "500"
+                message: "ERROR: duplicate key value violates unique constraint ...."
+                debugMessage: "org.springframework.dao.DuplicateKeyException: PreparedStatementCallback; SQL [insert into ..."
+                errorUid: "0bb555bf-87b2-4c0f-b802-c1c34aa058da"
+  /api/v1/tenants/{uid}/organizations/{orgUid}:
+    get:
+      tags:
+        - "Organizations"
+      description: "Get organizations details"
+      parameters:
+        - name: uid
+          in: path
+          description: "Tenant's unique identifier"
+          required: true
+          schema:
+            type: string
+        - name: orgUid
+          in: path
+          description: "Organization's unique identifier"
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Organization"
+    post:
+      tags:
+        - "Organizations"
+      parameters:
+        - name: uid
+          in: path
+          description: "Tenant's unique identifier"
+          required: true
+          schema:
+            type: string
+        - name: orgUid
+          in: path
+          description: "Organization's unique identifier"
+          required: true
+          schema:
+            type: string
+      requestBody:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Organization"
+              example:
+                - commons:
+                  - code: "rennes-01" 
+                    label: "Rennes 01"
+                    kind: 0
+                    status: 1
+                    country: "fr"
+      responses:
+        '204':
+          description: "Update successfull"
+        '404':
+          description: "Organization not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "ORG_NOT_FOUND"
+                status: "404"
+                message: "Organization with uid [0bb555bf-87b2-4c0f-b802-c1c34aa058da] not found"
+        '400':
+          description: "Business error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "BAD_REQUEST"
+                status: "400"
+                message: "ArgumentNotValid"
+                details:
+                  - code: "NOT_NULL"
+                    field: "code"
+                    message: "Field [code] is required"
+                  - code: "LENGTH"
+                    field: "label"
+                    message: "Invalid field [label] size, expected [1-80]"        
+        '409':
+          description: "Business error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "ORG_CODE_ALREADY_USED"
+                status: "409"
+                message: "Organization with code [rennes-01] already in use"
+        '500':
+          description: "Tenants list"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "TECHNICAL"
+                code: "INTERNAL_SERVER_ERROR"
+                status: "500"
+                message: "ERROR: duplicate key value violates unique constraint ...."
+                debugMessage: "org.springframework.dao.DuplicateKeyException: PreparedStatementCallback; SQL [insert into ..."
+                errorUid: "0bb555bf-87b2-4c0f-b802-c1c34aa058da"
+    delete:
+      tags:
+        - "Organizations"
+      parameters:
+        - name: uid
+          in: path
+          description: "Tenant's unique identifier"
+          required: true
+          schema:
+            type: string
+        - name: orgUid
+          in: path
+          description: "Organization's unique identifier"
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: "Delete successfull"
+        '404':
+          description: "Organization not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "ORG_NOT_FOUND"
+                status: "404"
+                message: "Organization with uid [0bb555bf-87b2-4c0f-b802-c1c34aa058da] not found"
+    
+

@@ -20,6 +20,7 @@ public class OrganizationLightDto implements Serializable, IVersioned {
 	private static final long serialVersionUID = 1877592832111032724L;
 	private String uid;
 	private String label;
+	private String code;
 	private OrganizationKind kind;
 	private OrganizationStatus status;
 

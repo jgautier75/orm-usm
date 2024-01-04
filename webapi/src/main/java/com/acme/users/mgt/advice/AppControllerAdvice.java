@@ -94,6 +94,7 @@ public class AppControllerAdvice {
         }
         ApiError apiError = ApiError.builder()
                 .code(((FunctionalException) ex).getCode())
+                .kind(ErrorKind.FUNCTIONAL)
                 .message(((FunctionalException) ex).getMessage())
                 .status(targetStatus)
                 .build();
@@ -110,7 +111,7 @@ public class AppControllerAdvice {
     }
 
     private boolean isNotFound(FunctionalException exception) {
-        return FunctionalErrorsTypes.TENANT_CODE_ALREADY_USED.name().equals(exception.getCode())
+        return FunctionalErrorsTypes.TENANT_NOT_FOUND.name().equals(exception.getCode())
                 || FunctionalErrorsTypes.ORG_NOT_FOUND.name().equals(exception.getCode())
                 || FunctionalErrorsTypes.USER_NOT_FOUND.name().equals(exception.getCode())
                 || FunctionalErrorsTypes.SECTOR_NOT_FOUND.name().equals(exception.getCode());
