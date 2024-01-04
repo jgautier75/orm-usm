@@ -353,3 +353,42 @@ paths:
                 message: "ERROR: duplicate key value violates unique constraint ...."
                 debugMessage: "org.springframework.dao.DuplicateKeyException: PreparedStatementCallback; SQL [insert into ..."
                 errorUid: "0bb555bf-87b2-4c0f-b802-c1c34aa058da"
+    delete:
+      tags:
+        - "Tenants"
+      description: "Delete tenant by uid"
+      parameters:
+        - name: uid
+          in: path
+          description: "Tenant's unique identifier"
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: |
+            Delete succes (deleting a tenant deletes all linked resources like organizations, sectors & users)
+        '404':
+          description: "Tenant not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "TENANT_NOT_FOUND"
+                status: "404"
+                message: "Tenant with uid [0bb555bf-87b2-4c0f-b802-c1c34aa058da] not found"
+        '500':
+          description: "Tenants list"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "TECHNICAL"
+                code: "INTERNAL_SERVER_ERROR"
+                status: "500"
+                message: "ERROR: duplicate key value violates unique constraint ...."
+                debugMessage: "org.springframework.dao.DuplicateKeyException: PreparedStatementCallback; SQL [insert into ..."
+                errorUid: "0bb555bf-87b2-4c0f-b802-c1c34aa058da"
