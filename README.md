@@ -269,3 +269,10 @@ In this project, spring-native/reflect-config.json file describes classes like:
 Activity diagram for authentication with Keycloak.
 
 ![](docs/images/UserAuth.png)
+
+SPI API on Keycloak side is a jar with a class implementing at least:
+
+- org.keycloak.storage.UserStorageProvider;
+- org.keycloak.storage.user.UserLookupProvider;
+
+In this jar, declare a file in /src/main/resources/META-INF/services/org.keycloak.storage.UserStorageProviderFactory containing implementation class.
