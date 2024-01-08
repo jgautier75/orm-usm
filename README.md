@@ -263,3 +263,9 @@ In this project, spring-native/reflect-config.json file describes classes like:
 
 - https://www.youtube.com/watch?v=8umoZWj6UcU
 - https://www.youtube.com/watch?v=HWUy0kTlcj8
+
+**Keycloak SPI API**
+
+Activity diagram for authentication with Keycloak.
+
+![](docs/images/UserAuth.png)
