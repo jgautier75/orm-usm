@@ -30,6 +30,10 @@ spec:
           ports:
             - containerPort: {{ .Values.service.containerPort }}
           name: {{ include "orm-usm-webapi.name" . }}
+          {{- with .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           env:
             - name: spring_datasource_url
               value: {{ .Values.application.datasource | quote }}
@@ -47,6 +51,8 @@ spec:
               value: {{ .Values.application.kafka.brokers | quote }}
             - name: app_debugging_forceDebugMode
               value: {{ .Values.application.force_debug_mode | quote  }}
+            - name: log_path
+              value: "/var/log"
           livenessProbe:
             httpGet:
               path: /orm-usm/actuator/health
@@ -63,6 +69,10 @@ spec:
             timeoutSeconds: 2
             periodSeconds: 3
             failureThreshold: 2
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
