@@ -18,6 +18,7 @@ import com.acme.jga.users.mgt.dto.api.ErrorKind;
 import com.acme.jga.users.mgt.exceptions.FunctionalErrorsTypes;
 import com.acme.jga.users.mgt.exceptions.FunctionalException;
 import com.acme.users.mgt.config.AppGenericConfig;
+import com.acme.users.mgt.config.MicrometerPrometheus;
 import com.acme.users.mgt.logging.services.api.ILogService;
 import com.acme.users.mgt.logging.utils.LogHttpUtils;
 import com.acme.users.mgt.validation.ValidationException;
@@ -30,10 +31,15 @@ import lombok.RequiredArgsConstructor;
 public class AppControllerAdvice {
     private final ILogService logService;
     private final AppGenericConfig appGenericConfig;
+    private final MicrometerPrometheus micrometerPrometheus;
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleInternal(Exception exception, HttpServletRequest request) throws IOException {
         UUID idError = UUID.randomUUID();
+
+        // Increment tech errors gauge exported to prometheus format
+        micrometerPrometheus.getTechErrorsCoounter().incrementAndGet();
+
         String stack = null;
         try (StringWriter sw = new StringWriter(); PrintWriter pw = new PrintWriter(sw)) {
             exception.printStackTrace(pw);
