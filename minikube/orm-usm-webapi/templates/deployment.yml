@@ -33,8 +33,20 @@ spec:
           env:
             - name: spring_datasource_url
               value: {{ .Values.application.datasource | quote }}
+            - name: spring_datasource_username
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets
+                  key: username
+            - name: spring_datasource_password
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets
+                  key: password
             - name: app_kafka_producer_bootstrap-servers
               value: {{ .Values.application.kafka.brokers | quote }}
+            - name: app_debugging_forceDebugMode
+              value: {{ .Values.application.force_debug_mode | quote  }}
           livenessProbe:
             httpGet:
               path: /orm-usm/actuator/health
