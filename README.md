@@ -200,6 +200,12 @@ Update webapi/Dockerfile accordingly in jlinks section
 
 `RUN jlink --compress=2 --no-header-files --no-man-pages --add-modules java.base,java.desktop,java.instrument,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.security.sasl,java.sql.rowset,jdk.compiler,jdk.jfr,jdk.management,jdk.unsupported,jdk.crypto.ec  --output /app/customjre`
 
+Building Docker image:
+
+```sh
+docker build . -t orm-usm-webapi:1.0.0 --build-arg="JAR_FILE=target/webapi-1.0.0-SNAPSHOT.jar"
+```
+
 ## Native image with GraalVM
 
 Prerequisite: Graalvm installed https://www.graalvm.org/downloads/
@@ -292,3 +298,56 @@ Architecture:
 ## Permissions management
 
 ![](docs/images/lxc_permissions.drawio.png)
+
+## Minikube:
+
+Enabling ingress (nginx):
+
+```sh
+minikube addons enable ingress
+```
+
+Verifying nginx ingress is up:
+
+```sh
+kubectl -n ingress-nginx get pods
+```
+
+Using minikube docker
+
+```sh
+minikube docker-env
+```
+
+```sh
+eval $(minikube -p minikube docker-env)
+```
+
+Listing images:
+
+```sh
+minikube image ls --format table
+```
+
+Either save image and load in minikube:
+
+```sh
+docker save 4ed63bb1fddb --output orm-usm-webapi.tar
+minikube image load orm-usm-webapi.tar
+```
+
+Or build image in minikube:
+
+```sh
+minikube image build . -t orm-usm-webapi:1.0.0 --build-env="JAR_FILE=target/webapi-1.0.0-SNAPSHOT.jar"
+```
+
+Templating with helm ad deploying:
+
+```sh
+helm template orm-usm-webapi orm-usm-webapi | kubectl apply -f -
+```
+
+```sh
+minikube service orm-usm-webapi
+```
