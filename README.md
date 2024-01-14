@@ -122,12 +122,12 @@ Everytime an entity (tenant, organization, user, sector) is created, updated or 
 
 **Why persisting audit events in rdbms and not sending event directly to kafka ?**
 
-When talking about audit events, we must ensure audit events and underlying data in rdbms are **consistent**.
+When talking about audit events, we must ensure events and related data in rdbms are **consistent**.
 
 Indeed, we want to avoid the following two use cases:
 
 - A rollback is performed in rdbms and the event is still sent and thus the audit event does not reflect the underlying data.
-- For some reasons, the kafka brokers are not reacheable (network failure for example). In this case, either transation is rollback if message sending is within the same transactional method or message is not sent at all to kafka if outside transactiona method.
+- For some reasons, the kafka brokers are not reacheable (network failure for example) and we try to push directlty in a kafka topic. In this case, either transation is rollback if message sending is within the same transactional method or message is not sent at all to kafka if outside transactional method.
 
 Thus, to ensure consistency between data stored in rdbms and audit event, these ones are stored in rdbms in the same transaction than the data. Obvisouly, we're here relying on ACID features of potgreSQL relational database.
 In other words, if a transaction rollback occurs, both data and audit events are rollbacked.
@@ -168,6 +168,14 @@ This custom header is customizable in application.yml (Defaults to X-APP-DEBUG)
 Moreover, the unique Spring LogService logs requests depending of the ThreadLocal value set by filter.
 
 Finally, by default all requests are debugged, this behaviour is controlled by "forceDebugMode" parameter in application.yml
+
+## Technical errors:
+
+When a technical error occurs, the controller advice generates a technical report file and a micrometer gauge is incremented (see MicrometerPrometheus class).
+
+Moreover, the gauge value is exported in actuator/prometheus endpoint and thus can be scrapped by a prometheus job (tech_errors is example below).
+
+![](docs/images/micrometer-prometheus-gauge.png)
 
 ## Minimizing JDK in Docker image for spring-boot application
 
@@ -264,7 +272,7 @@ In this project, spring-native/reflect-config.json file describes classes like:
 - https://www.youtube.com/watch?v=8umoZWj6UcU
 - https://www.youtube.com/watch?v=HWUy0kTlcj8
 
-**Keycloak SPI API**
+## Keycloak SPI API
 
 Activity diagram for authentication with Keycloak.
 
@@ -276,3 +284,11 @@ SPI API on Keycloak side is a jar with a class implementing at least:
 - org.keycloak.storage.user.UserLookupProvider;
 
 In this jar, declare a file in /src/main/resources/META-INF/services/org.keycloak.storage.UserStorageProviderFactory containing implementation class.
+
+Architecture:
+
+![](docs/images/lxconnect.drawio.png)
+
+## Permissions management
+
+![](docs/images/lxc_permissions.drawio.png)
