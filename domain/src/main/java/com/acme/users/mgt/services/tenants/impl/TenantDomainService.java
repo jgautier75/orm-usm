@@ -62,6 +62,8 @@ public class TenantDomainService implements ITenantDomainService {
                 .build();
         String eventUid = eventsInfraService.createEvent(auditEvent);
         logService.debugS(callerName, "Created event [%s]", new Object[] { eventUid });
+
+        eventAuditChannel.send(MessageBuilder.withPayload(KafkaConfig.AUDIT_WAKE_UP).build());
         return compositeId;
     }
 
