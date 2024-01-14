@@ -35,6 +35,22 @@ spec:
               value: {{ .Values.application.datasource | quote }}
             - name: app_kafka_producer_bootstrap-servers
               value: {{ .Values.application.kafka.brokers | quote }}
+          livenessProbe:
+            httpGet:
+              path: /orm-usm/actuator/health
+              port: 8080
+            initialDelaySeconds: 5
+            timeoutSeconds: 2
+            periodSeconds: 3
+            failureThreshold: 2
+          readinessProbe:
+            httpGet:
+              path: /orm-usm/actuator/health
+              port: 8080
+            initialDelaySeconds: 5
+            timeoutSeconds: 2
+            periodSeconds: 3
+            failureThreshold: 2
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
