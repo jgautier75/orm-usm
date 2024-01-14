@@ -342,11 +342,13 @@ Or build image in minikube:
 minikube image build . -t orm-usm-webapi:1.0.0 --build-env="JAR_FILE=target/webapi-1.0.0-SNAPSHOT.jar"
 ```
 
-Templating with helm ad deploying:
+Templating with helm and deploying:
 
 ```sh
 helm template orm-usm-webapi orm-usm-webapi | kubectl apply -f -
 ```
+
+Opening service endpoint
 
 ```sh
 minikube service orm-usm-webapi
