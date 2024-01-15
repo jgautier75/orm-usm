@@ -11,11 +11,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.acme.jga.users.mgt.exceptions.FunctionalException;
+import com.acme.users.mgt.annotations.MetricPoint;
 import com.acme.users.mgt.dto.port.shared.UidDto;
 import com.acme.users.mgt.dto.port.tenants.v1.TenantDisplayDto;
 import com.acme.users.mgt.dto.port.tenants.v1.TenantDto;
 import com.acme.users.mgt.dto.port.tenants.v1.TenantListDisplayDto;
 import com.acme.users.mgt.services.api.tenant.ITenantPortService;
+import com.acme.users.mgt.versioning.WebApiVersions;
 import com.acme.users.mgt.versioning.WebApiVersions.TenantsResourceVersion;
 
 import lombok.RequiredArgsConstructor;
@@ -24,15 +26,17 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TenantsController {
     private final ITenantPortService tenantPortService;
-
+    
     @PostMapping(value = TenantsResourceVersion.ROOT, consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = {
             MediaType.APPLICATION_JSON_VALUE })
+    @MetricPoint(alias = "TENANT_CREATE",version = WebApiVersions.V1_PREFIX,regex = "^/(.*)/api/v([0-9]){1}/tenants")
     public ResponseEntity<UidDto> createTenant(@RequestBody TenantDto tenantDto) throws FunctionalException {
         UidDto uid = tenantPortService.createTenant(tenantDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(uid);
     }
 
     @GetMapping(value = TenantsResourceVersion.WITH_UID)
+    @MetricPoint(alias = "TENANT_CREATE",version = WebApiVersions.V1_PREFIX,regex = "^/(.*)/api/v([0-9]){1}/tenants/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
     public ResponseEntity<TenantDisplayDto> findTenantByUid(@PathVariable(name = "uid", required = true) String uid)
             throws FunctionalException {
         TenantDisplayDto tenantDisplayDto = tenantPortService.findTenantByUid(uid);
