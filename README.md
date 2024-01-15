@@ -63,7 +63,17 @@ mvn clean package install -DskipTests
 4. Perform Liquibase update:
 
 ```java
-java -jar db-migration.jar --classpath=db-migration.jar --driver=org.postgresql.Driver --url="jdbc:postgresql://localhost:5432/orm_usm" --changeLogFile="postgresql/changelogs.xml" --username=tec_orm_usm_dba --password=tec_orm_usm_dba --logLevel=info  update
+java -jar db-migration.jar --classpath=db-migration.jar --driver=org.postgresql.Driver --url="jdbc:postgresql://localhost:5432/orm_usm" --changeLogFile="postgresql/changelogs.xml" --username=tec_orm_usm_dba --password=tec_orm_usm_dba --logLevel=info --contexts="all,grants" update
+```
+
+Building a Docker image:
+
+```sh
+docker build . -t db-migration:1.2.0 --build-arg="JAR_FILE=target/db-migration.jar" --build-arg="INITSH=scripts/init.sh" --build-arg="ACTSQLFILE=sql/accounts_setup.sql" --build-arg="DBSQLFILE=sql/create_database.sql" --build-arg="LIQUITEMP=liquibase/liquibase_template.properties" --build-arg="GRANTSTEMP=sql/grants_template.sql" --build-arg="GRANTSDBA=sql/grants_dba_template.sql"
+```
+
+```sh
+docker run -it --env P_PGHOST=192.168.1.15 --env P_PGPORT=5432 --env P_PGUSER=postgres --env P_PGPASS=posgres --env P_DBNAME=orm-test --env P_DBAUSER=orm_dba --env P_DBAPASS=dba_pass --env P_APPUSER=orm_app --env P_APPPASS=pass_app ec29fd57abd9
 ```
 
 ## Entities

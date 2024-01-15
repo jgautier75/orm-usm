@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/usr/bin/env sh
+#set -e
 
 echo "P_PGHOST=$P_PGHOST"
 echo "P_PGPORT=$P_PGPORT"
