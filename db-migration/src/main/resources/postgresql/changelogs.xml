@@ -121,9 +121,6 @@
             <column name="status" />
         </createIndex>
     </changeSet>
-    <changeSet id="grants" author="jga" runAlways="true" runOrder="last" failOnError="false">
-        <sqlFile path="grants.sql" relativeToChangelogFile="true" encoding="UTF-8"></sqlFile>
-    </changeSet>
     <changeSet id="sectors" author="jga">
         <createSequence sequenceName="seq_sectors" />
         <createTable tableName="sectors">
@@ -157,9 +154,13 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="label_unique_constraints" author="JGA">
+    <changeSet id="label_unique_constraints" author="jga" context="all">
         <dropUniqueConstraint tableName="organizations" constraintName="un_organizations_label" />
         <dropUniqueConstraint tableName="tenants" constraintName="un_tenant_label" />
         <dropUniqueConstraint tableName="sectors" constraintName="un_sectors_label" />
+    </changeSet>
+    <changeSet id="grants" author="jga" runAlways="true" runOrder="last" failOnError="false"
+        context="grants">
+        <sqlFile path="grants.sql" relativeToChangelogFile="true" encoding="UTF-8"></sqlFile>
     </changeSet>
 </databaseChangeLog>
