@@ -349,11 +349,11 @@ minikube image ls --format table
 
 Please refer to Docker > Database setup to build image.
 
-In minikube/orm-usm-bd-init/values.yaml, ensure parameters are the right ones.
+In kube/orm-usm-bd-init/values.yaml, ensure parameters are the right ones.
 
 Note: db-migration scripts are idempotent, so if database and/or accounts already exist, they arenot re-created.
 
-When image db-migration:x.y.z is ready, run the folling helm command in minikube directory:
+When image db-migration:x.y.z is ready, run the folling helm command in kube directory:
 ```sh
 helm template orm-usm-bd-init orm-usm-bd-init | kubectl apply -f -
 ```
