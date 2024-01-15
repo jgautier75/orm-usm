@@ -163,4 +163,9 @@
         context="grants">
         <sqlFile path="grants.sql" relativeToChangelogFile="true" encoding="UTF-8"></sqlFile>
     </changeSet>
+    <changeSet id="user_notif" author="jga" context="all">
+        <addColumn tableName="users">
+            <column name="notif_email" type="varchar(50)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

@@ -23,7 +23,7 @@ Standard REST application relying on:
 - Spring JDBC for persistence (No f**\*\*** ORM)
 - Spring integration for PublishSubscribe channel
 - Kafka stack (Kafka + Zookeeper + Schema registry + AKHQ)
-- Testcontainers and Mockito for unit testing (docker containers like postgreSQL)
+- Testcontainers and Mockito for unit testing
 
 ## Docker
 
@@ -41,7 +41,10 @@ Services:
 | kafka           | 7.4.3   | 9092 |
 | schema-registry | 7.4.3   | 8085 |
 
-**Database setup**:
+### Database setup
+
+
+#### Manually
 
 Database schema management relies on liquibase, to setup:
 
@@ -60,13 +63,15 @@ mvn clean package install -DskipTests
 
 3. Move to db-migration/target folder
 
-4. Perform Liquibase update:
+4. Perform Liquibase update manually:
 
 ```java
 java -jar db-migration.jar --classpath=db-migration.jar --driver=org.postgresql.Driver --url="jdbc:postgresql://localhost:5432/orm_usm" --changeLogFile="postgresql/changelogs.xml" --username=tec_orm_usm_dba --password=tec_orm_usm_dba --logLevel=info --contexts="all,grants" update
 ```
 
-Building a Docker image:
+#### Docker image
+
+Building the database init docker image:
 
 ```sh
 docker build . -t db-migration:1.2.0 --build-arg="JAR_FILE=target/db-migration.jar" --build-arg="INITSH=scripts/init.sh" --build-arg="ACTSQLFILE=sql/accounts_setup.sql" --build-arg="DBSQLFILE=sql/create_database.sql" --build-arg="LIQUITEMP=liquibase/liquibase_template.properties" --build-arg="GRANTSTEMP=sql/grants_template.sql" --build-arg="GRANTSDBA=sql/grants_dba_template.sql"
@@ -109,6 +114,7 @@ docker run -it --env P_PGHOST=192.168.1.15 --env P_PGPORT=5432 --env P_PGUSER=po
     - middleName: Middle name
     - email: Email address
     - status: (Enumeration: DRAFT, ACTIVE, INACTIVE)
+    - notif_email: Email for notifications (non unique, e.g: a diffusion list)
 - **Events**:
   - Storage of audit events.
   - An audit event is always recorded when an entity is created (tenant, organization, sector), updated or deleted
@@ -338,6 +344,23 @@ Listing images:
 ```sh
 minikube image ls --format table
 ```
+
+### Init Database
+
+Please refer to Docker > Database setup to build image.
+
+In minikube/orm-usm-bd-init/values.yaml, ensure parameters are the right ones.
+
+Note: db-migration scripts are idempotent, so if database and/or accounts already exist, they arenot re-created.
+
+When image db-migration:x.y.z is ready, run the folling helm command in minikube directory:
+```sh
+helm template orm-usm-bd-init orm-usm-bd-init | kubectl apply -f -
+```
+
+Command above will deploy a pod in kubernetes, this pod performs liquibase update.
+
+### WebApi
 
 Either save image and load in minikube:
 
