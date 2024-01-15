@@ -5,8 +5,9 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class WebApiVersions {
+    public static final String V1 = "v1";
     public static final String API_PREFIX = "/api";
-    public static final String V1_PREFIX = "/v1";
+    public static final String V1_PREFIX = "/"+V1;
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public class TenantsResourceVersion {
