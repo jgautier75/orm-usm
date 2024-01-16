@@ -22,6 +22,7 @@ import com.acme.jga.users.mgt.dto.organizations.OrganizationKind;
 import com.acme.jga.users.mgt.dto.organizations.OrganizationStatus;
 import com.acme.users.mgt.config.AppDebuggingConfig;
 import com.acme.users.mgt.config.AppGenericConfig;
+import com.acme.users.mgt.config.MicrometerPrometheus;
 import com.acme.users.mgt.dto.port.organizations.v1.OrganizationLightDto;
 import com.acme.users.mgt.dto.port.shared.UidDto;
 import com.acme.users.mgt.dto.port.users.v1.UserCommonsDto;
@@ -45,6 +46,8 @@ class UsersControllerTest {
         private AppGenericConfig appGenericConfig;
         @MockBean
         private AppDebuggingConfig appDebuggingConfig;
+        @MockBean
+        private MicrometerPrometheus micrometerPrometheus;
         @Autowired
         private MockMvc mockMvc;
 

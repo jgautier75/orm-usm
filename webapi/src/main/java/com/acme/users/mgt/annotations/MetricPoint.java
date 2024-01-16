@@ -15,4 +15,6 @@ public @interface MetricPoint {
     String version();
 
     String regex();
+
+    String method();
 }

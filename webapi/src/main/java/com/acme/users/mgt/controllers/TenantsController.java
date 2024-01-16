@@ -26,17 +26,17 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TenantsController {
     private final ITenantPortService tenantPortService;
-    
+
     @PostMapping(value = TenantsResourceVersion.ROOT, consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = {
             MediaType.APPLICATION_JSON_VALUE })
-    @MetricPoint(alias = "TENANT_CREATE",version = WebApiVersions.V1,regex = "^/(.*)/api/v1/tenants")
+    @MetricPoint(alias = "TENANT_CREATE", method = "POST", version = WebApiVersions.V1, regex = "^/(.*)/api/v1/tenants")
     public ResponseEntity<UidDto> createTenant(@RequestBody TenantDto tenantDto) throws FunctionalException {
         UidDto uid = tenantPortService.createTenant(tenantDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(uid);
     }
 
     @GetMapping(value = TenantsResourceVersion.WITH_UID)
-    @MetricPoint(alias = "TENANT_FIND_UID",version = WebApiVersions.V1,regex = "^/(.*)/api/v1/tenants/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+    @MetricPoint(alias = "TENANT_FIND_UID", method = "GET", version = WebApiVersions.V1, regex = "^/(.*)/api/v1/tenants/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
     public ResponseEntity<TenantDisplayDto> findTenantByUid(@PathVariable(name = "uid", required = true) String uid)
             throws FunctionalException {
         TenantDisplayDto tenantDisplayDto = tenantPortService.findTenantByUid(uid);

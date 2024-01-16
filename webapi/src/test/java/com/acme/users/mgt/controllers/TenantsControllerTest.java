@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.acme.users.mgt.config.AppDebuggingConfig;
 import com.acme.users.mgt.config.AppGenericConfig;
+import com.acme.users.mgt.config.MicrometerPrometheus;
 import com.acme.users.mgt.dto.port.shared.UidDto;
 import com.acme.users.mgt.dto.port.tenants.v1.TenantDto;
 import com.acme.users.mgt.logging.services.api.ILogService;
@@ -29,6 +30,8 @@ class TenantsControllerTest {
     private ITenantPortService tenantPortService;
     @MockBean
     private ILogService logService;
+    @MockBean
+    private MicrometerPrometheus micrometerPrometheus;
     @MockBean
     private AppGenericConfig appGenericConfig;
     @MockBean
