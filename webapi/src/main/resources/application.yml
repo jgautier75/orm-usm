@@ -51,6 +51,11 @@ management:
       enabled: true
     defaults:
       enabled: true
+  tracing:
+    sampling:
+      # Trace 100% of requests
+      probability: 1.0
+
 server:
   servlet:
     context-path: /orm-usm/
@@ -64,6 +69,7 @@ app:
   config:
     moduleName: "orm-usm"
     errorPath: "."
+  telemetry: http://192.168.1.15:4317
   debugging:
     forceDebugMode: "true"
     headerName: "X-APP-DEBUG"

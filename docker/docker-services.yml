@@ -83,6 +83,13 @@ services:
       SCHEMA_REGISTRY_HOST_NAME: "schema-registry"
       SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:8085"
       SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: "INFO"
+  jaeger:
+    image: jaegertracing/all-in-one:1.53.0
+    ports:
+      - "16686:16686" # the jaeger UI 
+      - "4317:4317" # the OpenTelemetry collector grpc 
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
 volumes:
   pgdata:
     driver: local
