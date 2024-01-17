@@ -22,6 +22,7 @@ Standard REST application relying on:
 - Liquibase for rdbms schema versions management
 - Spring JDBC for persistence (No f**\*\*** ORM)
 - Spring integration for PublishSubscribe channel
+- OpenTelemetry + Jaeger
 - Kafka stack (Kafka + Zookeeper + Schema registry + AKHQ)
 - Testcontainers and Mockito for unit testing
 
@@ -33,13 +34,17 @@ Docker compose file: docker/docker-services.yml
 
 Services:
 
-| Service         | Version | Port |
-| --------------- | ------- | ---- |
-| postgreSQL      | 16.1    | 5432 |
-| akhq            | 0.24.0  | 8086 |
-| zookeeper       | 7.4.3   | 2181 |
-| kafka           | 7.4.3   | 9092 |
-| schema-registry | 7.4.3   | 8085 |
+| Service                         | Version | Port   |
+| --------------------------------| ------- | ------ |
+| postgreSQL                      | 16.1    |  5432  |
+| akhq                            | 0.24.0  |  8086  |
+| zookeeper                       | 7.4.3   |  2181  |
+| kafka                           | 7.4.3   |  9092  |
+| schema-registry                 | 7.4.3   |  8085  |
+| jaeger-all-in-one               | 7.4.3   | 16686  |
+| prometheus                      | v2.49.1 |  9090  |
+| grafana                         | 9.5.15  |  3000  |
+| opentelemetry-collector-contrib | 0.92.0  |  3000  |
 
 ### Database setup
 
@@ -386,3 +391,89 @@ Opening service endpoint
 ```sh
 minikube service orm-usm-webapi
 ```
+
+## OpenTelemetry
+
+Goal of [OpenTelemetry](https://opentelemetry.io/) is used to instrument, generate, collect, and export telemetry data (metrics, logs, and traces) to help you analyze your software’s performance and behavior.
+
+OpenTelemetry collector config: otel-collector-config.yml
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'otel-collector'
+          scrape_interval: 5s
+          static_configs:
+            - targets: ['0.0.0.0:8888']
+
+processors:
+  batch:
+
+
+exporters:
+  # OTLP
+  otlp:
+    endpoint: otel-collector:4317
+    tls:
+      insecure: true
+  # Data sources: traces
+  logging:
+    verbosity: detailed
+    sampling_initial: 5
+    sampling_thereafter: 200
+  # Prometheus
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+
+extensions:
+  health_check:
+  pprof:
+  zpages:
+
+service:
+  extensions: [health_check,pprof,zpages]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp,logging]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp,logging, prometheus]
+```
+
+No additional dependency required in maven project.
+
+Launch application with the following arguments:
+
+```sh
+java -javaagent:/home/jgautier/git-data/opentelemetry-javaagent.jar -Dotel.service.name=orm-usm-webapi -Dotel.traces.exporter=jaeger -Dotel.exporter.otlp.protocol=http/protobuf -Dotel.javaagent.debug=true -Dotel.metrics.exporter=otlp -Dotel.logs.exporter=none -jar webapi-1.0.0-SNAPSHOT.jar
+```
+
+Update -Dotel.javaagent.debug=true argument to disable opentelementry java agent debug mode.
+
+OpenTelemetry spans logs:
+
+```sh
+otel.javaagent 2024-01-17 22:36:06:457 +0100] [http-nio-8080-exec-1] INFO io.opentelemetry.exporter.logging.LoggingSpanExporter - 'SELECT orm_usm.tenants' : 62dd1652c7fe3942a5c33403e84f0f44 00c752df75943a17 CLIENT [tracer: io.opentelemetry.jdbc:2.0.0-alpha] AttributesMap{data={db.operation=SELECT, db.sql.table=tenants, db.name=orm_usm, thread.name=http-nio-8080-exec-1, thread.id=49, db.user=tec_orm_usm_app, db.connection_string=postgresql://localhost:5432, server.address=localhost, db.system=postgresql, db.statement=select id,uid,code,label from tenants where (uid=?), server.port=5432}, capacity=128, totalAddedValues=11}
+[otel.javaagent 2024-01-17 22:36:06:460 +0100] [http-nio-8080-exec-1] INFO io.opentelemetry.exporter.logging.LoggingSpanExporter - 'SELECT orm_usm.organizations' : 62dd1652c7fe3942a5c33403e84f0f44 edb8737ec0cc3856 CLIENT [tracer: io.opentelemetry.jdbc:2.0.0-alpha] AttributesMap{data={db.operation=SELECT, db.sql.table=organizations, db.name=orm_usm, thread.name=http-nio-8080-exec-1, thread.id=49, db.user=tec_orm_usm_app, db.connection_string=postgresql://localhost:5432, server.address=localhost, db.system=postgresql, db.statement=select id from organizations where code=?, server.port=5432}, capacity=128, totalAddedValues=11}
+[otel.javaagent 2024-01-17 22:36:06:463 +0100] [http-nio-8080-exec-1] INFO io.opentelemetry.exporter.logging.LoggingSpanExporter - 'INSERT orm_usm.organizations' : 62dd1652c7fe3942a5c33403e84f0f44 ca323db9cd220da5 CLIENT [tracer: io.opentelemetry.jdbc:2.0.0-alpha] AttributesMap{data={db.operation=INSERT, db.sql.table=organizations, db.name=orm_usm, thread.name=http-nio-8080-exec-1, thread.id=49, db.user=tec_orm_usm_app, db.connection_string=postgresql://localhost:5432, server.address=localhost, db.system=postgresql, db.statement=insert into organizations(tenant_id,uid,code,label,kind,country,status) values (?,?,?,?,?,?,?), server.port=5432}, capacity=128, totalAddedValues=11}
+[otel.javaagent 2024-01-17 22:36:06:469 +0100] [http-nio-8080-exec-1] INFO io.opentelemetry.exporter.logging.LoggingSpanExporter - 'INSERT orm_usm.events' : 62dd1652c7fe3942a5c33403e84f0f44 fb12855a3d92f909 CLIENT [tracer: io.opentelemetry.jdbc:2.0.0-alpha] AttributesMap{data={db.operation=INSERT, db.sql.table=events, db.name=orm_usm, thread.name=http-nio-8080-exec-1, thread.id=49, db.user=tec_orm_usm_app, db.connection_string=postgresql://localhost:5432, server.address=localhost, db.system=postgresql, db.statement=insert into events(uid,created_at,last_updated_at,target,object_uid,action,status,payload) values(?,?,?,?,?,?,?,?), server.port=5432}, capacity=128, totalAddedValues=11}
+[otel.javaagent 2024-01-17 22:36:06:470 +0100] [http-nio-8080-exec-1] INFO io.opentelemetry.exporter.logging.LoggingSpanExporter - 'INSERT orm_usm.sectors' : 62dd1652c7fe3942a5c33403e84f0f44 8021aa0286c870ad CLIENT [tracer: io.opentelemetry.jdbc:2.0.0-alpha] AttributesMap{data={db.operation=INSERT, db.sql.table=sectors, db.name=orm_usm, thread.name=http-nio-8080-exec-1, thread.id=49, db.user=tec_orm_usm_app, db.connection_string=postgresql://localhost:5432, server.address=localhost, db.system=postgresql, db.statement=insert into sectors(uid,tenant_id,org_id,label,code,root,parent_id) values(?,?,?,?,?,?,?), server.port=5432}, capacity=128, totalAddedValues=11}
+2024-01-17 22:36:06,471 INFO  [http-nio-8080-exec-1] - com.acme.users.mgt.infra.services.impl.sectors.SectorsInfraServicecreateSector: Created sector with uid [8939cdfb-7543-46bb-8626-a03d3cf345f2] on tenant [1] and organization [5]
+[otel.javaagent 2024-01-17 22:36:06:472 +0100] [http-nio-8080-exec-1] INFO io.opentelemetry.exporter.logging.LoggingSpanExporter - 'INSERT orm_usm.events' : 62dd1652c7fe3942a5c33403e84f0f44 f50362fdb0ee9610 CLIENT [tracer: io.opentelemetry.jdbc:2.0.0-alpha] AttributesMap{data={db.operation=INSERT, db.sql.table=events, db.name=orm_usm, thread.name=http-nio-8080-exec-1, thread.id=49, db.user=tec_orm_usm_app, db.connection_string=postgresql://localhost:5432, server.address=localhost, db.system=postgresql, db.statement=insert into events(uid,created_at,last_updated_at,target,object_uid,action,status,payload) values(?,?,?,?,?,?,?,?), server.port=5432}, capacity=128, totalAddedValues=11}
+2024-01-17 22:36:06,483 DEBUG [http-nio-8080-exec-1] - com.acme.users.mgt.events.EventBusHandler: Handling wakeup message
+[otel.javaagent 2024-01-17 22:36:06:485 +0100] [http-nio-8080-exec-1] INFO io.opentelemetry.exporter.logging.LoggingSpanExporter - 'SELECT orm_usm.events' : 62dd1652c7fe3942a5c33403e84f0f44 7d3459dbd94ab94c CLIENT [tracer: io.opentelemetry.jdbc:2.0.0-alpha] AttributesMap{data={db.operation=SELECT, db.sql.table=events, db.name=orm_usm, thread.name=http-nio-8080-exec-1, thread.id=49, db.user=tec_orm_usm_app, db.connection_string=postgresql://localhost:5432, server.address=localhost, db.system=postgresql, db.statement=select uid,created_at,last_updated_at,target,object_uid,action,status,payload from events where (status=?) order by created_at ASC, server.port=5432}, capacity=128, totalAddedValues=11}
+```
+
+
+In Jaeger UI, organization creation lookis like:
+
+![](docs/images/otel_create_orga.png)

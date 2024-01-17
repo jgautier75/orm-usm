@@ -18,10 +18,14 @@ processors:
 exporters:
   # OTLP
   otlp:
-    endpoint: otelcol:4317
+    endpoint: otel-collector:4317
+    tls:
+      insecure: true
   # Data sources: traces
   logging:
-    loglevel: debug  
+    verbosity: detailed
+    sampling_initial: 5
+    sampling_thereafter: 200
   # Prometheus
   prometheus:
     endpoint: "0.0.0.0:8889"
