@@ -474,6 +474,6 @@ otel.javaagent 2024-01-17 22:36:06:457 +0100] [http-nio-8080-exec-1] INFO io.ope
 ```
 
 
-In Jaeger UI, organization creation lookis like:
+Organization creation in Jaeger UI:
 
 ![](docs/images/otel_create_orga.png)
