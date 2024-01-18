@@ -74,9 +74,12 @@ app:
     headerName: "X-APP-DEBUG"
     debugValue: "1"
   kafka:
+    consumer:
+      auditEventsGroupId: "kproto-grp"
     producer:
       bootstrap-servers:
         - 192.168.1.15:9092
+      schema-registry: "http://192.168.1.15:8085"
       acks: all
       client-id: "orm-usm"
       retries: 100
