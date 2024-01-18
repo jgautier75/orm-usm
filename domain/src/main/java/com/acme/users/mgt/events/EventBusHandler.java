@@ -1,6 +1,7 @@
 package com.acme.users.mgt.events;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -28,6 +29,7 @@ public class EventBusHandler implements MessageHandler, InitializingBean {
     private final IEventsInfraService eventsInfraService;
     private final ILogService logService;
     private final PublishSubscribeChannel eventAuditChannel;
+    private AtomicBoolean isRunning = new AtomicBoolean(false);
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -38,15 +40,22 @@ public class EventBusHandler implements MessageHandler, InitializingBean {
     public void handleMessage(Message<?> message) throws MessagingException {
         String callerName = this.getClass().getName();
         logService.debugS(callerName, "Handling wakeup message", null);
-        List<AuditEvent> auditEvents = eventsInfraService.findPendingEvents();
-        if (CollectionUtils.isEmpty(auditEvents)) {
-            logService.warnS(callerName, "No pending event to send", null);
-        } else {
-            for (AuditEvent auditEvent : auditEvents) {
-                kakaTemplateAudit.send(kafkaConfig.getTopicNameAuditEvents(), auditEvent.getPayload());
+        if (!isRunning.get()) {
+            try {
+                List<AuditEvent> auditEvents = eventsInfraService.findPendingEvents();
+                if (CollectionUtils.isEmpty(auditEvents)) {
+                    logService.warnS(callerName, "No pending event to send", null);
+                } else {
+                    for (AuditEvent auditEvent : auditEvents) {
+                        kakaTemplateAudit.send(kafkaConfig.getTopicNameAuditEvents(), auditEvent.getPayload());
+                    }
+                    List<String> uids = auditEvents.stream().map(AuditEvent::getUid).distinct()
+                            .collect(Collectors.toList());
+                    eventsInfraService.updateEventsStatus(uids, EventStatus.PROCESSED);
+                }
+            } finally {
+                isRunning.set(false);
             }
-            List<String> uids = auditEvents.stream().map(AuditEvent::getUid).distinct().collect(Collectors.toList());
-            eventsInfraService.updateEventsStatus(uids, EventStatus.PROCESSED);
         }
     }
 

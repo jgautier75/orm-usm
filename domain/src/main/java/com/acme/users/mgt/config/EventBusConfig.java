@@ -1,5 +1,10 @@
 package com.acme.users.mgt.config;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.channel.PublishSubscribeChannel;
@@ -15,7 +20,8 @@ public class EventBusConfig {
 
     @Bean
     public PublishSubscribeChannel eventAuditChannel() {
-        PublishSubscribeChannel exportChannel = new PublishSubscribeChannel();
+        ExecutorService executorService = new ThreadPoolExecutor(1, 1, 1000,TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+        PublishSubscribeChannel exportChannel = new PublishSubscribeChannel(executorService);
         exportChannel.setErrorHandler(errorHandler);
         return exportChannel;
     }
