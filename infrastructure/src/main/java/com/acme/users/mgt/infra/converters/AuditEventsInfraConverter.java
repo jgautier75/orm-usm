@@ -39,6 +39,7 @@ public class AuditEventsInfraConverter {
                     .objectUid(auditEventDb.getObjectUid())
                     .payload(auditEventDb.getPayload())
                     .status(auditEventDb.getStatus())
+                    .target(auditEventDb.getTarget())
                     .uid(auditEventDb.getUid())
                     .build();
         }

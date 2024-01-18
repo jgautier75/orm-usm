@@ -170,6 +170,86 @@ Listener "eventAuditChannel" responsibilities are:
 
 ![](docs/images/AuditEventListener.drawio.png)
 
+## Protobuf
+
+Messages sent to kafka are likely to change across time (new fields, refactoring, ...). Furthermore, you cannot expect all consumers to migrate to the new version at the same time. As a consequence, messages versioning must be handled.
+
+Google [Protobuf](https://protobuf.dev) provides a convenient way to manage versioning and also offers better performance than standard json or other binary formats.
+
+Protobuf relies on message definitions in [.protoc](https://protobuf.dev/programming-guides/proto3/) format (see domain/src/protobuf/event.proto).
+
+To generate java pojos from .proto file, execute maven command:
+
+```sh
+mvn clean generate-sources
+```
+
+NB: java pojos are generated in target/generated-sources (check protoc-jar-maven-plugin configuration)
+
+Audit events are sent to kafka using protobuf format (see EventBusHandler class).
+
+In case multiple versions of messages are available (e.g: a v1 and a v2), how to we know at consumer side which version to use ?
+
+This is where schema-registry comes into play.
+
+Basically, schema-registry stores in a versioned way messages definitions.
+
+To list schemas-registry stored schemas, just use a simple [REST api](https://docs.confluent.io/platform/current/schema-registry/develop/api.html):
+
+```sh
+curl -L http://localhost:8085/schemas
+```
+
+Response:
+
+```json
+[
+	{
+		"subject": "audit_events-value",
+		"version": 1,
+		"id": 1,
+		"schemaType": "PROTOBUF",
+		"schema": "syntax = \"proto3\";\npackage com.acme.users.mgt.events.protobuf;\n\nmessage AuditEventMessage {\n  string createdAt = 1;\n  string lastUpdatedAt = 2;\n  string uid = 3;\n  int32 target = 4;\n  .com.acme.users.mgt.events.protobuf.AuditAuthor author = 5;\n  .com.acme.users.mgt.events.protobuf.AuditScope scope = 6;\n  string objectUid = 7;\n  string action = 8;\n  int32 status = 9;\n  repeated .com.acme.users.mgt.events.protobuf.AuditChange changes = 10;\n}\nmessage AuditAuthor {\n  string uid = 1;\n  string name = 2;\n}\nmessage AuditScope {\n  string tenantUid = 1;\n  string tenantName = 2;\n  string organizationUid = 3;\n  string organizationName = 4;\n}\nmessage AuditChange {\n  string object = 1;\n  string from = 2;\n  string to = 3;\n}\n"
+	}
+]
+```
+
+Obviously the schema above is the content of the .proto file define earlier in this document.
+
+In this spring-boot prototype, spring send automatically schemas to registry.
+
+Consumer configuration points to schema registry:
+
+```java
+@Bean
+Map<String, Object> consumerConfigs() {
+    Map<String, Object> props = new HashMap<>();
+    props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+    props.put(ConsumerConfig.GROUP_ID_CONFIG, "generic-protobuf-consumer-group");
+    props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+    props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
+    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaProtobufDeserializer.class);
+    props.put(KafkaProtobufDeserializerConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistry);
+    return props;
+}
+```
+
+Listener itself:
+```java
+@Service
+@RequiredArgsConstructor
+public class KafkaSimpleConsumer {
+    private final ILogService logService;
+
+    @KafkaListener(topics = "${app.kafka.producer.topicNameAuditEvents}", groupId = "${app.kafka.consumer.auditEventsGroupId}")
+    public void consume(ConsumerRecord<String, AuditEventMessage> messageRecord) {
+        logService.infoS(this.getClass().getName(), "Received message: [%s]", new Object[] { messageRecord.value() });
+    }
+
+}
+```
+
 ## Testing REST APIS
 
 An [Insomnia](https://insomnia.rest/) collection is available in docs directory.

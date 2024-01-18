@@ -1,0 +1,32 @@
+syntax = "proto3";
+package com.acme.users.mgt.events.protobuf;
+message AuditEventMessage {
+    string createdAt = 1;
+    string lastUpdatedAt = 2;
+    string uid = 3;
+    int32 target = 4;
+    AuditAuthor author = 5;
+    AuditScope scope = 6;
+    string objectUid = 7;
+    string action = 8;
+    int32 status = 9;
+    repeated AuditChange changes = 10;
+}
+
+message AuditAuthor {
+    string uid = 1;
+    string name = 2;
+}
+
+message AuditScope {
+    string tenantUid = 1;
+    string tenantName = 2;
+    string organizationUid = 3;
+    string organizationName = 4;
+}
+
+message AuditChange {
+    string object = 1;
+    string from = 2;
+    string to = 3;
+}
