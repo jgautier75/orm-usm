@@ -49,6 +49,8 @@ spec:
                   key: password
             - name: app_kafka_producer_bootstrap-servers
               value: {{ .Values.application.kafka.brokers | quote }}
+            - name: app_kafka_schema-registry
+              value: {{ .Values.application.kafka.schema_registry | quote }}
             - name: app_debugging_forceDebugMode
               value: {{ .Values.application.force_debug_mode | quote  }}
             - name: log_path

@@ -104,3 +104,4 @@ application:
   force_debug_mode: "false"
   kafka:
     brokers: 192.168.1.15:9092
+    schema_registry: 192.168.1.15:8085
