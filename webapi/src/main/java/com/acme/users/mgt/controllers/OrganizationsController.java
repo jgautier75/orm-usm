@@ -15,14 +15,28 @@ import com.acme.users.mgt.dto.port.organizations.v1.OrganizationDto;
 import com.acme.users.mgt.dto.port.organizations.v1.OrganizationListLightDto;
 import com.acme.users.mgt.dto.port.shared.UidDto;
 import com.acme.users.mgt.services.api.organization.IOrganizationPortService;
+import com.acme.users.mgt.versioning.WebApiVersions;
 import com.acme.users.mgt.versioning.WebApiVersions.OrganizationsResourceVersion;
 
+import io.opentelemetry.api.logs.Logger;
+import io.opentelemetry.api.logs.Severity;
+import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.metrics.ObservableDoubleMeasurement;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.sdk.logs.SdkLoggerProvider;
+import io.opentelemetry.sdk.metrics.SdkMeterProvider;
+import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
 public class OrganizationsController {
     private final IOrganizationPortService organizationPortService;
+    private final SdkTracerProvider sdkTracerProvider;
+    private final SdkMeterProvider sdkMeterProvider; 
+    private final SdkLoggerProvider sdkLoggerProvider;
 
     @PostMapping(value = OrganizationsResourceVersion.ROOT)
     public ResponseEntity<UidDto> createOrganization(@PathVariable("tenantUid") String tenantUid,
@@ -34,7 +48,26 @@ public class OrganizationsController {
     @GetMapping(value = OrganizationsResourceVersion.ROOT)
     public ResponseEntity<OrganizationListLightDto> findOrgsByTenant(@PathVariable("tenantUid") String tenantUid)
             throws FunctionalException {
-        OrganizationListLightDto lightList = organizationPortService.findAllOrgsLightByTenant(tenantUid);
+        Tracer tracer = sdkTracerProvider.get("ORGS", WebApiVersions.V1);
+        Meter meter = sdkMeterProvider.get("ORGS-LIST");
+        Logger otelLogger =  sdkLoggerProvider.get("ORGS-LIST-LOGS");
+        Span span = tracer.spanBuilder("LIST").startSpan();
+        OrganizationListLightDto lightList = null;
+        try {
+            otelLogger.logRecordBuilder().setSeverity(Severity.INFO).setBody("List organizations logs via opentelemetry").emit();
+            ObservableDoubleMeasurement measurement =  meter.gaugeBuilder("orgs-list-gauge").buildObserver();
+            long tStart = System.currentTimeMillis();
+            lightList = organizationPortService.findAllOrgsLightByTenant(tenantUid);
+            long tEnd = System.currentTimeMillis();
+            measurement.record((tEnd-tStart));
+        } catch (Exception t) {
+            span.setStatus(StatusCode.ERROR);
+            span.recordException(t);
+            throw t;
+        } finally {
+            span.end();
+        }
+
         return new ResponseEntity<>(lightList, HttpStatus.OK);
     }
 

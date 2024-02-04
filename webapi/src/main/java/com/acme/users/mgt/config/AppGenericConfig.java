@@ -16,4 +16,5 @@ import lombok.NoArgsConstructor;
 public class AppGenericConfig {
     private String moduleName;
     private String errorPath;
+    private String otlpEndpoint;
 }
