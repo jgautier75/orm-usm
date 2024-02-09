@@ -5,6 +5,8 @@ import com.acme.users.mgt.dto.port.organizations.v1.OrganizationDto;
 import com.acme.users.mgt.dto.port.organizations.v1.OrganizationListLightDto;
 import com.acme.users.mgt.dto.port.shared.UidDto;
 
+import io.opentelemetry.api.trace.Span;
+
 public interface IOrganizationPortService {
 
     /**
@@ -24,7 +26,7 @@ public interface IOrganizationPortService {
      * @return Light representation of organization.
      * @throws FunctionalException Functional error
      */
-    OrganizationListLightDto findAllOrgsLightByTenant(String tenantUid) throws FunctionalException;
+    OrganizationListLightDto findAllOrgsLightByTenant(String tenantUid, Span parentSpan) throws FunctionalException;
 
     /**
      * Update organization.

@@ -13,13 +13,21 @@ import com.acme.users.mgt.infra.converters.OrganizationsInfraConverter;
 import com.acme.users.mgt.infra.dao.api.organizations.IOrganizationsDao;
 import com.acme.users.mgt.infra.dto.organizations.v1.OrganizationDb;
 import com.acme.users.mgt.infra.services.api.organizations.IOrganizationsInfraService;
+
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class OrganizationsInfraService implements IOrganizationsInfraService {
+    private static final String INSTRUMENTATION_NAME = OrganizationsInfraService.class.getCanonicalName();
     private final OrganizationsInfraConverter organizationsInfraConverter;
     private final IOrganizationsDao organizationsDao;
+    private final SdkTracerProvider sdkTracerProvider;
 
     @Transactional
     @Override
@@ -29,13 +37,35 @@ public class OrganizationsInfraService implements IOrganizationsInfraService {
     }
 
     @Override
-    public List<Organization> findAllOrganizations(Long tenantId) {
-        List<OrganizationDb> organizationDbs = organizationsDao.findAllOrganizations(tenantId);
+    public List<Organization> findAllOrganizations(Long tenantId, Span parentSpan) {
+        Tracer tracer = sdkTracerProvider.get(INSTRUMENTATION_NAME);
+        Span findSpan = tracer.spanBuilder("INFRA-FIND").setParent(Context.current().with(parentSpan)).startSpan();
+        List<OrganizationDb> organizationDbs = null;
+        try {
+            organizationDbs = organizationsDao.findAllOrganizations(tenantId);
+        } catch (Exception t) {
+            findSpan.setStatus(StatusCode.ERROR);
+            findSpan.recordException(t);
+            throw t;
+        } finally {
+            findSpan.end();
+        }
+
+        Span convertSpan = tracer.spanBuilder("INFRA-CONVERT").setParent(Context.current().with(parentSpan))
+                .startSpan();
         List<Organization> orgs = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(organizationDbs)) {
-            for (OrganizationDb orgDb : organizationDbs) {
-                orgs.add(organizationsInfraConverter.convertOrganizationDbToOrganization(orgDb));
+        try {
+            if (!CollectionUtils.isEmpty(organizationDbs)) {
+                for (OrganizationDb orgDb : organizationDbs) {
+                    orgs.add(organizationsInfraConverter.convertOrganizationDbToOrganization(orgDb));
+                }
             }
+        } catch (Exception t) {
+            convertSpan.setStatus(StatusCode.ERROR);
+            convertSpan.recordException(t);
+            throw t;
+        } finally {
+            convertSpan.end();
         }
         return orgs;
     }

@@ -6,6 +6,8 @@ import com.acme.jga.users.mgt.domain.organizations.v1.Organization;
 import com.acme.jga.users.mgt.dto.ids.CompositeId;
 import com.acme.jga.users.mgt.exceptions.FunctionalException;
 
+import io.opentelemetry.api.trace.Span;
+
 public interface IOrganizationsDomainService {
 
     /**
@@ -22,9 +24,10 @@ public interface IOrganizationsDomainService {
      * List organizations.
      * 
      * @param tenantId Tenant internal id
+     * @param parentSpan OpenTelemetry Parent Span
      * @return Orgnizations list
      */
-    List<Organization> findAllOrganizations(Long tenantId);
+    List<Organization> findAllOrganizations(Long tenantId, Span parentSpan);
 
     /**
      * Find organizations.

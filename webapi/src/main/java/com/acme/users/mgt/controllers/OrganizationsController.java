@@ -20,22 +20,19 @@ import com.acme.users.mgt.versioning.WebApiVersions.OrganizationsResourceVersion
 
 import io.opentelemetry.api.logs.Logger;
 import io.opentelemetry.api.logs.Severity;
-import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.api.metrics.ObservableDoubleMeasurement;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.sdk.logs.SdkLoggerProvider;
-import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
 public class OrganizationsController {
+    private static final String INSTRUMENTATION_NAME = OrganizationsController.class.getCanonicalName();
     private final IOrganizationPortService organizationPortService;
     private final SdkTracerProvider sdkTracerProvider;
-    private final SdkMeterProvider sdkMeterProvider; 
     private final SdkLoggerProvider sdkLoggerProvider;
 
     @PostMapping(value = OrganizationsResourceVersion.ROOT)
@@ -48,18 +45,13 @@ public class OrganizationsController {
     @GetMapping(value = OrganizationsResourceVersion.ROOT)
     public ResponseEntity<OrganizationListLightDto> findOrgsByTenant(@PathVariable("tenantUid") String tenantUid)
             throws FunctionalException {
-        Tracer tracer = sdkTracerProvider.get("ORGS", WebApiVersions.V1);
-        Meter meter = sdkMeterProvider.get("ORGS-LIST");
+        Tracer tracer = sdkTracerProvider.get(INSTRUMENTATION_NAME, WebApiVersions.V1);
         Logger otelLogger =  sdkLoggerProvider.get("ORGS-LIST-LOGS");
-        Span span = tracer.spanBuilder("LIST").startSpan();
+        Span span = tracer.spanBuilder("ORGS-LIST").startSpan();
         OrganizationListLightDto lightList = null;
         try {
             otelLogger.logRecordBuilder().setSeverity(Severity.INFO).setBody("List organizations logs via opentelemetry").emit();
-            ObservableDoubleMeasurement measurement =  meter.gaugeBuilder("orgs-list-gauge").buildObserver();
-            long tStart = System.currentTimeMillis();
-            lightList = organizationPortService.findAllOrgsLightByTenant(tenantUid);
-            long tEnd = System.currentTimeMillis();
-            measurement.record((tEnd-tStart));
+            lightList = organizationPortService.findAllOrgsLightByTenant(tenantUid, span);
         } catch (Exception t) {
             span.setStatus(StatusCode.ERROR);
             span.recordException(t);

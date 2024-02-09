@@ -30,11 +30,17 @@ import com.acme.users.mgt.logging.services.api.ILogService;
 import com.acme.users.mgt.services.organizations.api.IOrganizationsDomainService;
 import com.acme.users.mgt.services.tenants.api.ITenantDomainService;
 
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class OrganizationsDomainService implements IOrganizationsDomainService {
+        private static final String INSTRUMENTATION_NAME = OrganizationsDomainService.class.getCanonicalName();
         private final IOrganizationsInfraService organizationsInfraService;
         private final ITenantDomainService tenantDomainService;
         private final MessageSource messageSource;
@@ -42,6 +48,7 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
         private final ISectorsInfraService sectorsInfraService;
         private final IEventsInfraService eventsInfraService;
         private final PublishSubscribeChannel eventAuditChannel;
+        private final SdkTracerProvider sdkTracerProvider;
 
         @Transactional
         @Override
@@ -110,8 +117,20 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
         }
 
         @Override
-        public List<Organization> findAllOrganizations(Long tenantId) {
-                return organizationsInfraService.findAllOrganizations(tenantId);
+        public List<Organization> findAllOrganizations(Long tenantId, Span parentSpan) {
+                Tracer tracer = sdkTracerProvider.get(INSTRUMENTATION_NAME);
+                Span domainSpan = tracer.spanBuilder("DOMAIN")
+                                .setParent(Context.current().with(parentSpan))
+                                .startSpan();
+                try {
+                        return organizationsInfraService.findAllOrganizations(tenantId, parentSpan);
+                } catch (Exception t) {
+                        domainSpan.setStatus(StatusCode.ERROR);
+                        domainSpan.recordException(t);
+                        throw t;
+                } finally {
+                        domainSpan.end();
+                }
         }
 
         @Override

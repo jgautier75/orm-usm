@@ -19,15 +19,23 @@ import com.acme.users.mgt.services.tenants.api.ITenantDomainService;
 import com.acme.users.mgt.validation.ValidationException;
 import com.acme.users.mgt.validation.ValidationResult;
 import com.acme.users.mgt.validation.organizations.OrganizationsValidationEngine;
+
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class OrganizationPortService implements IOrganizationPortService {
+    private static final String INSTRUMENTATION_NAME = OrganizationPortService.class.getCanonicalName();
     private final ITenantDomainService tenantDomainService;
     private final IOrganizationsDomainService organizationDomainService;
     private final OrganizationsPortConverter organizationsConverter;
     private final OrganizationsValidationEngine organizationsValidationEngine;
+    private final SdkTracerProvider sdkTracerProvider;
 
     /**
      * @inheritDoc
@@ -53,10 +61,27 @@ public class OrganizationPortService implements IOrganizationPortService {
      * @inheritDoc
      */
     @Override
-    public OrganizationListLightDto findAllOrgsLightByTenant(String tenantUid) throws FunctionalException {
+    public OrganizationListLightDto findAllOrgsLightByTenant(String tenantUid, Span parentSpan)
+            throws FunctionalException {
+        Tracer tracer = sdkTracerProvider.get(INSTRUMENTATION_NAME);
         // Find tenant
-        Tenant tenant = tenantDomainService.findTenantByUid(tenantUid);
-        List<Organization> orgs = organizationDomainService.findAllOrganizations(tenant.getId());
+        Span tenantSpan = tracer.spanBuilder("TENANT")
+                .setParent(Context.current().with(parentSpan))
+                .startSpan();
+
+        Tenant tenant = null;
+        try {
+            tenant = tenantDomainService.findTenantByUid(tenantUid);
+        } catch (Exception t) {
+            tenantSpan.setStatus(StatusCode.ERROR);
+            tenantSpan.recordException(t);
+            throw t;
+        } finally {
+            tenantSpan.end();
+        }
+
+
+        List<Organization> orgs = organizationDomainService.findAllOrganizations(tenant.getId(), parentSpan);
         List<OrganizationLightDto> lightOrgs = new ArrayList<>();
         if (!CollectionUtils.isEmpty(orgs)) {
             for (Organization org : orgs) {

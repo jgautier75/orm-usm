@@ -21,6 +21,9 @@ import com.acme.users.mgt.infra.converters.OrganizationsInfraConverter;
 import com.acme.users.mgt.infra.dao.api.organizations.IOrganizationsDao;
 import com.acme.users.mgt.infra.dto.organizations.v1.OrganizationDb;
 
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.context.Context;
+
 @RunWith(MockitoJUnitRunner.class)
 public class OrganizationsInfraServiceTest {
     private static final Long TENANT_ID = 1L;
@@ -70,7 +73,8 @@ public class OrganizationsInfraServiceTest {
         Mockito.when(organizationsInfraConverter.convertOrganizationDbToOrganization(Mockito.any())).thenReturn(org);
 
         // THEN
-        List<Organization> orgs = organizationsInfraService.findAllOrganizations(TENANT_ID);
+
+        List<Organization> orgs = organizationsInfraService.findAllOrganizations(TENANT_ID, Span.current());
         assertNotNull("Organizations list", orgs);
     }
 

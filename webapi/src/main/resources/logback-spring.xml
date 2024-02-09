@@ -19,8 +19,14 @@
             <pattern>%d{ISO8601} %-5level [%thread] - %msg%n%throwable</pattern>
         </encoder>
     </appender>
+    <appender name="OpenTelemetry"
+        class="io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender">
+        <captureExperimentalAttributes>true</captureExperimentalAttributes>
+        <captureKeyValuePairAttributes>true</captureKeyValuePairAttributes>
+    </appender>
     <root level="info">
         <appender-ref ref="Console" />
+        <appender-ref ref="OpenTelemetry"/>
     </root>
     <logger
         name="org.springframework.jdbc" level="info" additivity="false">
@@ -48,5 +54,6 @@
     <logger name="app-logger" level="debug" additivity="false">
         <appender-ref ref="Console" />
         <appender-ref ref="APP-MAIN-FILE" />
+        <appender-ref ref="OpenTelemetry"/>
     </logger>
 </configuration>

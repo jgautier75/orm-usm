@@ -73,7 +73,7 @@
 				<plugin>
 					<groupId>com.github.os72</groupId>
 					<artifactId>protoc-jar-maven-plugin</artifactId>
-					<version>3.11.4</version>					
+					<version>3.11.4</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -86,7 +86,7 @@
 				<version>1.34.1</version>
 				<type>pom</type>
 				<scope>import</scope>
-			  </dependency>
+			</dependency>
 			<dependency>
 				<groupId>org.junit</groupId>
 				<artifactId>junit-bom</artifactId>
@@ -123,6 +123,11 @@
 				<groupId>org.apache.httpcomponents.client5</groupId>
 				<artifactId>httpclient5</artifactId>
 				<version>5.2.1</version>
+			</dependency>
+			<dependency>
+				<groupId>io.opentelemetry</groupId>
+				<artifactId>opentelemetry-sdk</artifactId>
+				<version>1.34.1</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -185,7 +190,12 @@
 		<dependency>
 			<groupId>io.opentelemetry</groupId>
 			<artifactId>opentelemetry-api</artifactId>
-		  </dependency>
+		</dependency>
+		<dependency>
+			<groupId>io.opentelemetry.instrumentation</groupId>
+			<artifactId>opentelemetry-logback-appender-1.0</artifactId>
+			<version>2.0.0-alpha</version>
+		</dependency>
 		<!-- TEST -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

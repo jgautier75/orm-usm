@@ -45,5 +45,9 @@
 			<artifactId>validation</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>io.opentelemetry</groupId>
+			<artifactId>opentelemetry-sdk</artifactId>
+		</dependency>
 	</dependencies>
 </project>
