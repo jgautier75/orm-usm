@@ -436,7 +436,7 @@ Please refer to Docker > Database setup to build image.
 
 In kube/orm-usm-bd-init/values.yaml, ensure parameters are the right ones.
 
-Note: db-migration scripts are idempotent, so if database and/or accounts already exist, they arenot re-created.
+Note: db-migration scripts are idempotent, so if database and/or accounts already exist, they are not re-created.
 
 When image db-migration:x.y.z is ready, run the folling helm command in kube directory:
 ```sh
@@ -483,50 +483,31 @@ receivers:
   otlp:
     protocols:
       grpc:
-      http:
-  prometheus:
-    config:
-      scrape_configs:
-        - job_name: 'otel-collector'
-          scrape_interval: 5s
-          static_configs:
-            - targets: ['0.0.0.0:8888']
+        endpoint: otel-collector:4317
+  otlp/2:
+    protocols:
+      grpc:
+        endpoint: otel-collector:55679
+
+exporters:
+  otlp/jaeger: # Jaeger supports OTLP directly. The default port for OTLP/gRPC is 4317
+    endpoint: http://jaeger:4317
+    tls:
+      insecure: true
 
 processors:
   batch:
 
-
-exporters:
-  # OTLP
-  otlp:
-    endpoint: otel-collector:4317
-    tls:
-      insecure: true
-  # Data sources: traces
-  logging:
-    verbosity: detailed
-    sampling_initial: 5
-    sampling_thereafter: 200
-  # Prometheus
-  prometheus:
-    endpoint: "0.0.0.0:8889"
-
 extensions:
   health_check:
-  pprof:
-  zpages:
 
 service:
-  extensions: [health_check,pprof,zpages]
+  extensions: [health_check]
   pipelines:
     traces:
-      receivers: [otlp]
+      receivers: [otlp,otlp/2]
       processors: [batch]
-      exporters: [otlp,logging]
-    metrics:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [otlp,logging, prometheus]
+      exporters: [otlp/jaeger]
 ```
 
 No additional dependency required in maven project.

@@ -16,6 +16,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import com.acme.jga.users.mgt.dto.organizations.OrganizationKind;
@@ -23,6 +24,7 @@ import com.acme.jga.users.mgt.dto.organizations.OrganizationStatus;
 import com.acme.users.mgt.config.AppDebuggingConfig;
 import com.acme.users.mgt.config.AppGenericConfig;
 import com.acme.users.mgt.config.MicrometerPrometheus;
+import com.acme.users.mgt.config.OpenTelemetryTestConfig;
 import com.acme.users.mgt.dto.port.organizations.v1.OrganizationLightDto;
 import com.acme.users.mgt.dto.port.shared.UidDto;
 import com.acme.users.mgt.dto.port.users.v1.UserCommonsDto;
@@ -35,6 +37,7 @@ import com.acme.users.mgt.services.api.users.IUserPortService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = UsersController.class)
+@Import(value = {OpenTelemetryTestConfig.class})
 class UsersControllerTest {
         private static final String TENANT_UID = UUID.randomUUID().toString();
         private static final String ORG_UID = UUID.randomUUID().toString();

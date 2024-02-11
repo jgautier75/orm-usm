@@ -12,12 +12,14 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.acme.users.mgt.config.AppDebuggingConfig;
 import com.acme.users.mgt.config.AppGenericConfig;
 import com.acme.users.mgt.config.MicrometerPrometheus;
+import com.acme.users.mgt.config.OpenTelemetryTestConfig;
 import com.acme.users.mgt.dto.port.shared.UidDto;
 import com.acme.users.mgt.dto.port.tenants.v1.TenantDto;
 import com.acme.users.mgt.logging.services.api.ILogService;
@@ -25,6 +27,7 @@ import com.acme.users.mgt.services.api.tenant.ITenantPortService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = TenantsController.class)
+@Import(value = {OpenTelemetryTestConfig.class})
 class TenantsControllerTest {
     @MockBean
     private ITenantPortService tenantPortService;

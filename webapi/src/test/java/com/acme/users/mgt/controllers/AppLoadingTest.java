@@ -1,6 +1,6 @@
 package com.acme.users.mgt.controllers;
 
-import static org.awaitility.Awaitility.*;
+import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -9,6 +9,7 @@ import java.sql.DriverManager;
 import java.time.Duration;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
@@ -23,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.TestPropertySourceUtils;
@@ -31,6 +33,9 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import com.acme.users.mgt.config.OpenTelemetryTestConfig;
+
 import liquibase.command.CommandScope;
 import liquibase.command.core.UpdateCommandStep;
 import liquibase.command.core.helpers.DbUrlConnectionCommandStep;
@@ -39,12 +44,13 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import lombok.extern.slf4j.Slf4j;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = {})
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @Slf4j
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
 @Transactional
 @ContextConfiguration(initializers = AppLoadingTest.DataSourceInitializer.class)
+@Import(value = {OpenTelemetryTestConfig.class})
 class AppLoadingTest {
     @LocalServerPort
     int randomServerPort;
