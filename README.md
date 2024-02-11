@@ -392,14 +392,6 @@ SPI API on Keycloak side is a jar with a class implementing at least:
 
 In this jar, declare a file in /src/main/resources/META-INF/services/org.keycloak.storage.UserStorageProviderFactory containing implementation class.
 
-Architecture:
-
-![](docs/images/lxconnect.drawio.png)
-
-## Permissions management
-
-![](docs/images/lxc_permissions.drawio.png)
-
 ## Minikube:
 
 Enabling ingress (nginx):
