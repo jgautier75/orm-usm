@@ -22,7 +22,6 @@ import com.acme.users.mgt.infra.dao.api.organizations.IOrganizationsDao;
 import com.acme.users.mgt.infra.dto.organizations.v1.OrganizationDb;
 
 import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.context.Context;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OrganizationsInfraServiceTest {

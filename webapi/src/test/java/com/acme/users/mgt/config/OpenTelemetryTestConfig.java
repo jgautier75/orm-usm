@@ -59,26 +59,4 @@ public class OpenTelemetryTestConfig {
                                 .build();
         }
 
-        /*-
-        @Bean
-        public OpenTelemetry openTelemetry(SdkTracerProvider tracerProvider, SdkMeterProvider sdkMeterProvider,
-                        SdkLoggerProvider sdkLoggerProvider) {
-                Resource resource = Resource.getDefault().toBuilder()
-                                .put(ResourceAttributes.SERVICE_NAME, "TEST")
-                                .put(ResourceAttributes.SERVICE_VERSION, "1.0.0").build();
-        
-                // OpenTelemetry
-                OpenTelemetry openTelemetry = OpenTelemetrySdk.builder()
-                                .setTracerProvider(tracerProvider)
-                                .setMeterProvider(sdkMeterProvider)
-                                .setLoggerProvider(sdkLoggerProvider)
-                                .setPropagators(ContextPropagators.create(TextMapPropagator
-                                                .composite(W3CTraceContextPropagator.getInstance(),
-                                                                W3CBaggagePropagator.getInstance())))
-                                .buildAndRegisterGlobal();
-        
-                return openTelemetry;
-        
-        }*/
-
 }
