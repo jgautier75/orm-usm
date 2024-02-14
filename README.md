@@ -34,17 +34,17 @@ Docker compose file: docker/docker-services.yml
 
 Services:
 
-| Service                         | Version | Port   |
-| --------------------------------| ------- | ------ |
-| postgreSQL                      | 16.1    |  5432  |
-| akhq                            | 0.24.0  |  8086  |
-| zookeeper                       | 7.4.3   |  2181  |
-| kafka                           | 7.4.3   |  9092  |
-| schema-registry                 | 7.4.3   |  8085  |
-| jaeger-all-in-one               | 7.4.3   | 16686  |
-| prometheus                      | v2.49.1 |  9090  |
-| grafana                         | 9.5.15  |  3000  |
-| opentelemetry-collector-contrib | 0.92.0  |  3000  |
+| Service                         | Version | Port               |
+| --------------------------------| ------- | ------------------ |
+| postgreSQL                      | 16.1    |  5432              |
+| akhq                            | 0.24.0  |  8086              |
+| zookeeper                       | 7.4.3   |  2181              |
+| kafka                           | 7.4.3   |  9092              |
+| schema-registry                 | 7.4.3   |  8085              |
+| jaeger-all-in-one               | 7.4.3   | 16686              |
+| prometheus                      | v2.49.1 |  9090              |
+| grafana                         | 9.5.15  |  3000              |
+| opentelemetry-collector-contrib | 0.92.0  |  4317, 4318, 55679 |
 
 ### Database setup
 
@@ -147,7 +147,7 @@ When talking about audit events, we must ensure events and related data in rdbms
 
 Indeed, we want to avoid the following two use cases:
 
-- A rollback is performed in rdbms and the event is still sent and thus the audit event does not reflect the underlying data.
+- A rollback is performed in rdbms but the event is still sent and thus the audit event does not reflect the underlying data.
 - For some reasons, the kafka brokers are not reacheable (network failure for example) and we try to push directlty in a kafka topic. In this case, either transation is rollback if message sending is within the same transactional method or message is not sent at all to kafka if outside transactional method.
 
 Thus, to ensure consistency between data stored in rdbms and audit event, these ones are stored in rdbms in the same transaction than the data. Obvisouly, we're here relying on ACID features of potgreSQL relational database.

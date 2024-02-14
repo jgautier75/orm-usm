@@ -87,7 +87,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="events" author="jga">
+    <changeSet id="events" author="jga" context="all">
         <createSequence sequenceName="seq_events" />
         <createTable tableName="events">
             <column name="uid" type="varchar(40)" defaultValueSequenceNext="seq_events">
@@ -121,7 +121,7 @@
             <column name="status" />
         </createIndex>
     </changeSet>
-    <changeSet id="sectors" author="jga">
+    <changeSet id="sectors" author="jga" context="all">
         <createSequence sequenceName="seq_sectors" />
         <createTable tableName="sectors">
             <column name="id" type="bigint" defaultValueSequenceNext="seq_sectors">
@@ -165,7 +165,7 @@
     </changeSet>
     <changeSet id="user_notif" author="jga" context="all">
         <addColumn tableName="users">
-            <column name="notif_email" type="varchar(50)"/>
+            <column name="notif_email" type="varchar(50)" />
         </addColumn>
     </changeSet>
 </databaseChangeLog>
