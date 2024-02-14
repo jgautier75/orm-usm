@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 public class AuditChange {
     private String object;
+    private AuditOperation operation;
     private String from;
     private String to;
 }

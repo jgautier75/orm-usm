@@ -106,12 +106,12 @@ public class EventBusHandler implements MessageHandler, InitializingBean {
         auditEventMessageBuilder.setObjectUid(auditEvent.getObjectUid());
         auditEventMessageBuilder.setAction(auditEvent.getAction().name());
         auditEventMessageBuilder.setStatus(auditEvent.getStatus().getValue());
-
         if (!CollectionUtils.isEmpty(auditEvent.getChanges())) {
             for (AuditChange auditChange : auditEvent.getChanges()) {
                 auditEventMessageBuilder.addChanges(
                         com.acme.users.mgt.events.protobuf.Event.AuditChange.newBuilder().setFrom(auditChange.getFrom())
-                                .setObject(auditChange.getObject()).setTo(auditChange.getTo()).build());
+                                .setObject(auditChange.getObject()).setTo(auditChange.getTo())
+                                .setOperation(auditChange.getOperation().name()).build());
             }
         }
         return auditEventMessageBuilder.build();

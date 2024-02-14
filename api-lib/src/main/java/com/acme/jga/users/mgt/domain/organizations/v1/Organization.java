@@ -1,11 +1,7 @@
 package com.acme.jga.users.mgt.domain.organizations.v1;
 
 import java.io.Serializable;
-import java.util.List;
 
-import com.acme.jga.users.mgt.domain.addresses.v1.Address;
-import com.acme.jga.users.mgt.domain.delegations.v1.Delegation;
-import com.acme.jga.users.mgt.domain.phones.v1.Phone;
 import com.acme.jga.users.mgt.domain.sectors.v1.Sector;
 import com.acme.jga.users.mgt.dto.api.ApiVersion;
 import com.acme.jga.users.mgt.dto.api.IVersioned;
@@ -25,9 +21,6 @@ public class Organization implements IVersioned, Serializable {
 	private Long id;
 	private String uid;
 	private OrganizationCommons commons;
-	private List<Phone> phones;
-	private List<Address> addresses;
-	private List<Delegation> delegations;
 	private Sector sector;
 
 	@Override

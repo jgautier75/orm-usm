@@ -9,8 +9,10 @@ import org.springframework.integration.channel.PublishSubscribeChannel;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import com.acme.jga.users.mgt.domain.events.v1.AuditAction;
+import com.acme.jga.users.mgt.domain.events.v1.AuditChange;
 import com.acme.jga.users.mgt.domain.events.v1.AuditEvent;
 import com.acme.jga.users.mgt.domain.events.v1.AuditScope;
 import com.acme.jga.users.mgt.domain.events.v1.EventStatus;
@@ -23,6 +25,7 @@ import com.acme.jga.users.mgt.exceptions.FunctionalErrorsTypes;
 import com.acme.jga.users.mgt.exceptions.FunctionalException;
 import com.acme.jga.users.mgt.utils.DateTimeUtils;
 import com.acme.users.mgt.config.KafkaConfig;
+import com.acme.users.mgt.events.EventBuilderOrganization;
 import com.acme.users.mgt.infra.services.api.events.IEventsInfraService;
 import com.acme.users.mgt.infra.services.api.organizations.IOrganizationsInfraService;
 import com.acme.users.mgt.infra.services.api.sectors.ISectorsInfraService;
@@ -49,6 +52,7 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
         private final IEventsInfraService eventsInfraService;
         private final PublishSubscribeChannel eventAuditChannel;
         private final SdkTracerProvider sdkTracerProvider;
+        private final EventBuilderOrganization eventBuilderOrganization;
 
         @Transactional
         @Override
@@ -150,6 +154,7 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
                 return org;
         }
 
+        @Transactional
         @Override
         public Integer updateOrganization(String tenantUid, String orgUid, Organization organization)
                         throws FunctionalException {
@@ -169,6 +174,9 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
                 organization.setTenantId(tenant.getId());
                 organization.setUid(orgUid);
 
+                List<AuditChange> auditChanges = eventBuilderOrganization.buildAuditsChange(org.getCommons(),
+                                organization.getCommons());
+
                 Integer nbUpdated = organizationsInfraService.updateOrganization(tenant.getId(), organization.getId(),
                                 organization.getCommons().getCode(),
                                 organization.getCommons().getLabel(), organization.getCommons().getCountry(),
@@ -187,6 +195,10 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
                                 .createdAt(DateTimeUtils.nowIso())
                                 .lastUpdatedAt(DateTimeUtils.nowIso())
                                 .build();
+                if (!CollectionUtils.isEmpty(auditChanges)) {
+                        orgUpdateAuditEvent.setChanges(auditChanges);
+
+                }
                 eventsInfraService.createEvent(orgUpdateAuditEvent);
                 eventAuditChannel.send(MessageBuilder.withPayload(KafkaConfig.AUDIT_WAKE_UP).build());
                 return nbUpdated;
@@ -223,7 +235,7 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
                 logService.debugS(callerName, "Nb of organizations deleted: [%s]", new Object[] { nbOrgDeleted });
 
                 // Create audit event
-                AuditEvent orgUpdateAuditEvent = AuditEvent.builder()
+                AuditEvent orgDeleteAuditEvent = AuditEvent.builder()
                                 .action(AuditAction.DELETE)
                                 .objectUid(organization.getUid())
                                 .target(EventTarget.ORGANIZATION)
@@ -235,7 +247,7 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
                                 .createdAt(DateTimeUtils.nowIso())
                                 .lastUpdatedAt(DateTimeUtils.nowIso())
                                 .build();
-                eventsInfraService.createEvent(orgUpdateAuditEvent);
+                eventsInfraService.createEvent(orgDeleteAuditEvent);
                 eventAuditChannel.send(MessageBuilder.withPayload(KafkaConfig.AUDIT_WAKE_UP).build());
                 return nbUsersDeleted;
         }

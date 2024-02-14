@@ -29,4 +29,5 @@ message AuditChange {
     string object = 1;
     string from = 2;
     string to = 3;
+    string operation = 4;
 }
