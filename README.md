@@ -172,7 +172,7 @@ Listener "eventAuditChannel" responsibilities are:
 
 ## Protobuf
 
-Messages sent to kafka are likely to change across time (new fields, refactoring, ...). Furthermore, you cannot expect all consumers to migrate to the new version at the same time. As a consequence, messages versioning must be handled.
+Messages formats sent to kafka are likely to change across time (new fields, refactoring, ...). Furthermore, you cannot expect all consumers to migrate to the new version at the same time. As a consequence, messages versioning must be handled.
 
 Google [Protobuf](https://protobuf.dev) provides a convenient way to manage versioning and also offers better performance than standard json or other binary formats.
 
