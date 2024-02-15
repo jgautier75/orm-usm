@@ -2,12 +2,13 @@ package com.acme.users.mgt.events;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
 import com.acme.jga.users.mgt.domain.events.v1.AuditChange;
-import com.acme.jga.users.mgt.domain.events.v1.AuditOperation;
 import com.acme.jga.users.mgt.domain.organizations.v1.OrganizationCommons;
+import com.acme.users.mgt.utils.EventChangeUtils;
 
 @Component
 public class EventBuilderOrganization {
@@ -22,118 +23,34 @@ public class EventBuilderOrganization {
                 List<AuditChange> auditChanges = new ArrayList<>();
 
                 // Code
-                if (previous.getCode() == null && current.getCode() != null) {
-                        auditChanges.add(AuditChange.builder()
-                                        .object(META_COMMONS_CODE)
-                                        .operation(AuditOperation.ADD)
-                                        .to(current.getCode())
-                                        .build());
-                } else if (previous.getCode() != null && current.getCode() != null
-                                && !previous.getCode().equals(current.getCode())) {
-                        auditChanges.add(AuditChange.builder()
-                                        .object(META_COMMONS_CODE)
-                                        .operation(AuditOperation.UPDATE)
-                                        .from(previous.getCode())
-                                        .to(current.getCode())
-                                        .build());
-                } else if (previous.getCode() != null && current.getCode() == null) {
-                        auditChanges.add(AuditChange.builder()
-                                        .object(META_COMMONS_CODE)
-                                        .operation(AuditOperation.REMOVE)
-                                        .from(current.getCode())
-                                        .build());
-                }
+                Optional<AuditChange> hasCodeChanged = EventChangeUtils.compareStrings(META_COMMONS_CODE,
+                                previous != null ? previous.getCode() : null,
+                                current != null ? current.getCode() : null);
+                hasCodeChanged.ifPresent(auditChanges::add);
 
                 // Country
-                if (previous.getCountry() == null && current.getCountry() != null) {
-                        auditChanges.add(AuditChange.builder()
-                                        .object(META_COMMONS_COUNTRY)
-                                        .operation(AuditOperation.ADD)
-                                        .to(current.getCountry())
-                                        .build());
-                } else if (previous.getCountry() != null && current.getCountry() != null
-                                && !previous.getCountry().equals(current.getCountry())) {
-                        auditChanges.add(AuditChange.builder()
-                                        .object(META_COMMONS_COUNTRY)
-                                        .operation(AuditOperation.UPDATE)
-                                        .from(previous.getCountry())
-                                        .to(current.getCountry())
-                                        .build());
-                } else if (previous.getCountry() != null && current.getCountry() == null) {
-                        auditChanges.add(AuditChange.builder()
-                                        .object(META_COMMONS_COUNTRY)
-                                        .operation(AuditOperation.REMOVE)
-                                        .from(current.getCountry())
-                                        .build());
-                }
+                Optional<AuditChange> hasCountryChanged = EventChangeUtils.compareStrings(META_COMMONS_COUNTRY,
+                                previous != null ? previous.getCountry() : null,
+                                current != null ? current.getCountry() : null);
+                hasCountryChanged.ifPresent(auditChanges::add);
 
                 // Label
-                if (previous.getLabel() == null && current.getLabel() != null) {
-                        auditChanges.add(AuditChange.builder()
-                                        .object(META_COMMONS_LABEL)
-                                        .operation(AuditOperation.ADD)
-                                        .to(current.getLabel())
-                                        .build());
-                } else if (previous.getLabel() != null && current.getLabel() != null
-                                && !previous.getLabel().equals(current.getLabel())) {
-                        auditChanges.add(AuditChange.builder()
-                                        .object(META_COMMONS_LABEL)
-                                        .operation(AuditOperation.UPDATE)
-                                        .from(previous.getLabel())
-                                        .to(current.getLabel())
-                                        .build());
-                } else if (previous.getLabel() != null && current.getLabel() == null) {
-                        auditChanges.add(AuditChange.builder()
-                                        .object(META_COMMONS_LABEL)
-                                        .operation(AuditOperation.REMOVE)
-                                        .from(previous.getLabel())
-                                        .build());
-                }
+                Optional<AuditChange> hasLabelChanged = EventChangeUtils.compareStrings(META_COMMONS_LABEL,
+                                previous != null ? previous.getLabel() : null,
+                                current != null ? current.getLabel() : null);
+                hasLabelChanged.ifPresent(auditChanges::add);
 
                 // Kind
-                if (previous.getKind() == null && current.getKind() != null) {
-                        auditChanges.add(AuditChange.builder()
-                                        .object(META_COMMONS_KIND)
-                                        .operation(AuditOperation.ADD)
-                                        .to(current.getKind().getLabel())
-                                        .build());
-                } else if (previous.getKind() != null && current.getKind() != null
-                                && !previous.getKind().equals(current.getKind())) {
-                        auditChanges.add(AuditChange.builder()
-                                        .object(META_COMMONS_KIND)
-                                        .operation(AuditOperation.UPDATE)
-                                        .from(previous.getKind().getLabel())
-                                        .to(current.getKind().getLabel())
-                                        .build());
-                } else if (previous.getKind() != null && current.getKind() == null) {
-                        auditChanges.add(AuditChange.builder()
-                                        .object(META_COMMONS_KIND)
-                                        .operation(AuditOperation.REMOVE)
-                                        .from(previous.getKind().getLabel())
-                                        .build());
-                }
+                Optional<AuditChange> hasKindChanged = EventChangeUtils.compareOrganizationKind(META_COMMONS_KIND,
+                                previous != null ? previous.getKind() : null,
+                                current != null ? current.getKind() : null);
+                hasKindChanged.ifPresent(auditChanges::add);
 
                 // Status
-                if (previous.getStatus() == null && current.getStatus() != null) {
-                        auditChanges.add(AuditChange.builder()
-                                        .object(META_COMMONS_STATUS)
-                                        .operation(AuditOperation.ADD)
-                                        .to(Integer.toString(current.getStatus().getCode()))
-                                        .build());
-                } else if (previous.getStatus() != null && current.getStatus() != null
-                                && !previous.getStatus().equals(current.getStatus())) {
-                        auditChanges.add(AuditChange.builder()
-                                        .object(META_COMMONS_STATUS)
-                                        .operation(AuditOperation.UPDATE)
-                                        .from(previous.getStatus().getLabel())
-                                        .to(current.getStatus().getLabel()).build());
-                } else if (previous.getStatus() != null && current.getStatus() == null) {
-                        auditChanges.add(AuditChange.builder()
-                                        .object(META_COMMONS_STATUS)
-                                        .operation(AuditOperation.REMOVE)
-                                        .from(previous.getStatus().getLabel())
-                                        .build());
-                }
+                Optional<AuditChange> hasStatusChanged = EventChangeUtils.compareOrganizationStatus(META_COMMONS_STATUS,
+                                previous != null ? previous.getStatus() : null,
+                                current != null ? current.getStatus() : null);
+                hasStatusChanged.ifPresent(auditChanges::add);
 
                 return auditChanges;
         }

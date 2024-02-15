@@ -13,4 +13,6 @@ public interface ISectorsInfraService {
     Sector findSectorByUid(Long tenantId, Long orgId, String sectorUid);
 
     Optional<Long> existsByCode(String code);
+
+    int updateSector(Long tenantId, Long orgId, Sector sector);
 }

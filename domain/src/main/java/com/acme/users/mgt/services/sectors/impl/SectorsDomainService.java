@@ -1,5 +1,6 @@
 package com.acme.users.mgt.services.sectors.impl;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.context.MessageSource;
@@ -8,9 +9,11 @@ import org.springframework.integration.channel.PublishSubscribeChannel;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import com.acme.jga.users.mgt.domain.events.v1.AuditAction;
+import com.acme.jga.users.mgt.domain.events.v1.AuditChange;
 import com.acme.jga.users.mgt.domain.events.v1.AuditEvent;
 import com.acme.jga.users.mgt.domain.events.v1.AuditScope;
 import com.acme.jga.users.mgt.domain.events.v1.EventStatus;
@@ -23,6 +26,7 @@ import com.acme.jga.users.mgt.exceptions.FunctionalErrorsTypes;
 import com.acme.jga.users.mgt.exceptions.FunctionalException;
 import com.acme.jga.users.mgt.utils.DateTimeUtils;
 import com.acme.users.mgt.config.KafkaConfig;
+import com.acme.users.mgt.events.EventBuilderSector;
 import com.acme.users.mgt.infra.services.api.events.IEventsInfraService;
 import com.acme.users.mgt.infra.services.api.sectors.ISectorsInfraService;
 import com.acme.users.mgt.services.organizations.api.IOrganizationsDomainService;
@@ -40,6 +44,7 @@ public class SectorsDomainService implements ISectorsDomainService {
         private final MessageSource messageSource;
         private final IEventsInfraService eventsInfraService;
         private final PublishSubscribeChannel eventAuditChannel;
+        private final EventBuilderSector eventBuilderSector;
 
         @Transactional(rollbackFor = { FunctionalException.class })
         @Override
@@ -125,6 +130,55 @@ public class SectorsDomainService implements ISectorsDomainService {
                                 organizationUid, false);
 
                 return sectorsInfraService.fetchSectorsWithHierarchy(tenant.getId(), organization.getId());
+        }
+
+        @Transactional(rollbackFor = { FunctionalException.class })
+        @Override
+        public Integer updateSector(String tenantUid, String organizationUid, String sectorUid, Sector sector)
+                        throws FunctionalException {
+                // Find tenant
+                Tenant tenant = tenantDomainService.findTenantByUid(tenantUid);
+
+                // Find organization
+                Organization organization = organizationsDomainService.findOrganizationByTenantAndUid(tenant.getId(),
+                                organizationUid, false);
+
+                // Find sector
+                Sector rdbmsSector = findSectorByUidTenantOrg(tenant.getId(), organization.getId(), sectorUid);
+                sector.setId(rdbmsSector.getId());
+                sector.setUid(rdbmsSector.getUid());
+                sector.setTenantId(rdbmsSector.getTenantId());
+                sector.setOrgId(rdbmsSector.getOrgId());
+
+                if (sector.getParentUid() != null) {
+                        Sector parentSector = findSectorByUidTenantOrg(tenant.getId(), organization.getId(),
+                                        sector.getParentUid());
+                        sector.setParentId(parentSector.getId());
+                }
+
+                List<AuditChange> auditChanges = eventBuilderSector.buildAuditsChange(rdbmsSector, sector);
+                boolean hasChanges = !CollectionUtils.isEmpty(auditChanges);
+
+                if (hasChanges) {
+                        // Create sector audit event
+                        AuditEvent sectorAuditEvent = AuditEvent.builder()
+                                        .action(AuditAction.UPDATE)
+                                        .objectUid(rdbmsSector.getUid())
+                                        .target(EventTarget.SECTOR)
+                                        .changes(auditChanges)
+                                        .scope(AuditScope.builder().tenantName(tenant.getLabel()).tenantUid(tenantUid)
+                                                        .organizationUid(organization.getUid())
+                                                        .organizationName(organization.getCommons().getLabel())
+                                                        .build())
+                                        .status(EventStatus.PENDING)
+                                        .createdAt(DateTimeUtils.nowIso())
+                                        .lastUpdatedAt(DateTimeUtils.nowIso())
+                                        .build();
+                        eventsInfraService.createEvent(sectorAuditEvent);
+                        return sectorsInfraService.updateSector(tenant.getId(), organization.getId(), sector);
+                } else {
+                        return 0;
+                }
         }
 
 }

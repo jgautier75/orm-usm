@@ -42,4 +42,15 @@ public class SectorsPortService implements ISectorsPortService {
         return sectorsConverter.convertSectorDomainToSectorDisplay(rootSector);
     }
 
+    @Override
+    public Integer updateSector(String tenantUid, String organizationUid, String sectorUid, SectorDto sectorDto)
+            throws FunctionalException {
+        ValidationResult validationResult = sectorsValidationEngine.validate(sectorDto);
+        if (!validationResult.isSuccess()) {
+            throw new ValidationException(validationResult.getErrors());
+        }
+        Sector sector = sectorsConverter.convertSectorDtoToDomain(sectorDto);
+        return sectorsDomainService.updateSector(tenantUid, organizationUid, sectorUid, sector);
+    }
+
 }

@@ -174,34 +174,41 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
                 organization.setTenantId(tenant.getId());
                 organization.setUid(orgUid);
 
+                // Build audit changes
                 List<AuditChange> auditChanges = eventBuilderOrganization.buildAuditsChange(org.getCommons(),
                                 organization.getCommons());
+                boolean anythingChanged = !auditChanges.isEmpty();
 
-                Integer nbUpdated = organizationsInfraService.updateOrganization(tenant.getId(), organization.getId(),
-                                organization.getCommons().getCode(),
-                                organization.getCommons().getLabel(), organization.getCommons().getCountry(),
-                                organization.getCommons().getStatus());
+                if (anythingChanged) {
+                        Integer nbUpdated = organizationsInfraService.updateOrganization(tenant.getId(),
+                                        organization.getId(),
+                                        organization.getCommons().getCode(),
+                                        organization.getCommons().getLabel(), organization.getCommons().getCountry(),
+                                        organization.getCommons().getStatus());
 
-                // Create audit event
-                AuditEvent orgUpdateAuditEvent = AuditEvent.builder()
-                                .action(AuditAction.UPDATE)
-                                .objectUid(organization.getUid())
-                                .target(EventTarget.ORGANIZATION)
-                                .scope(AuditScope.builder().tenantName(tenant.getLabel()).tenantUid(tenantUid)
-                                                .organizationUid(organization.getUid())
-                                                .organizationName(organization.getCommons().getLabel())
-                                                .build())
-                                .status(EventStatus.PENDING)
-                                .createdAt(DateTimeUtils.nowIso())
-                                .lastUpdatedAt(DateTimeUtils.nowIso())
-                                .build();
-                if (!CollectionUtils.isEmpty(auditChanges)) {
-                        orgUpdateAuditEvent.setChanges(auditChanges);
+                        // Create audit event
+                        AuditEvent orgUpdateAuditEvent = AuditEvent.builder()
+                                        .action(AuditAction.UPDATE)
+                                        .objectUid(organization.getUid())
+                                        .target(EventTarget.ORGANIZATION)
+                                        .scope(AuditScope.builder().tenantName(tenant.getLabel()).tenantUid(tenantUid)
+                                                        .organizationUid(organization.getUid())
+                                                        .organizationName(organization.getCommons().getLabel())
+                                                        .build())
+                                        .status(EventStatus.PENDING)
+                                        .createdAt(DateTimeUtils.nowIso())
+                                        .lastUpdatedAt(DateTimeUtils.nowIso())
+                                        .build();
+                        if (!CollectionUtils.isEmpty(auditChanges)) {
+                                orgUpdateAuditEvent.setChanges(auditChanges);
 
+                        }
+                        eventsInfraService.createEvent(orgUpdateAuditEvent);
+                        eventAuditChannel.send(MessageBuilder.withPayload(KafkaConfig.AUDIT_WAKE_UP).build());
+                        return nbUpdated;
+                } else {
+                        return 0;
                 }
-                eventsInfraService.createEvent(orgUpdateAuditEvent);
-                eventAuditChannel.send(MessageBuilder.withPayload(KafkaConfig.AUDIT_WAKE_UP).build());
-                return nbUpdated;
         }
 
         @Override

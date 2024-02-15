@@ -42,4 +42,17 @@ public interface ISectorsDomainService {
          */
         Sector fetchSectorsWithHierarchy(String tenantUid, String organizationUid) throws FunctionalException;
 
+        /**
+         * Update sector.
+         * 
+         * @param tenantUid       Tenant uid
+         * @param organizationUid Organization uid
+         * @param sectorUid       Sector uid
+         * @param sector          Sector
+         * @return Number of rows update
+         * @throws FunctionalException Functional error
+         */
+        Integer updateSector(String tenantUid, String organizationUid, String sectorUid, Sector sector)
+                        throws FunctionalException;
+
 }

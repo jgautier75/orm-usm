@@ -87,4 +87,10 @@ public class SectorsInfraService implements ISectorsInfraService {
         }
     }
 
+    @Override
+    public int updateSector(Long tenantId, Long orgId, Sector sector) {
+        SectorDb sectorDb = sectorsConverter.convertSectorDomaintoDb(sector);
+        return sectorsDao.updateSector(tenantId, orgId, sectorDb);
+    }
+
 }

@@ -27,4 +27,18 @@ public interface ISectorsPortService {
      * @throws FunctionalException Functional error
      */
     SectorDisplayDto findSectors(String tenantUid, String organizationUid) throws FunctionalException;
+
+    /**
+     * Update sector.
+     * 
+     * @param tenantUid       Tenant uid
+     * @param organizationUid Organization uid
+     * @param sectorUid       Sector uid
+     * @param sectorDto       Sector DTO
+     * @return Nb of updated sectors
+     * @throws FunctionalException Functional error
+     */
+    Integer updateSector(String tenantUid, String organizationUid, String sectorUid, SectorDto sectorDto)
+            throws FunctionalException;
+
 }

@@ -15,4 +15,6 @@ public interface ISectorsDao {
     CompositeId createSector(Long tenantId, Long orgId, SectorDb sectorDb);
 
     Optional<Long> existsByCode(String code);
+
+    int updateSector(Long tenantId, Long orgId, SectorDb sectorDb);
 }

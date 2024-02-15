@@ -135,4 +135,17 @@ public class SectorsDao extends AbstractJdbcDaoSupport implements ISectorsDao {
         return Optional.ofNullable(sectorId);
     }
 
+    @Override
+    public int updateSector(Long tenantId, Long orgId, SectorDb sectorDb) {
+        String baseQuery = super.getQuery("sector_update");
+        Map<String, Object> params = new HashMap<>();
+        params.put(DaoConstants.P_CODE, sectorDb.getCode());
+        params.put(DaoConstants.P_LABEL, sectorDb.getLabel());
+        params.put(DaoConstants.P_PARENT_ID, sectorDb.getParentId());
+        params.put(DaoConstants.P_ID, sectorDb.getId());
+        params.put(DaoConstants.P_ORG_ID, orgId);
+        params.put(DaoConstants.P_TENANT_ID, tenantId);
+        return super.getNamedParameterJdbcTemplate().update(baseQuery, params);
+    }
+
 }
