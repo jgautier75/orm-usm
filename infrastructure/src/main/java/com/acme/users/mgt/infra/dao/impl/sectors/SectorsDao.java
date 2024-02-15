@@ -148,4 +148,14 @@ public class SectorsDao extends AbstractJdbcDaoSupport implements ISectorsDao {
         return super.getNamedParameterJdbcTemplate().update(baseQuery, params);
     }
 
+    @Override
+    public int deleteSector(Long tenantId, Long orgId, Long sectorId) {
+        String baseQuery = super.getQuery("sector_delete");
+        Map<String, Object> params = new HashMap<>();
+        params.put(DaoConstants.P_ID, sectorId);
+        params.put(DaoConstants.P_ORG_ID, orgId);
+        params.put(DaoConstants.P_TENANT_ID, tenantId);
+        return super.getNamedParameterJdbcTemplate().update(baseQuery, params);
+    }
+
 }

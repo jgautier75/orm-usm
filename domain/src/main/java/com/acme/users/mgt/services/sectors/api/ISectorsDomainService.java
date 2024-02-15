@@ -55,4 +55,15 @@ public interface ISectorsDomainService {
         Integer updateSector(String tenantUid, String organizationUid, String sectorUid, Sector sector)
                         throws FunctionalException;
 
+        /**
+         * Delete sector.
+         * 
+         * @param tenantUid       Tenant uid
+         * @param organizationUid Organization uid
+         * @param sectorUid       Sector uid
+         * @return Nb of deleted sectors
+         * @throws FunctionalException Functional error
+         */
+        Integer deleteSector(String tenantUid, String organizationUid, String sectorUid) throws FunctionalException;
+
 }

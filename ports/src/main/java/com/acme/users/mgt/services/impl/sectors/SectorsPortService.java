@@ -53,4 +53,9 @@ public class SectorsPortService implements ISectorsPortService {
         return sectorsDomainService.updateSector(tenantUid, organizationUid, sectorUid, sector);
     }
 
+    @Override
+    public Integer deleteSector(String tenantUid, String organizationUid, String sectorUid) throws FunctionalException {
+        return sectorsDomainService.deleteSector(tenantUid, organizationUid, sectorUid);
+    }
+
 }

@@ -40,5 +40,9 @@ public enum FunctionalErrorsTypes {
     /**
      * Sector code already used.
      */
-    SECTOR_CODE_ALREADY_USED;
+    SECTOR_CODE_ALREADY_USED,
+    /**
+     * Root sector cannot be deleted.
+     */
+    SECTOR_ROOT_DELETE_NOT_ALLOWED;
 }

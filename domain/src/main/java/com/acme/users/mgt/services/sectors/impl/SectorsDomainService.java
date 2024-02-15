@@ -175,10 +175,49 @@ public class SectorsDomainService implements ISectorsDomainService {
                                         .lastUpdatedAt(DateTimeUtils.nowIso())
                                         .build();
                         eventsInfraService.createEvent(sectorAuditEvent);
+                        eventAuditChannel.send(MessageBuilder.withPayload(KafkaConfig.AUDIT_WAKE_UP).build());
                         return sectorsInfraService.updateSector(tenant.getId(), organization.getId(), sector);
                 } else {
                         return 0;
                 }
+        }
+
+        @Transactional(rollbackFor = { FunctionalException.class })
+        @Override
+        public Integer deleteSector(String tenantUid, String organizationUid, String sectorUid)
+                        throws FunctionalException {
+                // Find tenant
+                Tenant tenant = tenantDomainService.findTenantByUid(tenantUid);
+
+                // Find organization
+                Organization organization = organizationsDomainService.findOrganizationByTenantAndUid(tenant.getId(),
+                                organizationUid, false);
+
+                // Find sector
+                Sector rdbmsSector = findSectorByUidTenantOrg(tenant.getId(), organization.getId(), sectorUid);
+                if (rdbmsSector.isRoot()) {
+                        throw new FunctionalException(FunctionalErrorsTypes.SECTOR_ROOT_DELETE_NOT_ALLOWED.name(), null,
+                                        messageSource
+                                                        .getMessage("sector_root_delete_deny",
+                                                                        new Object[] { sectorUid },
+                                                                        LocaleContextHolder.getLocale()));
+                }
+
+                AuditEvent sectorAuditEvent = AuditEvent.builder()
+                                .action(AuditAction.DELETE)
+                                .objectUid(rdbmsSector.getUid())
+                                .target(EventTarget.SECTOR)
+                                .scope(AuditScope.builder().tenantName(tenant.getLabel()).tenantUid(tenantUid)
+                                                .organizationUid(organization.getUid())
+                                                .organizationName(organization.getCommons().getLabel())
+                                                .build())
+                                .status(EventStatus.PENDING)
+                                .createdAt(DateTimeUtils.nowIso())
+                                .lastUpdatedAt(DateTimeUtils.nowIso())
+                                .build();
+                eventsInfraService.createEvent(sectorAuditEvent);
+                eventAuditChannel.send(MessageBuilder.withPayload(KafkaConfig.AUDIT_WAKE_UP).build());
+                return sectorsInfraService.deleteSector(tenant.getId(), organization.getId(), rdbmsSector.getId());
         }
 
 }

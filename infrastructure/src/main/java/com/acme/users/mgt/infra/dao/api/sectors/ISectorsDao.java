@@ -17,4 +17,6 @@ public interface ISectorsDao {
     Optional<Long> existsByCode(String code);
 
     int updateSector(Long tenantId, Long orgId, SectorDb sectorDb);
+
+    int deleteSector(Long tenantId, Long orgId, Long sectorId);
 }

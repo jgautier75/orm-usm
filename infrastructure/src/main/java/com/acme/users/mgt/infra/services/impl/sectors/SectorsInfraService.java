@@ -93,4 +93,9 @@ public class SectorsInfraService implements ISectorsInfraService {
         return sectorsDao.updateSector(tenantId, orgId, sectorDb);
     }
 
+    @Override
+    public int deleteSector(Long tenantId, Long organizationId, Long sectorId) {
+        return sectorsDao.deleteSector(tenantId, organizationId, sectorId);
+    }
+
 }

@@ -2,6 +2,7 @@ package com.acme.users.mgt.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,6 +44,14 @@ public class SectorsController {
             @PathVariable("sectorUid") String sectorUid,
             @RequestBody SectorDto sector) throws FunctionalException {
         sectorsPortService.updateSector(tenantUid, orgUid, sectorUid, sector);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping(value = SectorsResourceVersion.WITH_UID)
+    public ResponseEntity<Void> deleteSector(@PathVariable("tenantUid") String tenantUid,
+            @PathVariable("orgUid") String orgUid,
+            @PathVariable("sectorUid") String sectorUid) throws FunctionalException {
+        sectorsPortService.deleteSector(tenantUid, orgUid, sectorUid);
         return ResponseEntity.noContent().build();
     }
 

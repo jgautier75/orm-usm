@@ -15,4 +15,6 @@ public interface ISectorsInfraService {
     Optional<Long> existsByCode(String code);
 
     int updateSector(Long tenantId, Long orgId, Sector sector);
+
+    int deleteSector(Long tenantId, Long organizationId, Long sectorId);
 }
