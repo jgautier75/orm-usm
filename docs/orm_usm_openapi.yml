@@ -1230,7 +1230,7 @@ paths:
                 status: "409"
                 message: "Sector code [rennes-wst] already in use"
         '500':
-          description: "Tenants list"
+          description: "Internal Error"
           content:
             application/json:
               schema:
@@ -1245,7 +1245,7 @@ paths:
     get:
       tags:
         - "Sectors"
-      description: "Sectors list"
+      description: "Sectors list with hierarchy"
       parameters:
         - name: uid
           in: path
@@ -1295,6 +1295,145 @@ paths:
                 message: "Organization with uid [0bb555bf-87b2-4c0f-b802-c1c34aa058da] not found"
         '500':
           description: "Technical error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "TECHNICAL"
+                code: "INTERNAL_SERVER_ERROR"
+                status: "500"
+                message: "ERROR: duplicate key value violates unique constraint ...."
+                debugMessage: "org.springframework.dao.DuplicateKeyException: PreparedStatementCallback; SQL [insert into ..."
+                errorUid: "0bb555bf-87b2-4c0f-b802-c1c34aa058da"
+  /api/v1/tenants/{uid}/organizations/{orgUid}/sectors/{sectorUid}:
+    post:
+      description: "Update sector"
+      tags:
+        - "Sectors"
+      parameters:
+        - name: uid
+          in: path
+          description: "Tenant's unique identifier"
+          required: true
+          schema:
+            type: string
+        - name: orgUid
+          in: path
+          description: "Organization's unique identifier"
+          required: true
+          schema:
+            type: string
+        - name: sectorUid
+          in: path
+          description: "Sector's unique identifier"
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Sector"
+            example:
+              - code: "rennes-wst"
+                label: "Rennes west"
+                parentUid: "0bb555bf-87b2-4c0f-b802-c1c34aa058da"
+      responses:
+        '204':
+          description: "Update success"
+        '400':
+          description: "Bad request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "BAD_REQUEST"
+                status: "400"
+                message: "ArgumentNotValid"
+                details:
+                  - code: "NOT_NULL"
+                    field: "code"
+                    message: "Field [code] is required"
+                  - code: "LENGTH"
+                    field: "label"
+                    message: "Invalid field [label] size, expected [1-80]"  
+        '404':
+          description: "Sector not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "SECTOR_NOT_FOUND"
+                status: "404"
+                message: "Sector with uid [0bb555bf-87b2-4c0f-b802-c1c34aa058da] not found"
+        '500':
+          description: "Internal Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "TECHNICAL"
+                code: "INTERNAL_SERVER_ERROR"
+                status: "500"
+                message: "ERROR: duplicate key value violates unique constraint ...."
+                debugMessage: "org.springframework.dao.DuplicateKeyException: PreparedStatementCallback; SQL [insert into ..."
+                errorUid: "0bb555bf-87b2-4c0f-b802-c1c34aa058da"
+    delete:
+      description: "Delete sector"
+      tags:
+        - "Sectors"
+      parameters:
+        - name: uid
+          in: path
+          description: "Tenant's unique identifier"
+          required: true
+          schema:
+            type: string
+        - name: orgUid
+          in: path
+          description: "Organization's unique identifier"
+          required: true
+          schema:
+            type: string
+        - name: sectorUid
+          in: path
+          description: "Sector's unique identifier"
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: "Delete success"
+        '404':
+          description: "Sector not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "SECTOR_NOT_FOUND"
+                status: "404"
+                message: "Sector with uid [0bb555bf-87b2-4c0f-b802-c1c34aa058da] not found"
+        '409':
+          description: "Functional error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+              example:
+                kind: "FUNCTIONAL"
+                code: "SECTOR_ROOT_DELETE_NOT_ALLOWED"
+                status: "409"
+                message: "Root sector cannot be deleted"
+        '500':
+          description: "Internal Error"
           content:
             application/json:
               schema:
