@@ -67,7 +67,7 @@
                   <buildArgs>
                     <arg>-H:+UnlockExperimentalVMOptions</arg>
                     <arg>-H:IncludeResources=.*properties$</arg>
-                    <arg>-H:ReflectionConfigurationFiles=../spring-native/reflect-config.json</arg>
+                    <arg>-H:ReflectionConfigurationFiles=./spring-native/reflect-config.json</arg>
                   </buildArgs>
                 </configuration>
                 <phase>package</phase>
