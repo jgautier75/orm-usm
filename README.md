@@ -106,6 +106,17 @@ docker run -it --env P_PGHOST=192.168.1.15 --env P_PGPORT=5432 --env P_PGUSER=po
     - kind: Organization's code (Enumeration: TENANT,BU,COMMUNITY,ENTERPRISE)
     - country: Country code (ISO 3166-1 Alpha2)
     - status: status (Enumeration: DRAFT, ACTIVE, INACTIVE)
+- **Sector**:
+  - A sector is a logical sub-division of an organization.
+  - An organization always have a root sector.
+  - A root sector cannot be deleted.
+  - Properties:
+    - id: internal identifier
+    - uid: external identifier (UUID)
+    - code: functional code (unique)
+    - label: sector's label
+    - parentId: Parent sector internal identifier
+    - root: boolean, is current sector the root sector
 - **User**:
   - A user belongs to an organization and thus to a tenant
   - Properties:
