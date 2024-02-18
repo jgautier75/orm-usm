@@ -181,6 +181,10 @@ Listener "eventAuditChannel" responsibilities are:
 
 ![](docs/images/AuditEventListener.drawio.png)
 
+Message in kafka topic:
+
+![](docs/images/akhq_kafka_msg.png)
+
 ## Protobuf
 
 Messages formats sent to kafka are likely to change across time (new fields, refactoring, ...). Furthermore, you cannot expect all consumers to migrate to the new version at the same time. As a consequence, messages versioning must be handled.
@@ -226,6 +230,10 @@ Response:
 ```
 
 Obviously the schema above is the content of the .proto file define earlier in this document.
+
+If schema registry is configured in AKHQ, messages can be decoded into a human readable format:
+
+![](docs/images/akhq_protobuf.png)
 
 In this spring-boot prototype, spring send automatically schemas to registry.
 
