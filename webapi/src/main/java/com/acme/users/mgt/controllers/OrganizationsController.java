@@ -66,7 +66,7 @@ public class OrganizationsController {
     @GetMapping(value = OrganizationsResourceVersion.WITH_UID)
     public ResponseEntity<OrganizationDto> findOrgDetails(@PathVariable("tenantUid") String tenantUid,
             @PathVariable("orgUid") String orgUid,
-            @RequestParam(name = "fetchSectors", defaultValue = "false") boolean fecthSectors)
+            @RequestParam(name = "fetchSectors", defaultValue = "true") boolean fecthSectors)
             throws FunctionalException {
         OrganizationDto orgDto = organizationPortService.findOrganizationByUid(tenantUid, orgUid, fecthSectors);
         return new ResponseEntity<>(orgDto, HttpStatus.OK);
