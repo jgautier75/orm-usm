@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17.0.9_9-jdk-alpine AS customjre
+FROM eclipse-temurin:21.0.2_13-jdk-alpine AS customjre
 ARG JAR_FILE
 
 WORKDIR /app
@@ -6,7 +6,7 @@ RUN apk add --no-cache unzip
 COPY ${JAR_FILE} app.jar
 RUN jlink --compress=2 --no-header-files --no-man-pages --add-modules java.base,java.desktop,java.instrument,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.security.sasl,java.sql.rowset,jdk.compiler,jdk.jfr,jdk.management,jdk.unsupported,jdk.crypto.ec  --output /app/customjre
 
-FROM alpine:3.18.4
+FROM alpine:3.19.1
 EXPOSE 8080/tcp
 RUN mkdir -p /app/ && \    
     apk add --no-cache curl jq
