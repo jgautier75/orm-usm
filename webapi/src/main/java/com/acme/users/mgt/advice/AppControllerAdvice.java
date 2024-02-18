@@ -117,7 +117,8 @@ public class AppControllerAdvice {
                 || FunctionalErrorsTypes.ORG_CODE_ALREADY_USED.name().equals(exception.getCode())
                 || FunctionalErrorsTypes.SECTOR_CODE_ALREADY_USED.name().equals(exception.getCode())
                 || FunctionalErrorsTypes.USER_EMAIL_ALREADY_USED.name().equals(exception.getCode())
-                || FunctionalErrorsTypes.USER_LOGIN_ALREADY_USED.name().equals(exception.getCode());
+                || FunctionalErrorsTypes.USER_LOGIN_ALREADY_USED.name().equals(exception.getCode())
+                || FunctionalErrorsTypes.SECTOR_ROOT_DELETE_NOT_ALLOWED.name().equals(exception.getCode());
     }
 
     private boolean isNotFound(FunctionalException exception) {

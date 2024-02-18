@@ -76,7 +76,7 @@ public class LogHttpUtils {
         if (CachedHttpServletRequest.class.isAssignableFrom(httpServletRequest.getClass())) {
             return dumpCachedHttpRequest((CachedHttpServletRequest) httpServletRequest);
         } else {
-            return dumpHttpRequest(httpServletRequest);
+            return dumpHttpReqRaw(httpServletRequest);
         }
     }
 
