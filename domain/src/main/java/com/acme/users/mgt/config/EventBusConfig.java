@@ -20,7 +20,7 @@ public class EventBusConfig {
 
     @Bean
     public PublishSubscribeChannel eventAuditChannel() {
-        ExecutorService executorService = new ThreadPoolExecutor(1, 1, 1000,TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+        ExecutorService executorService = new ThreadPoolExecutor(1, 1, 1000,TimeUnit.SECONDS, new LinkedBlockingQueue<>());
         PublishSubscribeChannel exportChannel = new PublishSubscribeChannel(executorService);
         exportChannel.setErrorHandler(errorHandler);
         return exportChannel;

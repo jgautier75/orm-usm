@@ -17,10 +17,9 @@ import org.springframework.kafka.core.ProducerFactory;
 
 import com.acme.users.mgt.events.protobuf.Event.AuditEventMessage;
 
+import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig;
 import io.confluent.kafka.serializers.protobuf.KafkaProtobufDeserializer;
-import io.confluent.kafka.serializers.protobuf.KafkaProtobufDeserializerConfig;
 import io.confluent.kafka.serializers.protobuf.KafkaProtobufSerializer;
-import io.confluent.kafka.serializers.protobuf.KafkaProtobufSerializerConfig;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -48,7 +47,7 @@ public class KafkaConfig {
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaProtobufSerializer.class);
         props.put(ProducerConfig.BATCH_SIZE_CONFIG, 1);
         props.put(ProducerConfig.LINGER_MS_CONFIG, 1);
-        props.put(KafkaProtobufSerializerConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistry);
+        props.put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistry);
         return props;
     }
 
@@ -61,7 +60,7 @@ public class KafkaConfig {
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaProtobufDeserializer.class);
-        props.put(KafkaProtobufDeserializerConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistry);
+        props.put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistry);
         return props;
     }
 
