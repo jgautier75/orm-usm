@@ -55,8 +55,9 @@ public class EventBusHandler implements MessageHandler, InitializingBean {
                 } else {
                     for (AuditEvent auditEvent : auditEvents) {
                         AuditEventMessage auditEventMessage = protobufConversion(auditEvent);
+                        String msgKey = auditEvent.getObjectUid() + "-" + auditEvent.getUid();
                         ProducerRecord<String, AuditEventMessage> producerRecord = new ProducerRecord<>(
-                                kafkaConfig.getTopicNameAuditEvents(), auditEventMessage);
+                                kafkaConfig.getTopicNameAuditEvents(), msgKey, auditEventMessage);
                         kakaTemplateAudit.send(producerRecord);
                     }
                     List<String> uids = auditEvents.stream().map(AuditEvent::getUid).distinct()
