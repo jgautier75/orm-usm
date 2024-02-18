@@ -178,9 +178,10 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
                 List<AuditChange> auditChanges = eventBuilderOrganization.buildAuditsChange(org.getCommons(),
                                 organization.getCommons());
                 boolean anythingChanged = !auditChanges.isEmpty();
+                int nbUpdated = 0;
 
                 if (anythingChanged) {
-                        Integer nbUpdated = organizationsInfraService.updateOrganization(tenant.getId(),
+                        nbUpdated = organizationsInfraService.updateOrganization(tenant.getId(),
                                         organization.getId(),
                                         organization.getCommons().getCode(),
                                         organization.getCommons().getLabel(), organization.getCommons().getCountry(),
@@ -205,10 +206,9 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
                         }
                         eventsInfraService.createEvent(orgUpdateAuditEvent);
                         eventAuditChannel.send(MessageBuilder.withPayload(KafkaConfig.AUDIT_WAKE_UP).build());
-                        return nbUpdated;
-                } else {
-                        return 0;
+
                 }
+                return nbUpdated;
         }
 
         @Override
