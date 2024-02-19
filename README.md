@@ -353,7 +353,7 @@ To build a native image run the following command to build all maven modules:
 mvn clean package -DskipTests
 ```
 
-Then move to webapi directory and run:
+To build a native image run the following command:
 
 ```sh
 mvn clean package -DskipTests -Pnative
