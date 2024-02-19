@@ -396,11 +396,11 @@ Plugin configuration example in webapi/pom.xml file
 
 **TIPS**
 
-Since AOT(**A**head **O**f **T**ime) is a kind of static compilation, reflection mechanisms cannot be handled the same way than JIT (**Just** **In** **T**ime) which occurs at runtime.
+AOT(**A**head **O**f **T**ime) is a static compilation and thus reflection mechanisms cannot be handled the same way than JIT (**Just** **In** **T**ime).
 
-Thus, to use reflection like jackson when serializing / deserializing from/to json, description of fields and methods of DTOs (**Data** **T**ransfer **Object**) might be required.
+For example, to use reflection like jackson when serializing / deserializing from/to json, description of fields and methods of DTOs (**Data** **T**ransfer **Object**) might be required.
 
-To achieve this, a reflect-config file must be designed to indicate how to seriaize / deserialize from a DTO / JSON.
+To achieve this, a reflect-config file must be designed to indicate how to serialize / deserialize from a DTO / JSON.
 
 See https://www.graalvm.org/latest/reference-manual/native-image/dynamic-features/Reflection/
 
@@ -409,6 +409,14 @@ In this project, spring-native/reflect-config.json file describes classes like:
 - AuditEvent: These objects are serialized in json before being persisted in rdbms
 - AuditScope: A nested object of AuditEvent
 - ApiError: Standard POJO returned as json when an error occurs in REST controllers
+
+**2024-02-19** Update:
+
+Integrating kafka with protobuf is not an easy thing.
+
+Indeed, the problem with kafka & protobuf in a native image is that compilation succeeds but fails at runtime.
+
+Thus, the reflect-config.json file grew up to more than 500 lines with kafka & protobuf integration.
 
 **Youtube Spring I/O**:
 
