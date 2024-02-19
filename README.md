@@ -418,6 +418,8 @@ Indeed, the problem with kafka & protobuf in a native image is that compilation 
 
 Thus, the reflect-config.json file grew up to more than 500 lines with kafka & protobuf integration.
 
+https://docs.spring.io/spring-boot/docs/current/reference/html/native-image.html
+
 **Youtube Spring I/O**:
 
 - https://www.youtube.com/watch?v=8umoZWj6UcU
