@@ -14,7 +14,7 @@ public class EventBusErrorHandler implements ErrorHandler {
 
     @Override
     public void handleError(Throwable t) {
-        logService.errorS(this.getClass().getName(), t.getMessage(), null);
+        logService.error(this.getClass().getName(), t);
     }
 
 }

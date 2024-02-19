@@ -6,105 +6,109 @@ package com.acme.users.mgt.logging.services.api;
 public interface ILogService {
 
     /**
-     * Trace en mode info.
+     * Log level INFO.
      *
-     * @param callerName    Appelant
+     * @param callerName    Caller
      * @param bundleMessage Message
      * @param params        Param&egrave;tres
      */
     void infoB(String callerName, String bundleMessage, Object[] params);
 
     /**
-     * Trace en mode info avec formatage du message (expressions de type
-     * String.format(%s,xxx)).
+     * Log level INFO with parameters substitutions (String.format(%s,xxx)).
      *
-     * @param callerName Appelant
+     * @param callerName Caller
      * @param message    Message
-     * @param params     Param&egrave;tres
+     * @param params     Paramters
      */
     void infoS(String callerName, String message, Object[] params);
 
     /**
-     * Trace en mode debug.
+     * Log level DEBUG using bundle message.
      *
-     * @param callerName    Appelant
-     * @param bundleMessage Message
-     * @param params        Param&egrave;tres
+     * @param callerName    Caller
+     * @param bundleMessage Bundle key
+     * @param params        Parameters
      */
     void debugB(String callerName, String bundleMessage, Object[] params);
 
     /**
-     * Trace en mode debug avec formatage du message (expressions de type
-     * String.format(%s,xxx)).
+     * Log level DEBUG with parameters substitutions (String.format(%s,xxx)).
      *
-     * @param callerName Appelant
+     * @param callerName Caller
      * @param message    Message
-     * @param params     Param&egrave;tres
+     * @param params     Parameters
      */
     void debugS(String callerName, String message, Object[] params);
 
     /**
-     * Trace en mode trace.
+     * Log level TRACE using bundle message.
      *
-     * @param callerName    Appelant
-     * @param bundleMessage Message
-     * @param params        Param&egrave;tres
+     * @param callerName    Caller
+     * @param bundleMessage Bundle key
+     * @param params        Parameters
      */
     void traceB(String callerName, String bundleMessage, Object[] params);
 
     /**
-     * Trace en mode trace avec formatage du message (expressions de type
-     * String.format(%s,xxx)).
+     * Log level TRACE with parameters substitutions (String.format(%s,xxx)).
      *
-     * @param callerName Appelant
+     * @param callerName Caller
      * @param message    Message
-     * @param params     Param&egrave;tres
+     * @param params     Parameteres
      */
     void traceS(String callerName, String message, Object[] params);
 
     /**
-     * Trace en mode warning.
+     * Log level WARNING using bundle key.
      *
-     * @param callerName    Appelant
-     * @param bundleMessage Message
-     * @param params        Param&egrave;tres
+     * @param callerName    Caller
+     * @param bundleMessage Bundle key
+     * @param params        Parameters
      */
     void warnB(String callerName, String bundleMessage, Object[] params);
 
     /**
-     * Trace en mode warning avec formatage du message (expressions de type
-     * String.format(%s,xxx)).
+     * Log level WARNING with parameters substitutions (String.format(%s,xxx)).
      *
-     * @param callerName Appelant
+     * @param callerName Caller
      * @param message    Message
-     * @param params     Param&egrave;tres
+     * @param params     Parameters
      */
     void warnS(String callerName, String message, Object[] params);
 
     /**
-     * Trace en mode erreur.
+     * Log level ERROR simple.
      *
-     * @param callerName Appelant
+     * @param callerName Caller
      * @param e          Exception
      */
     void error(String callerName, Exception e);
 
     /**
-     * Trace en mode erreur.
+     * Log level ERROR with bundle key.
      *
-     * @param callerName    Appelant
-     * @param bundleMessage Message
-     * @param params        Param&egrave;tres
+     * @param callerName    Caller
+     * @param bundleMessage Bundle key
+     * @param params        Parameters
      */
     void errorB(String callerName, String bundleMessage, Object[] params);
 
     /**
-     * Trace en mode erreur (expressions de type String.format(%s,xxx)).
+     * Log level ERROR with parameters substitutions (String.format(%s,xxx)).
      *
-     * @param callerName Appelant
+     * @param callerName Caller
      * @param message    Message
-     * @param params     Param&egrave;tres
+     * @param params     Parameters
      */
     void errorS(String callerName, String message, Object[] params);
+
+    /**
+     * Log level ERROR throwable.
+     * 
+     * @param callerName Caller
+     * @param t          Throwable
+     */
+    void error(String callerName, Throwable t);
 
 }

@@ -213,4 +213,9 @@ public class LogService implements ILogService {
         }
     }
 
+    @Override
+    public void error(String callerName, Throwable t) {
+        LOGGER.error(callerName, t);
+    }
+
 }
