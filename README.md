@@ -17,6 +17,7 @@ Code is organized in a "domain driven" way where:
 
 Standard REST application relying on:
 
+- Java 21 ([Graalvm](https://www.graalvm.org/downloads/) for native images )
 - Sprint boot (3.2.x)
 - PostgreSQL (16.x) for persistence
 - Liquibase for rdbms schema versions management
@@ -24,7 +25,7 @@ Standard REST application relying on:
 - Spring integration for PublishSubscribe channel
 - OpenTelemetry + Jaeger
 - Kafka stack (Kafka + Zookeeper + Schema registry + AKHQ)
-- Testcontainers and Mockito for unit testing
+- Junit/Mockito/Testcontainers for testing
 
 ## Docker
 
