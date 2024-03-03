@@ -41,11 +41,13 @@ services:
     volumes:
       - zookeeper-data:/var/lib/zookeeper/data:Z
       - zookeeper-log:/var/lib/zookeeper/log:Z
+      - ./jmx-exporter:/usr/share/jmx_exporter/
     environment:
       ZOOKEEPER_CLIENT_PORT: "2181"
       ZOOKEEPER_ADMIN_ENABLE_SERVER: "false"
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_SERVERS: zookeeper:2888:3888
+      EXTRA_ARGS: -javaagent:/usr/share/jmx_exporter/jmx_prometheus_javaagent-0.20.0.jar=1234:/usr/share/jmx_exporter/zookeeper.yml
   kafka:
     image: confluentinc/cp-kafka:7.4.3
     restart: unless-stopped
@@ -55,6 +57,7 @@ services:
       - "9999:9999"
     volumes:
       - kafka-data:/var/lib/kafka/data:Z
+      - ./jmx-exporter:/usr/share/jmx_exporter/
     environment:
       KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:19092,EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9092,DOCKER://host.docker.internal:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,DOCKER:PLAINTEXT
@@ -69,6 +72,7 @@ services:
       KAFKA_JMX_HOSTNAME: ${DOCKER_HOST_IP:-127.0.0.1}
       KAFKA_AUTHORIZER_CLASS_NAME: kafka.security.authorizer.AclAuthorizer
       KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "true"
+      KAFKA_OPTS: -javaagent:/usr/share/jmx_exporter/jmx_prometheus_javaagent-0.20.0.jar=1234:/usr/share/jmx_exporter/kafka-broker.yml
     links:
       - zookeeper
   schema-registry:
@@ -126,4 +130,6 @@ volumes:
   zookeeper-log:
     driver: local
   kafka-data:
+    driver: local
+  jmx-exporter:
     driver: local

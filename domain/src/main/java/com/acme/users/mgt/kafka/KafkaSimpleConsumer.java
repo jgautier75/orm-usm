@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 public class KafkaSimpleConsumer {
     private final ILogService logService;
 
-    @KafkaListener(topics = "${app.kafka.producer.topicNameAuditEvents}", groupId = "${app.kafka.consumer.auditEventsGroupId}")
+    @KafkaListener(topics = "${app.kafka.producer.topicNameAuditEvents}", groupId = "${app.kafka.consumer.auditEventsGroupId}", id = "audit-events-listener")
     public void consume(ConsumerRecord<String, DynamicMessage> messageRecord) throws InvalidProtocolBufferException {
 
         AuditEventMessage auditEventMessage = AuditEventMessage.newBuilder().build().getParserForType()
