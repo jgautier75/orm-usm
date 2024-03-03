@@ -50,13 +50,19 @@ public class LogHttpFilter extends OncePerRequestFilter {
      * @return Boolean flag
      */
     private boolean activateDebugging(HttpServletRequest request) {
+        String reqUri = request.getRequestURI();
+
         boolean activateDebugMode = false;
-        if (appConfig.isForceDebugMode()) {
-            activateDebugMode = true;
-        } else {
-            if (!ObjectUtils.isEmpty(appConfig.getHeaderName()) && !ObjectUtils.isEmpty(appConfig.getDebugValue())) {
-                String headerValue = request.getHeader(appConfig.getHeaderName());
-                activateDebugMode = !ObjectUtils.isEmpty(headerValue) && appConfig.getDebugValue().equals(headerValue);
+        if (!reqUri.contains("actuator")) {
+            if (appConfig.isForceDebugMode()) {
+                activateDebugMode = true;
+            } else {
+                if (!ObjectUtils.isEmpty(appConfig.getHeaderName())
+                        && !ObjectUtils.isEmpty(appConfig.getDebugValue())) {
+                    String headerValue = request.getHeader(appConfig.getHeaderName());
+                    activateDebugMode = !ObjectUtils.isEmpty(headerValue)
+                            && appConfig.getDebugValue().equals(headerValue);
+                }
             }
         }
         return activateDebugMode;

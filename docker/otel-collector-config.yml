@@ -17,6 +17,8 @@ exporters:
     verbosity: detailed
     sampling_initial: 5
     sampling_thereafter: 200
+  prometheus:
+    endpoint: "0.0.0.0:8889"
 
 processors:
   batch:
@@ -38,4 +40,4 @@ service:
     metrics:
       receivers: [otlp,otlp/2]
       processors: [batch]
-      exporters: [logging]
+      exporters: [logging,prometheus]

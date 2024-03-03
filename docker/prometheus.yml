@@ -12,6 +12,11 @@ scrape_configs:
   - job_name: prometheus
     static_configs:
       - targets: ["localhost:9090"]
+  - job_name: orm_usm
+    scrape_interval: 5s
+    metrics_path: '/orm-usm/actuator/prometheus'
+    static_configs:
+      - targets: ["192.168.1.15:8080"]
   #- job_name: node
   #  static_configs:
   #    - targets: ["node-exporter:8889"]
