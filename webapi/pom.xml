@@ -10,7 +10,7 @@
   <artifactId>webapi</artifactId>
 
   <properties>
-    <spring-boot-plugin-version>3.2.1</spring-boot-plugin-version>
+    <spring-boot-plugin-version>3.2.3</spring-boot-plugin-version>
   </properties>
 
   <build>
