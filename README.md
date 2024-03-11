@@ -348,13 +348,8 @@ docker build . -t orm-usm-webapi:1.0.0 --build-arg="JAR_FILE=target/webapi-1.0.0
 
 Prerequisite: Graalvm installed https://www.graalvm.org/downloads/
 
-To build a native image run the following command to build all maven modules:
 
-```sh
-mvn clean package -DskipTests
-```
-
-To build a native image run the following command:
+To build a native image run the following command with "native" profile:
 
 ```sh
 mvn clean package -DskipTests -Pnative
