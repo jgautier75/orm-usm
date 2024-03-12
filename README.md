@@ -528,6 +528,12 @@ exporters:
     endpoint: http://jaeger:4317
     tls:
       insecure: true
+  logging:
+    verbosity: detailed
+    sampling_initial: 5
+    sampling_thereafter: 200
+  prometheus:
+    endpoint: "0.0.0.0:8889"
 
 processors:
   batch:
@@ -537,11 +543,19 @@ extensions:
 
 service:
   extensions: [health_check]
-  pipelines:
+  pipelines:    
     traces:
       receivers: [otlp,otlp/2]
       processors: [batch]
       exporters: [otlp/jaeger]
+    logs:
+      receivers: [otlp,otlp/2]
+      processors: [batch]
+      exporters: [logging]
+    metrics:
+      receivers: [otlp,otlp/2]
+      processors: [batch]
+      exporters: [logging,prometheus]
 ```
 
 No additional dependency required in maven project.
