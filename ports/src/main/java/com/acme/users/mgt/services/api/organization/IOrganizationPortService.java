@@ -14,10 +14,11 @@ public interface IOrganizationPortService {
      * 
      * @param tenantUid       Tenant uid
      * @param organizationDto Organization payload
+     * @param parentSpan Parent span
      * @return Generated uid
      * @throws FunctionalException Functional error
      */
-    UidDto createOrganization(String tenantUid, OrganizationDto organizationDto) throws FunctionalException;
+    UidDto createOrganization(String tenantUid, OrganizationDto organizationDto, Span parentSpan) throws FunctionalException;
 
     /**
      * Find all organizations in a tenant.

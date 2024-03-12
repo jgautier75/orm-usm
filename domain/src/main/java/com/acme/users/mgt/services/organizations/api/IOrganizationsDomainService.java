@@ -15,10 +15,11 @@ public interface IOrganizationsDomainService {
      * 
      * @param tenantUid    Tenant external id
      * @param organization Organization
+     * @param parentSpan Parent Span
      * @return Composite id
      * @throws FunctionalException Functional error
      */
-    CompositeId createOrganization(String tenantUid, Organization organization) throws FunctionalException;
+    CompositeId createOrganization(String tenantUid, Organization organization, Span parentSpan) throws FunctionalException;
 
     /**
      * List organizations.

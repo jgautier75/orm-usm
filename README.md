@@ -571,4 +571,10 @@ otel.javaagent 2024-01-17 22:36:06:457 +0100] [http-nio-8080-exec-1] INFO io.ope
 
 Organization creation in Jaeger UI:
 
+With instrumentation using java agent
+
 ![](docs/images/otel_create_orga.png)
+
+With programmatic spans:
+
+![](docs/images/opentelemetry_org_create.png)

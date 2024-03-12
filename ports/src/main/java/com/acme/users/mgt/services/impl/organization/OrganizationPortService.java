@@ -2,8 +2,11 @@ package com.acme.users.mgt.services.impl.organization;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
 import com.acme.jga.users.mgt.domain.organizations.v1.Organization;
 import com.acme.jga.users.mgt.dto.ids.CompositeId;
 import com.acme.jga.users.mgt.dto.tenant.Tenant;
@@ -23,8 +26,8 @@ import com.acme.users.mgt.validation.organizations.OrganizationsValidationEngine
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.api.trace.TracerProvider;
 import io.opentelemetry.context.Context;
-import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -35,13 +38,18 @@ public class OrganizationPortService implements IOrganizationPortService {
     private final IOrganizationsDomainService organizationDomainService;
     private final OrganizationsPortConverter organizationsConverter;
     private final OrganizationsValidationEngine organizationsValidationEngine;
-    private final SdkTracerProvider sdkTracerProvider;
+    @Autowired
+    private TracerProvider sdkTracerProvider;
+
+     public void setSdkTracerProvider(TracerProvider sdkTracerProvider) {
+        this.sdkTracerProvider = sdkTracerProvider;
+     }  
 
     /**
      * @inheritDoc
      */
     @Override
-    public UidDto createOrganization(String tenantUid, OrganizationDto organizationDto) throws FunctionalException {
+    public UidDto createOrganization(String tenantUid, OrganizationDto organizationDto, Span parentSpan) throws FunctionalException {
 
         // Validate payload
         ValidationResult validationResult = organizationsValidationEngine.validate(organizationDto);
@@ -53,7 +61,8 @@ public class OrganizationPortService implements IOrganizationPortService {
         Organization org = organizationsConverter.convertOrganizationDtoToDomain(organizationDto);
 
         // Create organization
-        CompositeId compositeId = organizationDomainService.createOrganization(tenantUid, org);
+       
+        CompositeId compositeId = organizationDomainService.createOrganization(tenantUid, org, parentSpan);
         return new UidDto(compositeId.getUid());
     }
 

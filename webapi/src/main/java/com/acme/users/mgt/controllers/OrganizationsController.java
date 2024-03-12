@@ -18,12 +18,9 @@ import com.acme.users.mgt.services.api.organization.IOrganizationPortService;
 import com.acme.users.mgt.versioning.WebApiVersions;
 import com.acme.users.mgt.versioning.WebApiVersions.OrganizationsResourceVersion;
 
-import io.opentelemetry.api.logs.Logger;
-import io.opentelemetry.api.logs.Severity;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.sdk.logs.SdkLoggerProvider;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import lombok.RequiredArgsConstructor;
 
@@ -33,12 +30,23 @@ public class OrganizationsController {
     private static final String INSTRUMENTATION_NAME = OrganizationsController.class.getCanonicalName();
     private final IOrganizationPortService organizationPortService;
     private final SdkTracerProvider sdkTracerProvider;
-    private final SdkLoggerProvider sdkLoggerProvider;
 
     @PostMapping(value = OrganizationsResourceVersion.ROOT)
     public ResponseEntity<UidDto> createOrganization(@PathVariable("tenantUid") String tenantUid,
             @RequestBody OrganizationDto organizationDto) throws FunctionalException {
-        UidDto uidDto = organizationPortService.createOrganization(tenantUid, organizationDto);
+        Tracer tracer = sdkTracerProvider.get(INSTRUMENTATION_NAME, WebApiVersions.V1);
+        Span span = tracer.spanBuilder("ORGS-CREATE").startSpan();
+        UidDto uidDto = null;
+        try {
+            uidDto = organizationPortService.createOrganization(tenantUid, organizationDto,span);
+        } catch (Exception t) {
+            span.setStatus(StatusCode.ERROR);
+            span.recordException(t);
+            throw t;
+        } finally {
+            span.end();
+        }
+
         return new ResponseEntity<>(uidDto, HttpStatus.CREATED);
     }
 
@@ -46,11 +54,9 @@ public class OrganizationsController {
     public ResponseEntity<OrganizationListLightDto> findOrgsByTenant(@PathVariable("tenantUid") String tenantUid)
             throws FunctionalException {
         Tracer tracer = sdkTracerProvider.get(INSTRUMENTATION_NAME, WebApiVersions.V1);
-        Logger otelLogger =  sdkLoggerProvider.get("ORGS-LIST-LOGS");
         Span span = tracer.spanBuilder("ORGS-LIST").startSpan();
         OrganizationListLightDto lightList = null;
         try {
-            otelLogger.logRecordBuilder().setSeverity(Severity.INFO).setBody("List organizations logs via opentelemetry").emit();
             lightList = organizationPortService.findAllOrgsLightByTenant(tenantUid, span);
         } catch (Exception t) {
             span.setStatus(StatusCode.ERROR);

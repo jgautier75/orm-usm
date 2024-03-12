@@ -68,7 +68,7 @@ class OrganizationsControllerTest {
                 String orgJson = objectMapper.writeValueAsString(organizationDto);
 
                 // WHEN
-                Mockito.when(organizationPortService.createOrganization(Mockito.any(), Mockito.any()))
+                Mockito.when(organizationPortService.createOrganization(Mockito.any(), Mockito.any(), Mockito.any()))
                                 .thenReturn(uidDto);
                 // THEN
                 mockMvc.perform(post("/api/v1/tenants/" + TENANT_UID + "/organizations")

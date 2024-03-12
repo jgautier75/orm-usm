@@ -3,6 +3,7 @@ package com.acme.users.mgt.services.organizations.impl;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.integration.channel.PublishSubscribeChannel;
@@ -36,8 +37,8 @@ import com.acme.users.mgt.services.tenants.api.ITenantDomainService;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.api.trace.TracerProvider;
 import io.opentelemetry.context.Context;
-import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -51,17 +52,48 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
         private final ISectorsInfraService sectorsInfraService;
         private final IEventsInfraService eventsInfraService;
         private final PublishSubscribeChannel eventAuditChannel;
-        private final SdkTracerProvider sdkTracerProvider;
+        @Autowired
+        private TracerProvider sdkTracerProvider;      
         private final EventBuilderOrganization eventBuilderOrganization;
+
+        public void setSdkTracerProvider(TracerProvider sdkTracerProvider) {
+                this.sdkTracerProvider = sdkTracerProvider;
+        }        
 
         @Transactional
         @Override
-        public CompositeId createOrganization(String tenantUid, Organization organization) throws FunctionalException {
+        public CompositeId createOrganization(String tenantUid, Organization organization, Span parentSpan)
+                        throws FunctionalException {
                 // Find tenant
-                Tenant tenant = tenantDomainService.findTenantByUid(tenantUid);
+                Tracer tracer = sdkTracerProvider.get(INSTRUMENTATION_NAME);
+                Span tenantSpan = tracer.spanBuilder("DOMAIN_FIND_TENANT")
+                                .setParent(Context.current().with(parentSpan))
+                                .startSpan();
+                Tenant tenant = null;
+                try {
+                        tenant = tenantDomainService.findTenantByUid(tenantUid);
+                } catch (Exception e) {
+                        tenantSpan.setStatus(StatusCode.ERROR);
+                        tenantSpan.recordException(e);
+                        throw e;
+                } finally {
+                        tenantSpan.end();
+                }
 
-                Optional<Long> orgCodeUsed = organizationsInfraService
-                                .codeAlreadyUsed(organization.getCommons().getCode());
+                Span codeSpan = tracer.spanBuilder("DOMAIN_ORG_CODE_EXISTS")
+                                .setParent(Context.current().with(tenantSpan))
+                                .startSpan();
+                Optional<Long> orgCodeUsed = Optional.empty();
+                try {
+                        orgCodeUsed = organizationsInfraService
+                                        .codeAlreadyUsed(organization.getCommons().getCode());
+                } catch (Exception e) {
+                        codeSpan.setStatus(StatusCode.ERROR);
+                        codeSpan.recordException(e);
+                        throw e;
+                } finally {
+                        codeSpan.end();
+                }
                 if (orgCodeUsed.isPresent()) {
                         throw new FunctionalException(FunctionalErrorsTypes.ORG_CODE_ALREADY_USED.name(), null,
                                         messageSource.getMessage("org_code_already_used",
@@ -70,7 +102,19 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
                 }
 
                 organization.setTenantId(tenant.getId());
-                CompositeId orgCompositeId = organizationsInfraService.createOrganization(organization);
+
+                Span infraSpan = tracer.spanBuilder("DOMAIN_INFRA_CREATE").setParent(Context.current().with(codeSpan))
+                                .startSpan();
+                CompositeId orgCompositeId = null;
+                try {
+                        orgCompositeId = organizationsInfraService.createOrganization(organization);
+                } catch (Exception e) {
+                        infraSpan.setStatus(StatusCode.ERROR);
+                        infraSpan.recordException(e);
+                        throw e;
+                } finally {
+                        infraSpan.end();
+                }
 
                 // Create organization audit event
                 AuditEvent orgAuditEvent = AuditEvent.builder()
@@ -86,7 +130,18 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
                                 .createdAt(DateTimeUtils.nowIso())
                                 .lastUpdatedAt(DateTimeUtils.nowIso())
                                 .build();
-                eventsInfraService.createEvent(orgAuditEvent);
+                Span orgEventSpan = tracer.spanBuilder("DOMAIN_ORG_EVENT")
+                                .setParent(Context.current().with(infraSpan))
+                                .startSpan();
+                try {
+                        eventsInfraService.createEvent(orgAuditEvent);
+                } catch (Exception e) {
+                        orgEventSpan.setStatus(StatusCode.ERROR);
+                        orgEventSpan.recordException(e);
+                        throw e;
+                } finally {
+                        orgEventSpan.end();
+                }
 
                 // Create root sector
                 Sector sector = Sector.builder()
@@ -96,8 +151,20 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
                                 .root(true)
                                 .tenantId(tenant.getId())
                                 .build();
-                CompositeId sectorCompositeId = sectorsInfraService.createSector(tenant.getId(), orgCompositeId.getId(),
-                                sector);
+                CompositeId sectorCompositeId = null;
+
+                Span sectorSpan = tracer.spanBuilder("DOMAIN_SECTOR").setParent(Context.current().with(orgEventSpan))
+                                .startSpan();
+                try {
+                        sectorCompositeId = sectorsInfraService.createSector(tenant.getId(), orgCompositeId.getId(),
+                                        sector);
+                } catch (Exception e) {
+                        sectorSpan.setStatus(StatusCode.ERROR);
+                        sectorSpan.recordException(e);
+                        throw e;
+                } finally {
+                        sectorSpan.end();
+                }
 
                 // Create sector audit event
                 AuditEvent sectorAuditEvent = AuditEvent.builder()
@@ -113,9 +180,33 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
                                 .createdAt(DateTimeUtils.nowIso())
                                 .lastUpdatedAt(DateTimeUtils.nowIso())
                                 .build();
-                eventsInfraService.createEvent(sectorAuditEvent);
 
-                eventAuditChannel.send(MessageBuilder.withPayload(KafkaConfig.AUDIT_WAKE_UP).build());
+                Span sectorEventSpan = tracer.spanBuilder("DOMAIN_SECTOR_EVENT")
+                                .setParent(Context.current().with(sectorSpan))
+                                .startSpan();
+                try {
+                        eventsInfraService.createEvent(sectorAuditEvent);
+                } catch (Exception e) {
+                        sectorEventSpan.setStatus(StatusCode.ERROR);
+                        sectorEventSpan.recordException(e);
+                        throw e;
+                } finally {
+                        sectorEventSpan.end();
+
+                }
+
+                Span eventPubSpan = tracer.spanBuilder("DOMAIN_EVENT_PUBLISH")
+                                .setParent(Context.current().with(sectorEventSpan))
+                                .startSpan();
+                try {
+                        eventAuditChannel.send(MessageBuilder.withPayload(KafkaConfig.AUDIT_WAKE_UP).build());
+                } catch (Exception e) {
+                        eventPubSpan.setStatus(StatusCode.ERROR);
+                        eventPubSpan.recordException(e);
+                        throw e;
+                } finally {
+                        eventPubSpan.end();
+                }
 
                 return orgCompositeId;
         }
