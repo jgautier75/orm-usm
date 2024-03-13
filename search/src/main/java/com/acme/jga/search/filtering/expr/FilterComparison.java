@@ -12,4 +12,12 @@ public class FilterComparison {
     public static final String EEQUALS = "eq";
     public static final String NOT_EQUALS = "ne";
     public static final String LIKE = "lk";
+    public static final String SQL_EQUALS = "=";
+    public static final String SQL_GREATER_THAN = ">";
+    public static final String SQL_GREATER_OR_EQUALS = ">=";
+    public static final String SQL_LOWER_THAN = "<";
+    public static final String SQL_LOWER_OR_EQUALS = "<=";
+    public static final String SQL_NOT_EQUALS = "!=";
+    public static final String OPERATOR_AND = "and";
+    public static final String OPERATOR_OR = "or";
 }

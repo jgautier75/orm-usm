@@ -30,6 +30,12 @@ public final class DaoConstants {
 	public static final String P_COUNTRY = "pCountry";
 	public static final String P_STATUS = "pStatus";
 	public static final String P_PARENT_ID = "pParentId";
+	public static final String ORDER_BY = " order by ";
+	public static final String ORDER_ASC_SIGN = "+";
+	public static final String ORDER_DESC_SIGN = "-";
+	public static final String ORDER_ASC_KEYWORD = " asc";
+	public static final String ORDER_DESC_KEYWORD = " desc";
+	public static final String PAGINATION_PATTERN =  " limit %s  offset %s";
 
 	public static String generatedUUID() {
 		return UUID.randomUUID().toString();

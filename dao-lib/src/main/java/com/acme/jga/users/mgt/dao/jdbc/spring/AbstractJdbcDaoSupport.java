@@ -11,7 +11,6 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.postgresql.util.PGobject;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
@@ -21,11 +20,11 @@ import org.springframework.util.CollectionUtils;
 import com.acme.jga.search.filtering.expr.Expression;
 import com.acme.jga.search.filtering.expr.FilterComparison;
 import com.acme.jga.search.filtering.utils.ParsingResult;
+import com.acme.jga.users.mgt.dao.jdbc.utils.DaoConstants;
 import com.acme.jga.users.mgt.dto.filtering.FilteringConstants;
 import com.acme.jga.users.mgt.dto.pagination.OrderByClause;
 import com.acme.jga.users.mgt.dto.pagination.Pagination;
 import com.acme.jga.users.mgt.dto.pagination.WhereClause;
-import com.acme.jga.users.mgt.exceptions.FunctionalException;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -237,7 +236,11 @@ public abstract class AbstractJdbcDaoSupport extends JdbcDaoSupport {
 		return jsonObject;
 	}
 
-
+	/**
+	 * Build query based on search params.
+	 * @param searchParams Search params
+	 * @return Composite object with where clause, pagination and order by
+	 */
 	public CompositeQuery buildQuery(Map<String,Object> searchParams){		
 		ParsingResult parsingResult = (ParsingResult) searchParams.get(FilteringConstants.PARSING_RESULTS);
 		StringBuilder sb = new StringBuilder();
@@ -254,7 +257,7 @@ public abstract class AbstractJdbcDaoSupport extends JdbcDaoSupport {
 						sb.append(" ( ");
 						break;
 					case COMPARISON:
-						 sb.append(buildComparison(expression.getValue()));
+						 sb.append(convertComparison(expression.getValue()));
 						break;
 					case CLOSING_PARENTEHSIS:
 						sb.append(" ) ");
@@ -263,7 +266,7 @@ public abstract class AbstractJdbcDaoSupport extends JdbcDaoSupport {
 						sb.append(" not ");
 						break;
 					case OPERATOR:
-						sb.append(buildOperator(expression.getValue()));
+						sb.append(convertOperator(expression.getValue()));
 						break;
 					case PROPERTY:
 						sb.append(stripEnclosingQuotes(expression.getValue()));
@@ -297,18 +300,19 @@ public abstract class AbstractJdbcDaoSupport extends JdbcDaoSupport {
 			pageSize = DEFAULT_PAGE_SIZE;
 		}
 		int start = (pageIndex - 1) * pageSize;
-		String pagination = " limit " + pageSize + " offset " + start;
-		String orderBy = " order by ";
+		String pagination = String.format(DaoConstants.PAGINATION_PATTERN, pageSize,start);
+		String orderBy = "";
 		if (!org.springframework.util.ObjectUtils.isArray(searchParams.get(FilteringConstants.ORDER_BY))){
-			String orderDirection = ((String) searchParams.get(FilteringConstants.ORDER_BY)).substring(0,1);
-			if ("+".equals(orderDirection) || "-".equals(orderDirection)){
+						String orderDirection = ((String) searchParams.get(FilteringConstants.ORDER_BY)).substring(0,1);
+			if (DaoConstants.ORDER_ASC_SIGN.equals(orderDirection) || DaoConstants.ORDER_DESC_SIGN.equals(orderDirection)){
+				orderBy = DaoConstants.ORDER_BY;
 				String orderDir = ((String) searchParams.get(FilteringConstants.ORDER_BY)).substring(0,1);
 				String orderCol = ((String) searchParams.get(FilteringConstants.ORDER_BY)).substring(1);
 				orderBy += orderCol;
-				if ("+".equals(orderDir)){
-					orderBy += " asc";
+				if (DaoConstants.ORDER_ASC_SIGN.equals(orderDir)){
+					orderBy += DaoConstants.ORDER_ASC_KEYWORD;
 				}else if ("-".equals(orderDir)){
-					orderBy += " desc";
+					orderBy += DaoConstants.ORDER_DESC_KEYWORD;
 				}
 			}
 		}
@@ -316,6 +320,11 @@ public abstract class AbstractJdbcDaoSupport extends JdbcDaoSupport {
 		return new CompositeQuery(sb.toString(),params,!isEmpty,pagination,orderBy);
 	}
 
+	/**
+	 * Strip enclosing single quotes.
+	 * @param value Value
+	 * @return Stripped value
+	 */
 	protected String stripEnclosingQuotes(String value){
 		if (value!=null && value.startsWith("'") && value.endsWith("'")){
 			String leftPart = value.substring(1);
@@ -325,35 +334,45 @@ public abstract class AbstractJdbcDaoSupport extends JdbcDaoSupport {
 		}
 	}
 
-	protected String buildOperator(String operator){
-		if (operator!=null && "AND".equalsIgnoreCase(operator)){
-			return " and ";
-		}else if (operator!=null && "OR".equalsIgnoreCase(operator)){
-			return " or ";
+
+	/**
+	 * Convert operator.
+	 * @param operator Operator
+	 * @return Operator
+	 */
+	protected String convertOperator(String operator){
+		if (operator!=null && FilterComparison.OPERATOR_AND.equalsIgnoreCase(operator)){
+			return " "+ FilterComparison.OPERATOR_AND + " ";
+		}else if (operator!=null && FilterComparison.OPERATOR_OR.equalsIgnoreCase(operator)){
+			return " " + FilterComparison.OPERATOR_OR + " ";
 		}else {
-			return "";
+			throw new IllegalArgumentException("Invalid operator ["+ operator +"]");
 		}
 	}
 
-	protected String buildComparison(String comparison){
+	/**
+	 * Convert comparison to SQL.
+	 * @param comparison Comparison
+	 * @return SQL
+	 */
+	protected String convertComparison(String comparison){
 		if (comparison!=null && FilterComparison.EEQUALS.equalsIgnoreCase(comparison)){
-			return "=";
+			return FilterComparison.SQL_EQUALS;
 		}else if (comparison!=null && FilterComparison.GREATER_OR_EQUALS.equalsIgnoreCase(comparison)){
-			return ">=";
+			return FilterComparison.SQL_GREATER_OR_EQUALS;
 		}else if (comparison!=null && FilterComparison.GREATER_THAN.equalsIgnoreCase(comparison)){
-			return ">";
+			return FilterComparison.SQL_GREATER_THAN;
 		}else if (comparison!=null && FilterComparison.LIKE.equalsIgnoreCase(comparison)){
 			return "like";
 		}else if (comparison!=null && FilterComparison.LOWER_OR_EQUALS.equalsIgnoreCase(comparison)){
-			return "<=";
+			return FilterComparison.SQL_LOWER_OR_EQUALS;
 		}else if (comparison!=null && FilterComparison.LOWER_THAN.equalsIgnoreCase(comparison)){
-			return "<";
+			return FilterComparison.SQL_LOWER_THAN;
 		}else if (comparison!=null && FilterComparison.NOT_EQUALS.equalsIgnoreCase(comparison)){
-			return "!=";
+			return FilterComparison.SQL_NOT_EQUALS;
 		}else {
-			return "";
+			throw new IllegalArgumentException("Invalid comparison [" + comparison + "]");
 		}
-
 	}
 
 }
