@@ -22,6 +22,8 @@ import org.springframework.stereotype.Repository;
 
 import com.acme.jga.users.mgt.dao.jdbc.spring.AbstractJdbcDaoSupport;
 import com.acme.jga.users.mgt.dao.jdbc.utils.DaoConstants;
+import com.acme.jga.users.mgt.domain.pagination.PaginatedResults;
+import com.acme.jga.users.mgt.dto.filtering.FilteringConstants;
 import com.acme.jga.users.mgt.dto.ids.CompositeId;
 import com.acme.jga.users.mgt.dto.organizations.OrganizationStatus;
 import com.acme.jga.users.mgt.dto.pagination.WhereClause;
@@ -125,21 +127,36 @@ public class OrganizationsDao extends AbstractJdbcDaoSupport implements IOrganiz
 	}
 
 	@Override
-	public List<OrganizationDb> findAllOrganizations(Long tenantId, Map<String,Object> searchParams) {
+	public PaginatedResults<OrganizationDb> findAllOrganizations(Long tenantId, Map<String,Object> searchParams) {
 		String baseQuery = super.getQuery(BASE_SELECT);
 		CompositeQuery compositeQuery = super.buildQuery(searchParams);
+		String countQuery = super.getQuery("org_count");
 		String whereClause = "";
 		if (compositeQuery.isNotEmpty()){
 			whereClause = " where " + compositeQuery.getQuery();
+			countQuery += whereClause;
 		}
-		String fullQuery = baseQuery + whereClause + compositeQuery.orderBy + compositeQuery.pagination;
-		return super.getNamedParameterJdbcTemplate().query(fullQuery,compositeQuery.getParameters(), new RowMapper<OrganizationDb>() {
+		String fullQuery = baseQuery + whereClause + compositeQuery.orderBy + compositeQuery.pagination;		
+
+		Integer nbResults = super.getNamedParameterJdbcTemplate().query(countQuery, compositeQuery.getParameters(), resultSet -> {
+            if (resultSet.next()) {
+                return resultSet.getInt(1);
+            } else {
+                return null;
+            }
+        });
+
+
+		List<OrganizationDb> results = super.getNamedParameterJdbcTemplate().query(fullQuery,compositeQuery.getParameters(), new RowMapper<OrganizationDb>() {
 			@Override
 			@Nullable
 			public OrganizationDb mapRow(ResultSet rs, int rowNum) throws SQLException {
 				return OrganizationDbExtractor.extractOrganization(rs, false);
 			}
 		});
+
+		return new PaginatedResults<>(nbResults, (nbResults / (Integer) searchParams.get(FilteringConstants.PAGE_SIZE)), results);
+
 	}
 
 	@Override

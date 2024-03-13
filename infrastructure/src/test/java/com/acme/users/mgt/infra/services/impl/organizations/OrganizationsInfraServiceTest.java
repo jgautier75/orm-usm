@@ -15,6 +15,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.acme.jga.users.mgt.domain.organizations.v1.Organization;
 import com.acme.jga.users.mgt.domain.organizations.v1.OrganizationCommons;
+import com.acme.jga.users.mgt.domain.pagination.PaginatedResults;
 import com.acme.jga.users.mgt.dto.ids.CompositeId;
 import com.acme.jga.users.mgt.dto.organizations.OrganizationKind;
 import com.acme.jga.users.mgt.dto.organizations.OrganizationStatus;
@@ -66,15 +67,16 @@ public class OrganizationsInfraServiceTest {
         // GIVEN
         OrganizationDb orgDb = mockOrganizationDb();
         List<OrganizationDb> organizationDbs = List.of(orgDb);
+        PaginatedResults<OrganizationDb> paginatedResults = new PaginatedResults<>(organizationDbs.size(), 10, organizationDbs);
         Organization org = mockOrganization();
 
         // WHEN
-        Mockito.when(organizationsDao.findAllOrganizations(Mockito.any(),Mockito.any())).thenReturn(organizationDbs);
+        Mockito.when(organizationsDao.findAllOrganizations(Mockito.any(),Mockito.any())).thenReturn(paginatedResults);
         Mockito.when(organizationsInfraConverter.convertOrganizationDbToOrganization(Mockito.any())).thenReturn(org);
 
         // THEN
 
-        List<Organization> orgs = organizationsInfraService.findAllOrganizations(TENANT_ID, Span.current(),Collections.emptyMap());
+        PaginatedResults<Organization> orgs = organizationsInfraService.findAllOrganizations(TENANT_ID, Span.current(),Collections.emptyMap());
         assertNotNull("Organizations list", orgs);
     }
 

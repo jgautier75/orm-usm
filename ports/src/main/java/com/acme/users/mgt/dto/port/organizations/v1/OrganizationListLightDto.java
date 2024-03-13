@@ -10,5 +10,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Data
 public class OrganizationListLightDto {
+    private Integer nbResults;
+    private Integer nbPages;
     private List<OrganizationLightDto> organizations;
 }

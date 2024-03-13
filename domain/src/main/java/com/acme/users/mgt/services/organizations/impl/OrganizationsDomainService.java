@@ -20,6 +20,7 @@ import com.acme.jga.users.mgt.domain.events.v1.AuditScope;
 import com.acme.jga.users.mgt.domain.events.v1.EventStatus;
 import com.acme.jga.users.mgt.domain.events.v1.EventTarget;
 import com.acme.jga.users.mgt.domain.organizations.v1.Organization;
+import com.acme.jga.users.mgt.domain.pagination.PaginatedResults;
 import com.acme.jga.users.mgt.domain.sectors.v1.Sector;
 import com.acme.jga.users.mgt.dto.filtering.FilteringConstants;
 import com.acme.jga.users.mgt.dto.ids.CompositeId;
@@ -214,7 +215,7 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
         }
 
         @Override
-        public List<Organization> findAllOrganizations(Long tenantId, Span parentSpan, Map<String,Object> searchParams) {
+        public PaginatedResults<Organization> findAllOrganizations(Long tenantId, Span parentSpan, Map<String,Object> searchParams) {
                 Tracer tracer = sdkTracerProvider.get(INSTRUMENTATION_NAME);
                 Span domainSpan = tracer.spanBuilder("DOMAIN")
                                 .setParent(Context.current().with(parentSpan))

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import com.acme.jga.users.mgt.domain.organizations.v1.Organization;
+import com.acme.jga.users.mgt.domain.pagination.PaginatedResults;
 import com.acme.jga.users.mgt.dto.ids.CompositeId;
 import com.acme.jga.users.mgt.dto.organizations.OrganizationStatus;
 import com.acme.users.mgt.infra.converters.OrganizationsInfraConverter;
@@ -38,12 +39,13 @@ public class OrganizationsInfraService implements IOrganizationsInfraService {
     }
 
     @Override
-    public List<Organization> findAllOrganizations(Long tenantId, Span parentSpan,Map<String,Object> searchParams) {
+    public PaginatedResults<Organization> findAllOrganizations(Long tenantId, Span parentSpan,Map<String,Object> searchParams) {
         Tracer tracer = sdkTracerProvider.get(INSTRUMENTATION_NAME);
         Span findSpan = tracer.spanBuilder("INFRA-FIND").setParent(Context.current().with(parentSpan)).startSpan();
-        List<OrganizationDb> organizationDbs = null;
+        PaginatedResults<OrganizationDb> paginatedResults = null;
+        
         try {
-            organizationDbs = organizationsDao.findAllOrganizations(tenantId,searchParams);
+            paginatedResults = organizationsDao.findAllOrganizations(tenantId,searchParams);
         } catch (Exception t) {
             findSpan.setStatus(StatusCode.ERROR);
             findSpan.recordException(t);
@@ -51,10 +53,10 @@ public class OrganizationsInfraService implements IOrganizationsInfraService {
         } finally {
             findSpan.end();
         }
-
         Span convertSpan = tracer.spanBuilder("INFRA-CONVERT").setParent(Context.current().with(parentSpan))
                 .startSpan();
         List<Organization> orgs = new ArrayList<>();
+        List<OrganizationDb> organizationDbs = paginatedResults.getResults();
         try {
             if (!CollectionUtils.isEmpty(organizationDbs)) {
                 for (OrganizationDb orgDb : organizationDbs) {
@@ -68,7 +70,7 @@ public class OrganizationsInfraService implements IOrganizationsInfraService {
         } finally {
             convertSpan.end();
         }
-        return orgs;
+        return new PaginatedResults<>(paginatedResults.getNbResults(), paginatedResults.getNbPages(), orgs);
     }
 
     @Override

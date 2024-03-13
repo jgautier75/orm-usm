@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.acme.jga.users.mgt.domain.pagination.PaginatedResults;
 import com.acme.jga.users.mgt.dto.ids.CompositeId;
 import com.acme.jga.users.mgt.dto.organizations.OrganizationStatus;
 import com.acme.users.mgt.infra.dto.organizations.v1.OrganizationDb;
@@ -21,7 +22,7 @@ public interface IOrganizationsDao {
 
 	Integer deleteOrganization(Long tenantId, Long orgId);
 
-	List<OrganizationDb> findAllOrganizations(Long tenantId,Map<String,Object> searchParams);
+	PaginatedResults<OrganizationDb> findAllOrganizations(Long tenantId,Map<String,Object> searchParams);
 
 	Optional<Long> existsByCode(String code);
 

@@ -12,6 +12,7 @@ import org.springframework.util.CollectionUtils;
 import com.acme.jga.search.filtering.parser.QueryParser;
 import com.acme.jga.search.filtering.utils.ParsingResult;
 import com.acme.jga.users.mgt.domain.organizations.v1.Organization;
+import com.acme.jga.users.mgt.domain.pagination.PaginatedResults;
 import com.acme.jga.users.mgt.dto.filtering.FilteringConstants;
 import com.acme.jga.users.mgt.dto.ids.CompositeId;
 import com.acme.jga.users.mgt.dto.tenant.Tenant;
@@ -104,14 +105,14 @@ public class OrganizationPortService implements IOrganizationPortService {
         searchParams.put(FilteringConstants.PARSING_RESULTS, parsingResult);
         searchParams.put(FilteringConstants.ORDER_BY, searchFilterDto.getOrderBy());
 
-        List<Organization> orgs = organizationDomainService.findAllOrganizations(tenant.getId(), parentSpan,searchParams);
+        PaginatedResults<Organization> paginatedResults = organizationDomainService.findAllOrganizations(tenant.getId(), parentSpan,searchParams);
         List<OrganizationLightDto> lightOrgs = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(orgs)) {
-            for (Organization org : orgs) {
+        if (!CollectionUtils.isEmpty(paginatedResults.getResults())) {
+            for (Organization org : paginatedResults.getResults()) {
                 lightOrgs.add(organizationsConverter.convertOrganizationToLightOrgDto(org));
             }
         }
-        return new OrganizationListLightDto(lightOrgs);
+        return new OrganizationListLightDto(paginatedResults.getNbResults(),paginatedResults.getNbPages(), lightOrgs);
     }
 
     /**

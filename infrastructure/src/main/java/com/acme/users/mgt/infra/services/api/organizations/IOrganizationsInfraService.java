@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.acme.jga.users.mgt.domain.organizations.v1.Organization;
+import com.acme.jga.users.mgt.domain.pagination.PaginatedResults;
 import com.acme.jga.users.mgt.dto.ids.CompositeId;
 import com.acme.jga.users.mgt.dto.organizations.OrganizationStatus;
 
@@ -13,7 +14,7 @@ import io.opentelemetry.api.trace.Span;
 public interface IOrganizationsInfraService {
     CompositeId createOrganization(Organization organization);
 
-    List<Organization> findAllOrganizations(Long tenantId, Span parentSpan, Map<String,Object> searchParams);
+    PaginatedResults<Organization> findAllOrganizations(Long tenantId, Span parentSpan, Map<String,Object> searchParams);
 
     Organization findOrganizationByUid(Long tenantId, String uid);
 

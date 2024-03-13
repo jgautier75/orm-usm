@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.acme.jga.users.mgt.domain.organizations.v1.Organization;
+import com.acme.jga.users.mgt.domain.pagination.PaginatedResults;
 import com.acme.jga.users.mgt.dto.ids.CompositeId;
 import com.acme.jga.users.mgt.exceptions.FunctionalException;
 
@@ -30,7 +31,7 @@ public interface IOrganizationsDomainService {
      * @param searchParams Search parameters
      * @return Orgnizations list
      */
-    List<Organization> findAllOrganizations(Long tenantId, Span parentSpan, Map<String,Object> searchParams);
+    PaginatedResults<Organization> findAllOrganizations(Long tenantId, Span parentSpan, Map<String,Object> searchParams);
 
     /**
      * Find organizations.
