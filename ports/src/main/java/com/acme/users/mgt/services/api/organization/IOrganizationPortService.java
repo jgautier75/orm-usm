@@ -3,6 +3,7 @@ package com.acme.users.mgt.services.api.organization;
 import com.acme.jga.users.mgt.exceptions.FunctionalException;
 import com.acme.users.mgt.dto.port.organizations.v1.OrganizationDto;
 import com.acme.users.mgt.dto.port.organizations.v1.OrganizationListLightDto;
+import com.acme.users.mgt.dto.port.search.SearchFilterDto;
 import com.acme.users.mgt.dto.port.shared.UidDto;
 
 import io.opentelemetry.api.trace.Span;
@@ -24,10 +25,11 @@ public interface IOrganizationPortService {
      * Find all organizations in a tenant.
      * 
      * @param tenantUid Tenant uid
+     * @param searchFilter Search Filter
      * @return Light representation of organization.
      * @throws FunctionalException Functional error
      */
-    OrganizationListLightDto findAllOrgsLightByTenant(String tenantUid, Span parentSpan) throws FunctionalException;
+    OrganizationListLightDto findAllOrgsLightByTenant(String tenantUid, Span parentSpan, SearchFilterDto searchFilter) throws FunctionalException;
 
     /**
      * Update organization.

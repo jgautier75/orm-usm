@@ -1,6 +1,7 @@
 package com.acme.users.mgt.services.organizations.api;
 
 import java.util.List;
+import java.util.Map;
 
 import com.acme.jga.users.mgt.domain.organizations.v1.Organization;
 import com.acme.jga.users.mgt.dto.ids.CompositeId;
@@ -26,9 +27,10 @@ public interface IOrganizationsDomainService {
      * 
      * @param tenantId Tenant internal id
      * @param parentSpan OpenTelemetry Parent Span
+     * @param searchParams Search parameters
      * @return Orgnizations list
      */
-    List<Organization> findAllOrganizations(Long tenantId, Span parentSpan);
+    List<Organization> findAllOrganizations(Long tenantId, Span parentSpan, Map<String,Object> searchParams);
 
     /**
      * Find organizations.

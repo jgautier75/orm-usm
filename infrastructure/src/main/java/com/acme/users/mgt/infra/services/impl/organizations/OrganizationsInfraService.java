@@ -2,6 +2,7 @@ package com.acme.users.mgt.infra.services.impl.organizations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,12 +38,12 @@ public class OrganizationsInfraService implements IOrganizationsInfraService {
     }
 
     @Override
-    public List<Organization> findAllOrganizations(Long tenantId, Span parentSpan) {
+    public List<Organization> findAllOrganizations(Long tenantId, Span parentSpan,Map<String,Object> searchParams) {
         Tracer tracer = sdkTracerProvider.get(INSTRUMENTATION_NAME);
         Span findSpan = tracer.spanBuilder("INFRA-FIND").setParent(Context.current().with(parentSpan)).startSpan();
         List<OrganizationDb> organizationDbs = null;
         try {
-            organizationDbs = organizationsDao.findAllOrganizations(tenantId);
+            organizationDbs = organizationsDao.findAllOrganizations(tenantId,searchParams);
         } catch (Exception t) {
             findSpan.setStatus(StatusCode.ERROR);
             findSpan.recordException(t);

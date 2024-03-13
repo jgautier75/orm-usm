@@ -48,6 +48,11 @@
 		</dependency>
 		<dependency>
 			<groupId>com.acme.jga</groupId>
+			<artifactId>search</artifactId>
+			<version>${project.version}</version>
+		</dependency>		
+		<dependency>
+			<groupId>com.acme.jga</groupId>
 			<artifactId>logging</artifactId>
 			<version>${project.version}</version>
 		</dependency>

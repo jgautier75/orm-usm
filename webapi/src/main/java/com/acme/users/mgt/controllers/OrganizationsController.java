@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.acme.jga.users.mgt.exceptions.FunctionalException;
 import com.acme.users.mgt.dto.port.organizations.v1.OrganizationDto;
 import com.acme.users.mgt.dto.port.organizations.v1.OrganizationListLightDto;
+import com.acme.users.mgt.dto.port.search.SearchFilterDto;
 import com.acme.users.mgt.dto.port.shared.UidDto;
 import com.acme.users.mgt.services.api.organization.IOrganizationPortService;
 import com.acme.users.mgt.versioning.WebApiVersions;
@@ -51,13 +52,17 @@ public class OrganizationsController {
     }
 
     @GetMapping(value = OrganizationsResourceVersion.ROOT)
-    public ResponseEntity<OrganizationListLightDto> findOrgsByTenant(@PathVariable("tenantUid") String tenantUid)
+    public ResponseEntity<OrganizationListLightDto> findOrgsByTenant(@PathVariable("tenantUid") String tenantUid,
+            @RequestParam(value = "filter",required = false) String searchFilter, 
+            @RequestParam(value="index",required = false,defaultValue = "1") Integer pageIndex, 
+            @RequestParam(value = "size", required = false, defaultValue = "10") Integer pageSize)
             throws FunctionalException {
+        SearchFilterDto searchFilterDto = new SearchFilterDto(searchFilter, pageSize, pageIndex);
         Tracer tracer = sdkTracerProvider.get(INSTRUMENTATION_NAME, WebApiVersions.V1);
         Span span = tracer.spanBuilder("ORGS-LIST").startSpan();
         OrganizationListLightDto lightList = null;
         try {
-            lightList = organizationPortService.findAllOrgsLightByTenant(tenantUid, span);
+            lightList = organizationPortService.findAllOrgsLightByTenant(tenantUid, span, searchFilterDto);
         } catch (Exception t) {
             span.setStatus(StatusCode.ERROR);
             span.recordException(t);

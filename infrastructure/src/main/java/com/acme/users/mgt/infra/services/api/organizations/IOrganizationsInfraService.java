@@ -1,6 +1,7 @@
 package com.acme.users.mgt.infra.services.api.organizations;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.acme.jga.users.mgt.domain.organizations.v1.Organization;
@@ -12,7 +13,7 @@ import io.opentelemetry.api.trace.Span;
 public interface IOrganizationsInfraService {
     CompositeId createOrganization(Organization organization);
 
-    List<Organization> findAllOrganizations(Long tenantId, Span parentSpan);
+    List<Organization> findAllOrganizations(Long tenantId, Span parentSpan, Map<String,Object> searchParams);
 
     Organization findOrganizationByUid(Long tenantId, String uid);
 

@@ -1,6 +1,7 @@
 package com.acme.users.mgt.services.organizations.impl;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import com.acme.jga.users.mgt.domain.events.v1.EventStatus;
 import com.acme.jga.users.mgt.domain.events.v1.EventTarget;
 import com.acme.jga.users.mgt.domain.organizations.v1.Organization;
 import com.acme.jga.users.mgt.domain.sectors.v1.Sector;
+import com.acme.jga.users.mgt.dto.filtering.FilteringConstants;
 import com.acme.jga.users.mgt.dto.ids.CompositeId;
 import com.acme.jga.users.mgt.dto.tenant.Tenant;
 import com.acme.jga.users.mgt.exceptions.FunctionalErrorsTypes;
@@ -212,13 +214,15 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
         }
 
         @Override
-        public List<Organization> findAllOrganizations(Long tenantId, Span parentSpan) {
+        public List<Organization> findAllOrganizations(Long tenantId, Span parentSpan, Map<String,Object> searchParams) {
                 Tracer tracer = sdkTracerProvider.get(INSTRUMENTATION_NAME);
                 Span domainSpan = tracer.spanBuilder("DOMAIN")
                                 .setParent(Context.current().with(parentSpan))
                                 .startSpan();
+                Integer pageIndex =  (Integer)searchParams.get(FilteringConstants.PAGE_INDEX);
+                searchParams.put(FilteringConstants.PAGE_INDEX, pageIndex);
                 try {
-                        return organizationsInfraService.findAllOrganizations(tenantId, parentSpan);
+                        return organizationsInfraService.findAllOrganizations(tenantId, parentSpan,searchParams);
                 } catch (Exception t) {
                         domainSpan.setStatus(StatusCode.ERROR);
                         domainSpan.recordException(t);

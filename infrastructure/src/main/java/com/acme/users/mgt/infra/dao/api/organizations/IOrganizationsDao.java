@@ -1,6 +1,7 @@
 package com.acme.users.mgt.infra.dao.api.organizations;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.acme.jga.users.mgt.dto.ids.CompositeId;
@@ -20,7 +21,7 @@ public interface IOrganizationsDao {
 
 	Integer deleteOrganization(Long tenantId, Long orgId);
 
-	List<OrganizationDb> findAllOrganizations(Long tenantId);
+	List<OrganizationDb> findAllOrganizations(Long tenantId,Map<String,Object> searchParams);
 
 	Optional<Long> existsByCode(String code);
 

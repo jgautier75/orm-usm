@@ -276,3 +276,5 @@ webapi/target/classes/META-INF/spring/logback-pattern-rules
 webapi/target/spring-aot/main/resources/META-INF/spring/logback-model
 webapi/target/spring-aot/main/resources/META-INF/spring/logback-pattern-rules
 webapi/LOG_PATH_IS_UNDEFINED/orm-usm.2024-01-15.0.log.gz
+search/target/*.*
+search/target/**/*.*

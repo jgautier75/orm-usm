@@ -225,6 +225,7 @@
 	</dependencies>
 	<modules>
 		<module>db-migration</module>
+		<module>search</module>
 		<module>webapi</module>
 		<module>api-lib</module>
 		<module>ports</module>

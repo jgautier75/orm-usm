@@ -2,6 +2,7 @@ package com.acme.users.mgt.infra.services.impl.organizations;
 
 import static org.junit.Assert.assertNotNull;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -68,12 +69,12 @@ public class OrganizationsInfraServiceTest {
         Organization org = mockOrganization();
 
         // WHEN
-        Mockito.when(organizationsDao.findAllOrganizations(Mockito.any())).thenReturn(organizationDbs);
+        Mockito.when(organizationsDao.findAllOrganizations(Mockito.any(),Mockito.any())).thenReturn(organizationDbs);
         Mockito.when(organizationsInfraConverter.convertOrganizationDbToOrganization(Mockito.any())).thenReturn(org);
 
         // THEN
 
-        List<Organization> orgs = organizationsInfraService.findAllOrganizations(TENANT_ID, Span.current());
+        List<Organization> orgs = organizationsInfraService.findAllOrganizations(TENANT_ID, Span.current(),Collections.emptyMap());
         assertNotNull("Organizations list", orgs);
     }
 

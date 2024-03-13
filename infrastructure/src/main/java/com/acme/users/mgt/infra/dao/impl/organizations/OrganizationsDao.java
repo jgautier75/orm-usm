@@ -7,7 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import javax.sql.DataSource;
+
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
@@ -17,6 +19,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
+
 import com.acme.jga.users.mgt.dao.jdbc.spring.AbstractJdbcDaoSupport;
 import com.acme.jga.users.mgt.dao.jdbc.utils.DaoConstants;
 import com.acme.jga.users.mgt.dto.ids.CompositeId;
@@ -122,9 +125,15 @@ public class OrganizationsDao extends AbstractJdbcDaoSupport implements IOrganiz
 	}
 
 	@Override
-	public List<OrganizationDb> findAllOrganizations(Long tenantId) {
+	public List<OrganizationDb> findAllOrganizations(Long tenantId, Map<String,Object> searchParams) {
 		String baseQuery = super.getQuery(BASE_SELECT);
-		return super.getNamedParameterJdbcTemplate().query(baseQuery, new RowMapper<OrganizationDb>() {
+		CompositeQuery compositeQuery = super.buildQuery(searchParams);
+		String whereClause = "";
+		if (compositeQuery.isNotEmpty()){
+			whereClause = " where " + compositeQuery.getQuery();
+		}
+		String fullQuery = baseQuery + whereClause;		
+		return super.getNamedParameterJdbcTemplate().query(fullQuery,compositeQuery.getParameters(), new RowMapper<OrganizationDb>() {
 			@Override
 			@Nullable
 			public OrganizationDb mapRow(ResultSet rs, int rowNum) throws SQLException {

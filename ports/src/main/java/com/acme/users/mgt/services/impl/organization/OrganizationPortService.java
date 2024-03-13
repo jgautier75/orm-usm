@@ -1,13 +1,18 @@
 package com.acme.users.mgt.services.impl.organization;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.acme.jga.search.filtering.parser.QueryParser;
+import com.acme.jga.search.filtering.utils.ParsingResult;
 import com.acme.jga.users.mgt.domain.organizations.v1.Organization;
+import com.acme.jga.users.mgt.dto.filtering.FilteringConstants;
 import com.acme.jga.users.mgt.dto.ids.CompositeId;
 import com.acme.jga.users.mgt.dto.tenant.Tenant;
 import com.acme.jga.users.mgt.exceptions.FunctionalException;
@@ -15,6 +20,7 @@ import com.acme.users.mgt.converters.organization.OrganizationsPortConverter;
 import com.acme.users.mgt.dto.port.organizations.v1.OrganizationDto;
 import com.acme.users.mgt.dto.port.organizations.v1.OrganizationLightDto;
 import com.acme.users.mgt.dto.port.organizations.v1.OrganizationListLightDto;
+import com.acme.users.mgt.dto.port.search.SearchFilterDto;
 import com.acme.users.mgt.dto.port.shared.UidDto;
 import com.acme.users.mgt.services.api.organization.IOrganizationPortService;
 import com.acme.users.mgt.services.organizations.api.IOrganizationsDomainService;
@@ -38,6 +44,7 @@ public class OrganizationPortService implements IOrganizationPortService {
     private final IOrganizationsDomainService organizationDomainService;
     private final OrganizationsPortConverter organizationsConverter;
     private final OrganizationsValidationEngine organizationsValidationEngine;
+    private final QueryParser queryParser = new QueryParser();
     @Autowired
     private TracerProvider sdkTracerProvider;
 
@@ -70,13 +77,14 @@ public class OrganizationPortService implements IOrganizationPortService {
      * @inheritDoc
      */
     @Override
-    public OrganizationListLightDto findAllOrgsLightByTenant(String tenantUid, Span parentSpan)
+    public OrganizationListLightDto findAllOrgsLightByTenant(String tenantUid, Span parentSpan,SearchFilterDto searchFilterDto)
             throws FunctionalException {
         Tracer tracer = sdkTracerProvider.get(INSTRUMENTATION_NAME);
         // Find tenant
         Span tenantSpan = tracer.spanBuilder("TENANT")
                 .setParent(Context.current().with(parentSpan))
                 .startSpan();
+        
 
         Tenant tenant = null;
         try {
@@ -89,8 +97,13 @@ public class OrganizationPortService implements IOrganizationPortService {
             tenantSpan.end();
         }
 
+        ParsingResult parsingResult = queryParser.parseQuery(searchFilterDto.getFilter());
+        Map<String,Object> searchParams = new HashMap<>();
+        searchParams.put(FilteringConstants.PAGE_INDEX, searchFilterDto.getPageIndex());
+        searchParams.put(FilteringConstants.PAGE_SIZE, searchFilterDto.getPageSize());
+        searchParams.put(FilteringConstants.PARSING_RESULTS, parsingResult);
 
-        List<Organization> orgs = organizationDomainService.findAllOrganizations(tenant.getId(), parentSpan);
+        List<Organization> orgs = organizationDomainService.findAllOrganizations(tenant.getId(), parentSpan,searchParams);
         List<OrganizationLightDto> lightOrgs = new ArrayList<>();
         if (!CollectionUtils.isEmpty(orgs)) {
             for (Organization org : orgs) {
