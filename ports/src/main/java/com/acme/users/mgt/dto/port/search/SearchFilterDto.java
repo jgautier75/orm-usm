@@ -11,4 +11,5 @@ public class SearchFilterDto {
     private String filter;
     private Integer pageSize;
     private Integer pageIndex;
+    private String orderBy;
 }

@@ -55,9 +55,10 @@ public class OrganizationsController {
     public ResponseEntity<OrganizationListLightDto> findOrgsByTenant(@PathVariable("tenantUid") String tenantUid,
             @RequestParam(value = "filter",required = false) String searchFilter, 
             @RequestParam(value="index",required = false,defaultValue = "1") Integer pageIndex, 
-            @RequestParam(value = "size", required = false, defaultValue = "10") Integer pageSize)
+            @RequestParam(value = "size", required = false, defaultValue = "10") Integer pageSize,
+            @RequestParam(value = "orderBy", required = false, defaultValue = "label") String orderBy)
             throws FunctionalException {
-        SearchFilterDto searchFilterDto = new SearchFilterDto(searchFilter, pageSize, pageIndex);
+        SearchFilterDto searchFilterDto = new SearchFilterDto(searchFilter, pageSize, pageIndex,orderBy);
         Tracer tracer = sdkTracerProvider.get(INSTRUMENTATION_NAME, WebApiVersions.V1);
         Span span = tracer.spanBuilder("ORGS-LIST").startSpan();
         OrganizationListLightDto lightList = null;

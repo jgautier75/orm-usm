@@ -11,6 +11,7 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.postgresql.util.PGobject;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
@@ -24,6 +25,7 @@ import com.acme.jga.users.mgt.dto.filtering.FilteringConstants;
 import com.acme.jga.users.mgt.dto.pagination.OrderByClause;
 import com.acme.jga.users.mgt.dto.pagination.Pagination;
 import com.acme.jga.users.mgt.dto.pagination.WhereClause;
+import com.acme.jga.users.mgt.exceptions.FunctionalException;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -45,6 +47,7 @@ public abstract class AbstractJdbcDaoSupport extends JdbcDaoSupport {
 		public Map<String,Object> parameters;
 		public boolean notEmpty = false;
 		public String pagination;
+		public String orderBy;
 	}
 
 	protected AbstractJdbcDaoSupport() {
@@ -272,7 +275,7 @@ public abstract class AbstractJdbcDaoSupport extends JdbcDaoSupport {
 						sb.append(":"+paramName.toString());
 						if (isTypeInteger){
 							params.put(paramName.toString(),Integer.valueOf(stripEnclosingQuotes(expression.getValue())));
-						}else {
+						} else {
 							params.put(paramName.toString(),stripEnclosingQuotes(expression.getValue()));
 						}			
 						isTypeInteger = false;			
@@ -284,6 +287,7 @@ public abstract class AbstractJdbcDaoSupport extends JdbcDaoSupport {
 			}			
 		}
 
+		// Compute pagination
 		Integer pageIndex = (Integer) searchParams.get(FilteringConstants.PAGE_INDEX);
 		if (pageIndex==null || pageIndex==0) {
 			pageIndex = 1;
@@ -294,8 +298,22 @@ public abstract class AbstractJdbcDaoSupport extends JdbcDaoSupport {
 		}
 		int start = (pageIndex - 1) * pageSize;
 		String pagination = " limit " + pageSize + " offset " + start;
+		String orderBy = " order by ";
+		if (!org.springframework.util.ObjectUtils.isArray(searchParams.get(FilteringConstants.ORDER_BY))){
+			String orderDirection = ((String) searchParams.get(FilteringConstants.ORDER_BY)).substring(0,1);
+			if ("+".equals(orderDirection) || "-".equals(orderDirection)){
+				String orderDir = ((String) searchParams.get(FilteringConstants.ORDER_BY)).substring(0,1);
+				String orderCol = ((String) searchParams.get(FilteringConstants.ORDER_BY)).substring(1);
+				orderBy += orderCol;
+				if ("+".equals(orderDir)){
+					orderBy += " asc";
+				}else if ("-".equals(orderDir)){
+					orderBy += " desc";
+				}
+			}
+		}
 
-		return new CompositeQuery(sb.toString(),params,!isEmpty,pagination);
+		return new CompositeQuery(sb.toString(),params,!isEmpty,pagination,orderBy);
 	}
 
 	protected String stripEnclosingQuotes(String value){

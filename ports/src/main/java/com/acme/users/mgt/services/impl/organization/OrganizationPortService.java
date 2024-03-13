@@ -102,6 +102,7 @@ public class OrganizationPortService implements IOrganizationPortService {
         searchParams.put(FilteringConstants.PAGE_INDEX, searchFilterDto.getPageIndex());
         searchParams.put(FilteringConstants.PAGE_SIZE, searchFilterDto.getPageSize());
         searchParams.put(FilteringConstants.PARSING_RESULTS, parsingResult);
+        searchParams.put(FilteringConstants.ORDER_BY, searchFilterDto.getOrderBy());
 
         List<Organization> orgs = organizationDomainService.findAllOrganizations(tenant.getId(), parentSpan,searchParams);
         List<OrganizationLightDto> lightOrgs = new ArrayList<>();
