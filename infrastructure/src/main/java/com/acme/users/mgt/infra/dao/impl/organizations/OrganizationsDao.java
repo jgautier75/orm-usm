@@ -132,7 +132,7 @@ public class OrganizationsDao extends AbstractJdbcDaoSupport implements IOrganiz
 		if (compositeQuery.isNotEmpty()){
 			whereClause = " where " + compositeQuery.getQuery();
 		}
-		String fullQuery = baseQuery + whereClause;		
+		String fullQuery = baseQuery + whereClause + compositeQuery.pagination;		
 		return super.getNamedParameterJdbcTemplate().query(fullQuery,compositeQuery.getParameters(), new RowMapper<OrganizationDb>() {
 			@Override
 			@Nullable

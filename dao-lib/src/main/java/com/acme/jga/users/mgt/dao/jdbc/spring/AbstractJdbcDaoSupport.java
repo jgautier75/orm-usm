@@ -44,6 +44,7 @@ public abstract class AbstractJdbcDaoSupport extends JdbcDaoSupport {
 		public String query;
 		public Map<String,Object> parameters;
 		public boolean notEmpty = false;
+		public String pagination;
 	}
 
 	protected AbstractJdbcDaoSupport() {
@@ -241,9 +242,10 @@ public abstract class AbstractJdbcDaoSupport extends JdbcDaoSupport {
 		int inc = 0;
 		StringBuilder paramName = new StringBuilder();
 		boolean isEmpty = true;
+		boolean isTypeInteger = false;
 		if (parsingResult!=null && !CollectionUtils.isEmpty(parsingResult.getExpressions())){
 			isEmpty = false;
-			for (Expression expression : parsingResult.getExpressions()){
+			for (Expression expression : parsingResult.getExpressions()){				
 				switch (expression.getType()) {
 					case OPENING_PARENTHESIS:
 						sb.append(" ( ");
@@ -263,31 +265,37 @@ public abstract class AbstractJdbcDaoSupport extends JdbcDaoSupport {
 					case PROPERTY:
 						sb.append(stripEnclosingQuotes(expression.getValue()));
 						paramName.setLength(0);
+						isTypeInteger = "kind".equals(expression.getValue());
 						paramName.append("p"+stripEnclosingQuotes(expression.getValue())).append(inc);
 						break;					
 					case VALUE:
-						sb.append(":"+paramName.toString());						
-						params.put(paramName.toString(),stripEnclosingQuotes(expression.getValue()));
+						sb.append(":"+paramName.toString());
+						if (isTypeInteger){
+							params.put(paramName.toString(),Integer.valueOf(stripEnclosingQuotes(expression.getValue())));
+						}else {
+							params.put(paramName.toString(),stripEnclosingQuotes(expression.getValue()));
+						}			
+						isTypeInteger = false;			
 						break;					
 					default:
 						break;
 				}
 				inc++;
-			}
-
-			Integer pageIndex = (Integer) searchParams.get(FilteringConstants.PAGE_INDEX);
-			if (pageIndex==null || pageIndex==0) {
-				pageIndex = 1;
-			}
-			Integer pageSize = (Integer) searchParams.get(FilteringConstants.PAGE_SIZE);
-			if (pageSize==null){
-				pageSize = DEFAULT_PAGE_SIZE;
-			}
-			int start = (pageIndex - 1) * pageSize;
-			sb.append(" limit " + pageSize + " offset " + start);
-
+			}			
 		}
-		return new CompositeQuery(sb.toString(),params,!isEmpty);
+
+		Integer pageIndex = (Integer) searchParams.get(FilteringConstants.PAGE_INDEX);
+		if (pageIndex==null || pageIndex==0) {
+			pageIndex = 1;
+		}
+		Integer pageSize = (Integer) searchParams.get(FilteringConstants.PAGE_SIZE);
+		if (pageSize==null){
+			pageSize = DEFAULT_PAGE_SIZE;
+		}
+		int start = (pageIndex - 1) * pageSize;
+		String pagination = " limit " + pageSize + " offset " + start;
+
+		return new CompositeQuery(sb.toString(),params,!isEmpty,pagination);
 	}
 
 	protected String stripEnclosingQuotes(String value){
