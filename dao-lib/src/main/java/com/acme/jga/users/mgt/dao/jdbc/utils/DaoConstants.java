@@ -36,6 +36,7 @@ public final class DaoConstants {
 	public static final String ORDER_ASC_KEYWORD = " asc";
 	public static final String ORDER_DESC_KEYWORD = " desc";
 	public static final String PAGINATION_PATTERN =  " limit %s  offset %s";
+	public static final Integer DEFAULT_PAGE_SIZE = 10;
 
 	public static String generatedUUID() {
 		return UUID.randomUUID().toString();

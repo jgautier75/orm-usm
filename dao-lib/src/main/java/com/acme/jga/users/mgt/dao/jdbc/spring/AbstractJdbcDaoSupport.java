@@ -36,8 +36,7 @@ public abstract class AbstractJdbcDaoSupport extends JdbcDaoSupport {
 	private static final String DB_DAO_QUERY_FOLDER = "db/sql";
 	protected Properties queries = new Properties();
 	protected NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-	private static final Integer DEFAULT_PAGE_SIZE = 10;
-
+	
 	@AllArgsConstructor
 	@NoArgsConstructor
 	@Data
@@ -297,12 +296,12 @@ public abstract class AbstractJdbcDaoSupport extends JdbcDaoSupport {
 		}
 		Integer pageSize = (Integer) searchParams.get(FilteringConstants.PAGE_SIZE);
 		if (pageSize==null){
-			pageSize = DEFAULT_PAGE_SIZE;
+			pageSize = DaoConstants.DEFAULT_PAGE_SIZE;
 		}
 		int start = (pageIndex - 1) * pageSize;
 		String pagination = String.format(DaoConstants.PAGINATION_PATTERN, pageSize,start);
 		String orderBy = "";
-		if (!org.springframework.util.ObjectUtils.isArray(searchParams.get(FilteringConstants.ORDER_BY))){
+		if (!org.springframework.util.ObjectUtils.isEmpty(searchParams.get(FilteringConstants.ORDER_BY))){
 						String orderDirection = ((String) searchParams.get(FilteringConstants.ORDER_BY)).substring(0,1);
 			if (DaoConstants.ORDER_ASC_SIGN.equals(orderDirection) || DaoConstants.ORDER_DESC_SIGN.equals(orderDirection)){
 				orderBy = DaoConstants.ORDER_BY;
