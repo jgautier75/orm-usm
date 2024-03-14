@@ -20,4 +20,5 @@ public class FilterComparison {
     public static final String SQL_NOT_EQUALS = "!=";
     public static final String OPERATOR_AND = "and";
     public static final String OPERATOR_OR = "or";
+    public static final String SQL_LIKE = " like ";
 }

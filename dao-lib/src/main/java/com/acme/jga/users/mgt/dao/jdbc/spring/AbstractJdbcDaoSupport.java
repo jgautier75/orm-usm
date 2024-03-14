@@ -248,6 +248,7 @@ public abstract class AbstractJdbcDaoSupport extends JdbcDaoSupport {
 		StringBuilder paramName = new StringBuilder();
 		boolean isEmpty = true;
 		boolean isTypeInteger = false;
+		boolean isLikeOperator = false;
 		if (parsingResult!=null && !CollectionUtils.isEmpty(parsingResult.getExpressions())){
 			isEmpty = false;
 			for (Expression expression : parsingResult.getExpressions()){				
@@ -256,6 +257,7 @@ public abstract class AbstractJdbcDaoSupport extends JdbcDaoSupport {
 						sb.append(" ( ");
 						break;
 					case COMPARISON:
+						 isLikeOperator = FilterComparison.LIKE.equalsIgnoreCase(expression.getValue());
 						 sb.append(convertComparison(expression.getValue()));
 						break;
 					case CLOSING_PARENTEHSIS:
@@ -267,20 +269,25 @@ public abstract class AbstractJdbcDaoSupport extends JdbcDaoSupport {
 					case OPERATOR:
 						sb.append(convertOperator(expression.getValue()));
 						break;
-					case PROPERTY:
-						sb.append(stripEnclosingQuotes(expression.getValue()));
+					case PROPERTY:						
+						sb.append(stripEnclosingQuotes(expression.getValue()));						
 						paramName.setLength(0);
 						isTypeInteger = "kind".equals(expression.getValue());
 						paramName.append("p"+stripEnclosingQuotes(expression.getValue())).append(inc);
 						break;					
-					case VALUE:
-						sb.append(":"+paramName.toString());
+					case VALUE:						
+						sb.append(":"+paramName.toString());						
 						if (isTypeInteger){
 							params.put(paramName.toString(),Integer.valueOf(stripEnclosingQuotes(expression.getValue())));
 						} else {
-							params.put(paramName.toString(),stripEnclosingQuotes(expression.getValue()));
-						}			
+							if (isLikeOperator){
+								params.put(paramName.toString(),"%" + stripEnclosingQuotes(expression.getValue()) + "%");
+							}else {
+								params.put(paramName.toString(),stripEnclosingQuotes(expression.getValue()));
+							}
+						}
 						isTypeInteger = false;			
+						isLikeOperator = false;
 						break;					
 					default:
 						break;
@@ -362,7 +369,7 @@ public abstract class AbstractJdbcDaoSupport extends JdbcDaoSupport {
 		}else if (comparison!=null && FilterComparison.GREATER_THAN.equalsIgnoreCase(comparison)){
 			return FilterComparison.SQL_GREATER_THAN;
 		}else if (comparison!=null && FilterComparison.LIKE.equalsIgnoreCase(comparison)){
-			return "like";
+			return FilterComparison.SQL_LIKE;
 		}else if (comparison!=null && FilterComparison.LOWER_OR_EQUALS.equalsIgnoreCase(comparison)){
 			return FilterComparison.SQL_LOWER_OR_EQUALS;
 		}else if (comparison!=null && FilterComparison.LOWER_THAN.equalsIgnoreCase(comparison)){
