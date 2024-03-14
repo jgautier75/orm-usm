@@ -133,7 +133,7 @@ public class OrganizationsDao extends AbstractJdbcDaoSupport implements IOrganiz
 		String countQuery = super.getQuery("org_count");
 		String whereClause = "";
 		if (compositeQuery.isNotEmpty()){
-			whereClause = " where " + compositeQuery.getQuery();
+			whereClause = DaoConstants.WHERE_CLAUSE + compositeQuery.getQuery();
 			countQuery += whereClause;
 		}
 		String fullQuery = baseQuery + whereClause + compositeQuery.orderBy + compositeQuery.pagination;		
