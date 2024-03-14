@@ -2,56 +2,48 @@ package com.acme.users.mgt.events;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
+import org.apache.commons.lang3.builder.Diff;
+import org.apache.commons.lang3.builder.DiffResult;
 import org.springframework.stereotype.Component;
 
 import com.acme.jga.users.mgt.domain.events.v1.AuditChange;
+import com.acme.jga.users.mgt.domain.events.v1.AuditOperation;
 import com.acme.jga.users.mgt.domain.organizations.v1.OrganizationCommons;
-import com.acme.users.mgt.utils.EventChangeUtils;
 
 @Component
 public class EventBuilderOrganization {
         private static final String META_COMMONS_PREFIX = "commons.";
-        private static final String META_COMMONS_CODE = META_COMMONS_PREFIX + "code";
-        private static final String META_COMMONS_COUNTRY = META_COMMONS_PREFIX + "country";
-        private static final String META_COMMONS_LABEL = META_COMMONS_PREFIX + "label";
-        private static final String META_COMMONS_KIND = META_COMMONS_PREFIX + "kind";
-        private static final String META_COMMONS_STATUS = META_COMMONS_PREFIX + "status";
 
         public List<AuditChange> buildAuditsChange(OrganizationCommons previous, OrganizationCommons current) {
-                List<AuditChange> auditChanges = new ArrayList<>();
+                final List<AuditChange> auditChanges = new ArrayList<>();
 
-                // Code
-                Optional<AuditChange> hasCodeChanged = EventChangeUtils.compareStrings(META_COMMONS_CODE,
-                                previous != null ? previous.getCode() : null,
-                                current != null ? current.getCode() : null);
-                hasCodeChanged.ifPresent(auditChanges::add);
+                DiffResult<OrganizationCommons> diffResult = previous.diff(current);
+                AuditChange auditChange = null;
 
-                // Country
-                Optional<AuditChange> hasCountryChanged = EventChangeUtils.compareStrings(META_COMMONS_COUNTRY,
-                                previous != null ? previous.getCountry() : null,
-                                current != null ? current.getCountry() : null);
-                hasCountryChanged.ifPresent(auditChanges::add);
-
-                // Label
-                Optional<AuditChange> hasLabelChanged = EventChangeUtils.compareStrings(META_COMMONS_LABEL,
-                                previous != null ? previous.getLabel() : null,
-                                current != null ? current.getLabel() : null);
-                hasLabelChanged.ifPresent(auditChanges::add);
-
-                // Kind
-                Optional<AuditChange> hasKindChanged = EventChangeUtils.compareOrganizationKind(META_COMMONS_KIND,
-                                previous != null ? previous.getKind() : null,
-                                current != null ? current.getKind() : null);
-                hasKindChanged.ifPresent(auditChanges::add);
-
-                // Status
-                Optional<AuditChange> hasStatusChanged = EventChangeUtils.compareOrganizationStatus(META_COMMONS_STATUS,
-                                previous != null ? previous.getStatus() : null,
-                                current != null ? current.getStatus() : null);
-                hasStatusChanged.ifPresent(auditChanges::add);
-
+                for (Diff<?> diff : diffResult){
+                        AuditOperation operation = AuditOperation.UPDATE;
+                        if (diff.getLeft()!=null && diff.getRight()==null){
+                                operation = AuditOperation.REMOVE;
+                        }else if (diff.getLeft()==null && diff.getRight()!=null){
+                                operation = AuditOperation.ADD;
+                        }
+                        switch (operation) {
+                                case ADD:
+                                        auditChange = new AuditChange(META_COMMONS_PREFIX+diff.getFieldName(), operation, null,(String) diff.getRight());
+                                        break;
+                                case UPDATE:
+                                        auditChange = new AuditChange(META_COMMONS_PREFIX+diff.getFieldName(), operation, (String) diff.getLeft(),(String) diff.getRight());
+                                        break;
+                                case REMOVE:                                      
+                                        auditChange = new AuditChange(META_COMMONS_PREFIX+diff.getFieldName(), operation, (String) diff.getLeft(),null);
+                                        break;
+                                default:
+                                        break;
+                        }
+                        auditChanges.add(auditChange);
+                }
+                
                 return auditChanges;
         }
 
