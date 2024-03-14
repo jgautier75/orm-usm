@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.commons.lang3.builder.DiffResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -21,7 +20,6 @@ import com.acme.jga.users.mgt.domain.events.v1.AuditScope;
 import com.acme.jga.users.mgt.domain.events.v1.EventStatus;
 import com.acme.jga.users.mgt.domain.events.v1.EventTarget;
 import com.acme.jga.users.mgt.domain.organizations.v1.Organization;
-import com.acme.jga.users.mgt.domain.organizations.v1.OrganizationCommons;
 import com.acme.jga.users.mgt.domain.pagination.PaginatedResults;
 import com.acme.jga.users.mgt.domain.sectors.v1.Sector;
 import com.acme.jga.users.mgt.dto.filtering.FilteringConstants;
@@ -85,6 +83,7 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
                         tenantSpan.end();
                 }
 
+                // Ensure code is not already in used
                 Span codeSpan = tracer.spanBuilder("DOMAIN_ORG_CODE_EXISTS")
                                 .setParent(Context.current().with(tenantSpan))
                                 .startSpan();
@@ -271,11 +270,6 @@ public class OrganizationsDomainService implements IOrganizationsDomainService {
                 organization.setId(org.getId());
                 organization.setTenantId(tenant.getId());
                 organization.setUid(orgUid);
-
-                DiffResult<OrganizationCommons> diffResult = organization.getCommons().diff(org.getCommons());
-                diffResult.forEach(d -> {
-                        logService.infoS(callerName, d.getFieldName()+"-"+d.getLeft()+"-"+d.getRight(), new Object[0]);
-                });
 
                 // Build audit changes
                 List<AuditChange> auditChanges = eventBuilderOrganization.buildAuditsChange(org.getCommons(),
