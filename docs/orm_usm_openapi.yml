@@ -257,6 +257,12 @@ components:
       type: object
       description: "Organizations list for display"
       properties:
+        nbResults:
+          type: integer
+          description: "Total nb of results"
+        nbPages:
+          type: integer
+          description: "Number of pages"
         organizations:
           type: array
           description: "Organizations list"
@@ -682,6 +688,49 @@ paths:
           required: true
           schema:
             type: string
+        - name: filter
+          in: query
+          description: |
+            Search filter: (column) (comparison) ('value') (operator) (column) (comparison) ('value')
+            
+            Comparison:
+              - eq: Equals
+              - ne: NotEquals
+              - gt: Greater than
+              - ge: Greater or equals
+              - lt: Lower then
+              - le: Lower or equals
+              - lk: Like
+
+            Operator:
+              - and: Logical AND
+              - or: Logical OR
+
+            Example: (name eq 'Rennes' or name eq 'Cesson') and (code eq 'rn01' or code eq 'ces01)'
+          required: false
+          schema:
+            type: string
+        - name: index
+          in: query
+          description: "Page index"
+          required: true
+          schema:
+            type: integer
+        - name: size
+          in: query
+          description: "Nb of results per page"
+          required: true
+          schema:
+            type: integer
+        - name: orderBy
+          in: query
+          description: |
+            Order by column, (+-)columnName pattern
+
+            Example: +name
+          required: true
+          schema:
+            type: integer    
       responses:
         '200':
           description: "Success"
@@ -690,6 +739,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/OrganizationList"
               example:
+                nbResults: 100
+                nbPages: 10
                 organizations:
                   - uid: "0bb555bf-87b2-4c0f-b802-c1c34aa058da"
                     code: "rennes-01"
