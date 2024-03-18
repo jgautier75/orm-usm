@@ -568,6 +568,8 @@ java -javaagent:/home/jgautier/git-data/opentelemetry-javaagent.jar -Dotel.servi
 
 Update -Dotel.javaagent.debug=true argument to disable opentelementry java agent debug mode.
 
+NB: If you wanna launch application with java agent instrumentation, ensure to comment OpenTelemetryConfig.java configuration class !
+
 OpenTelemetry spans logs:
 
 ```sh
