@@ -79,7 +79,7 @@ public class OpenTelemetryConfig {
         public OpenTelemetry openTelemetry(SdkTracerProvider tracerProvider, SdkMeterProvider sdkMeterProvider,
                         SdkLoggerProvider sdkLoggerProvider) {
                 // OpenTelemetry
-                OpenTelemetry openTelemetry = OpenTelemetrySdk.builder()
+                return OpenTelemetrySdk.builder()
                                 .setTracerProvider(tracerProvider)
                                 .setMeterProvider(sdkMeterProvider)
                                 .setLoggerProvider(sdkLoggerProvider)
@@ -87,9 +87,6 @@ public class OpenTelemetryConfig {
                                                 .composite(W3CTraceContextPropagator.getInstance(),
                                                                 W3CBaggagePropagator.getInstance())))
                                 .buildAndRegisterGlobal();
-
-                return openTelemetry;
-
         }
 
 }
